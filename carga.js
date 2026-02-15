@@ -14,19 +14,21 @@ function iniciarEscaneo() {
     { facingMode: "environment" },
     { fps: 10, qrbox: { width: 280, height: 100 }, formatsToSupport: [Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.CODE_128] },
     (decodedText) => {
+      const codigoDetectado = decodedText.trim();
+
+      // Evitar procesar el mismo código varias veces seguidas
+      if (codigoDetectado === codigoActual) return;
+
+      codigoActual = codigoDetectado;
       playBeep();
-      codigoActual = decodedText.trim();
       document.getElementById("codigo").innerText = codigoActual;
       buscarProductoServidor(codigoActual);
-      
-      // Aquí podés decidir si querés detener después de cada escaneo:
-      // html5QrCode.stop().then(() => html5QrCode.clear());
     }
   ).catch(err => { console.error(err); alert("Error al iniciar cámara"); });
 }
 
 // ============================
-// DETENER ESCANEO (BOTÓN OPCIONAL)
+// DETENER ESCANEO
 // ============================
 function detenerEscaneo() {
   if (html5QrCode) {
