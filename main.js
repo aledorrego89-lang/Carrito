@@ -57,7 +57,7 @@ function renderCart() {
     li.className = "list-group-item d-flex justify-content-between align-items-center";
 
     li.innerHTML = `
-      <div>${item.nombre} x${item.cantidad} - $${item.precio * item.cantidad}</div>
+      <div>${item.nombre} x ${item.cantidad} - $${item.precio * item.cantidad}</div>
       <button class="btn btn-sm btn-outline-danger remove-btn" data-index="${index}">🗑️</button>
     `;
 
