@@ -63,9 +63,10 @@ function iniciarEscaneo() {
 (decodedText) => {
   codigoActual = decodedText; // actualizar variable global
   document.getElementById("codigo").innerText = codigoActual;
-  buscarProducto(decodedText);
+  buscarProductoLocal(decodedText); // <<--- aquí
   // html5QrCode.stop(); // opcional si quieres seguir escaneando
 }
+
 
   ).catch(err => {
     console.error(err);
