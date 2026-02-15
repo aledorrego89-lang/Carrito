@@ -4,7 +4,8 @@ const cartList = document.getElementById('cart-list');
 const totalSpan = document.getElementById('total');
 
 // JSON relativo
-const jsonUrl = "productos.json";
+const jsonUrl = "https://100.126.169.121/productos.json";
+
 let products = [];
 
 // Modal Bootstrap
