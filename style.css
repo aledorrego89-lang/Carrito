@@ -31,10 +31,7 @@ ul {
   background: black;
 }
 
-/* Elimina espacio extra generado por la librería */
-#qr-reader > div {
-  padding: 0 !important;
-}
+
 
 /* Video ajustado exactamente al tamaño del scanner */
 #qr-reader video {
