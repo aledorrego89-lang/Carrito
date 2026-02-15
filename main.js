@@ -112,16 +112,17 @@ function scanQR(callback) {
     }
   ).then(() => {
 
-    // Crear línea roja
-    const line = document.createElement("div");
-    line.className = "scan-line";
-    document.getElementById("qr-reader").appendChild(line);
+    // 🔥 Forzar tamaño real después de que la librería lo cambie
+    const reader = document.getElementById("qr-reader");
+    reader.style.height = "140px";
+    reader.style.width = "340px";
 
   }).catch(err => {
     console.error(err);
     qrReaderDiv.style.display = "none";
   });
 }
+
 
 
 // Escanear producto
