@@ -22,11 +22,12 @@ function iniciarEscaneo() {
         Html5QrcodeSupportedFormats.CODE_128
       ]
     },
-    (decodedText) => {
-      codigoActual = decodedText;
-      document.getElementById("codigo").innerText = decodedText;
-      html5QrCode.stop();
-    }
+(decodedText) => {
+  document.getElementById("codigo").value = decodedText;
+  html5QrCode.stop();
+  buscarProducto(decodedText);
+}
+
   ).catch(err => {
     console.error(err);
     alert("Error al iniciar cámara");
@@ -76,28 +77,27 @@ function guardarProducto() {
 // ============================
 // BUSCAR PRODUCTO
 // ============================
-function buscarProducto() {
+async function buscarProducto(codigo) {
+  const response = await fetch(
+    `https://100.126.169.121/buscar_producto.php?codigo=${codigo}`
+  );
 
-  let codigo = document.getElementById("buscarCodigo").value;
+  const data = await response.json();
 
-  fetch(jsonUrl)
-    .then(res => res.json())
-    .then(productos => {
+  const nombreInput = document.getElementById("nombre");
+  const precioInput = document.getElementById("precio");
+  const estado = document.getElementById("estado");
 
-      if (productos[codigo]) {
-
-        document.getElementById("resultado").innerHTML =
-          "Nombre: " + productos[codigo].nombre +
-          "<br>Precio: $" + productos[codigo].precio;
-
-        codigoActual = codigo;
-        document.getElementById("codigo").innerText = codigo;
-        document.getElementById("nombre").value = productos[codigo].nombre;
-        document.getElementById("precio").value = productos[codigo].precio;
-
-      } else {
-        document.getElementById("resultado").innerText = "Producto no encontrado";
-      }
-
-    });
+  if (data.existe) {
+    nombreInput.value = data.producto.nombre;
+    precioInput.value = data.producto.precio;
+    estado.innerText = "Producto existente - Puede editarlo";
+    estado.style.color = "orange";
+  } else {
+    nombreInput.value = "";
+    precioInput.value = "";
+    estado.innerText = "Producto nuevo";
+    estado.style.color = "green";
+  }
 }
+
