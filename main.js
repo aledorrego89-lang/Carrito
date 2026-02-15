@@ -95,7 +95,7 @@ scanQR(url => {
     renderCart();
     statusDiv.textContent = `Producto agregado: ${prod.nombre} x${qty}`;
   });
-});
+
 
 // Render inicial
 renderCart();
