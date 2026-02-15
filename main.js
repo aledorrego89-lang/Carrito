@@ -28,8 +28,13 @@ async function mostrarNegocio() {
     const res = await fetch("https://100.126.169.121/productos.json");
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
+    
     // Solo usamos el mensaje del JSON
     statusDiv.textContent = data.mensaje || "Conectado";
+    
+    // Guardar los productos para más adelante cuando escanees
+    window.products = data.productos || [];
+    
   } catch (err) {
     console.error("Error al conectar con el JSON:", err);
     statusDiv.textContent = "Error de conexión";
@@ -38,6 +43,7 @@ async function mostrarNegocio() {
 
 // Llamamos a la función al cargar la página
 mostrarNegocio();
+
 
 // ============================
 // RENDER CARRITO
