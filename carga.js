@@ -5,6 +5,44 @@ let html5QrCode;
 const jsonUrl = "https://100.126.169.121/productos.json";
 const apiUrl = "https://100.126.169.121/guardar_producto.php";
 
+
+let productos = []; // variable global
+
+// Cargar JSON al inicio
+async function cargarProductos() {
+  try {
+    const res = await fetch("https://100.126.169.121/productos.json");
+    const data = await res.json();
+    productos = data.productos; // ahora tenemos todos los productos en memoria
+    console.log("Productos cargados:", productos);
+  } catch (err) {
+    console.error("Error al cargar productos:", err);
+  }
+}
+
+// Buscar producto localmente
+function buscarProductoLocal(codigo) {
+  const prod = productos.find(p => String(p.codigo).trim() === String(codigo).trim());
+  const nombreInput = document.getElementById("nombre");
+  const precioInput = document.getElementById("precio");
+  const estado = document.getElementById("estado");
+
+  if (prod) {
+    nombreInput.value = prod.nombre;
+    precioInput.value = prod.precio;
+    estado.innerText = "Producto existente - Puede editarlo";
+    estado.style.color = "orange";
+  } else {
+    nombreInput.value = "";
+    precioInput.value = "";
+    estado.innerText = "Producto nuevo";
+    estado.style.color = "green";
+  }
+}
+
+// Al iniciar la página
+cargarProductos();
+
 // ============================
 // ESCANEAR CODIGO
 // ============================
@@ -78,27 +116,5 @@ function guardarProducto() {
 // ============================
 // BUSCAR PRODUCTO
 // ============================
-async function buscarProducto(codigo) {
-  const response = await fetch(
-    `https://100.126.169.121/buscar_producto.php?codigo=${codigo}`
-  );
 
-  const data = await response.json();
-
-  const nombreInput = document.getElementById("nombre");
-  const precioInput = document.getElementById("precio");
-  const estado = document.getElementById("estado");
-
-  if (data.existe) {
-    nombreInput.value = data.producto.nombre;
-    precioInput.value = data.producto.precio;
-    estado.innerText = "Producto existente - Puede editarlo";
-    estado.style.color = "orange";
-  } else {
-    nombreInput.value = "";
-    precioInput.value = "";
-    estado.innerText = "Producto nuevo";
-    estado.style.color = "green";
-  }
-}
 
