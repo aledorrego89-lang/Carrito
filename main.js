@@ -1,10 +1,12 @@
 let cart = JSON.parse(localStorage.getItem('cart') || "[]");
-let jsonUrl = localStorage.getItem('jsonUrl') || "";
 const statusDiv = document.getElementById('status');
 const cartList = document.getElementById('cart-list');
 const totalSpan = document.getElementById('total');
-const qrReaderDiv = document.getElementById('qr-reader');
 
+// URL relativa del JSON de productos
+const jsonUrl = "productos.json";
+
+// Renderiza el carrito
 function renderCart() {
   cartList.innerHTML = "";
   let total = 0;
@@ -18,11 +20,8 @@ function renderCart() {
   localStorage.setItem('cart', JSON.stringify(cart));
 }
 
+// Carga productos desde productos.json
 async function fetchProducts() {
-  if (!jsonUrl) {
-    statusDiv.textContent = "Escanea el QR del local primero";
-    return;
-  }
   try {
     statusDiv.textContent = "Conectando a la base de datos...";
     const res = await fetch(jsonUrl);
@@ -37,9 +36,14 @@ async function fetchProducts() {
   }
 }
 
+// Función para escanear productos con QR
+function scanProduct() {
+  if (!window.products) {
+    alert("No se han cargado los productos");
+    return;
+  }
 
-// Función para escanear QR
-function scanQR(callback) {
+  const qrReaderDiv = document.getElementById('qr-reader');
   qrReaderDiv.style.display = "block";
   const html5QrCode = new Html5Qrcode("qr-reader");
 
@@ -49,7 +53,23 @@ function scanQR(callback) {
     (decodedText, decodedResult) => {
       html5QrCode.stop();
       qrReaderDiv.style.display = "none";
-      callback(decodedText);
+
+      const prod = window.products.find(p => p.codigo === decodedText);
+      if (!prod) {
+        alert("Producto no encontrado");
+        return;
+      }
+
+      const qty = parseInt(prompt(`Cantidad de ${prod.nombre}:`, "1")) || 1;
+      
+      cart.push({
+        nombre: prod.nombre,
+        precio: prod.precio,
+        cantidad: qty
+      });
+
+      renderCart();
+      statusDiv.textContent = `Producto agregado: ${prod.nombre} x${qty}`;
     },
     errorMessage => {
       // console.log("QR scan error: ", errorMessage);
@@ -60,42 +80,8 @@ function scanQR(callback) {
   });
 }
 
-// Escanear local
-document.getElementById('scan-local').addEventListener('click', () => {
-  scanQR(url => {
-    jsonUrl = url;
-    localStorage.setItem('jsonUrl', jsonUrl);
-    fetchProducts();
-  });
-});
-
-// Escanear producto
-document.getElementById('scan-products').addEventListener('click', () => {
-  if (!window.products) {
-    alert("Primero conecta el local escaneando el QR");
-    return;
-  }
-
-scanQR(url => {
-  console.log("URL del QR:", url); // Verifica que sea correcta
-  jsonUrl = url;
-  localStorage.setItem('jsonUrl', jsonUrl);
-  fetchProducts();
-});
-
-
-    const qty = parseInt(prompt(`Cantidad de ${prod.nombre}:`, "1")) || 1;
-    
-    cart.push({
-      nombre: prod.nombre,
-      precio: prod.precio,
-      cantidad: qty
-    });
-
-    renderCart();
-    statusDiv.textContent = `Producto agregado: ${prod.nombre} x${qty}`;
-  });
-
+// Botón para escanear productos
+document.getElementById('scan-products').addEventListener('click', scanProduct);
 
 // Render inicial
 renderCart();
