@@ -3,16 +3,29 @@ const statusDiv = document.getElementById('status');
 const cartList = document.getElementById('cart-list');
 const totalSpan = document.getElementById('total');
 
-// URL relativa del JSON de productos
+// JSON relativo
 const jsonUrl = "productos.json";
+let products = [];
 
-// Renderiza el carrito
+// Modal Bootstrap
+const productModal = new bootstrap.Modal(document.getElementById('productModal'));
+const modalName = document.getElementById('modal-name');
+const modalPrice = document.getElementById('modal-price');
+const modalQty = document.getElementById('modal-qty');
+const modalAccept = document.getElementById('modal-accept');
+let currentProduct = null;
+
+// Render carrito
 function renderCart() {
   cartList.innerHTML = "";
   let total = 0;
   cart.forEach(item => {
     const li = document.createElement('li');
-    li.textContent = `${item.nombre} x${item.cantidad} - $${item.precio * item.cantidad}`;
+    li.className = "list-group-item d-flex justify-content-between align-items-center";
+    li.textContent = `${item.nombre} x${item.cantidad}`;
+    const span = document.createElement('span');
+    span.textContent = `$${item.precio * item.cantidad}`;
+    li.appendChild(span);
     cartList.appendChild(li);
     total += item.precio * item.cantidad;
   });
@@ -20,25 +33,24 @@ function renderCart() {
   localStorage.setItem('cart', JSON.stringify(cart));
 }
 
-// Carga productos desde productos.json
+// Cargar productos
 async function fetchProducts() {
   try {
     statusDiv.textContent = "Conectando a la base de datos...";
     const res = await fetch(jsonUrl);
     if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
     const data = await res.json();
-    window.products = data.productos;
-    statusDiv.textContent = "Conectado a los productos ✅";
-    console.log("Productos cargados:", data);
+    products = data.productos;
+    statusDiv.textContent = "Productos cargados ✅";
   } catch (e) {
     console.error(e);
-    statusDiv.textContent = "Error al conectar: " + e;
+    statusDiv.textContent = "Error al cargar productos: " + e;
   }
 }
 
-// Función para escanear productos con QR
+// Escanear producto
 function scanProduct() {
-  if (!window.products) {
+  if (!products.length) {
     alert("No se han cargado los productos");
     return;
   }
@@ -54,22 +66,17 @@ function scanProduct() {
       html5QrCode.stop();
       qrReaderDiv.style.display = "none";
 
-      const prod = window.products.find(p => p.codigo === decodedText);
+      const prod = products.find(p => p.codigo === decodedText);
       if (!prod) {
         alert("Producto no encontrado");
         return;
       }
 
-      const qty = parseInt(prompt(`Cantidad de ${prod.nombre}:`, "1")) || 1;
-      
-      cart.push({
-        nombre: prod.nombre,
-        precio: prod.precio,
-        cantidad: qty
-      });
-
-      renderCart();
-      statusDiv.textContent = `Producto agregado: ${prod.nombre} x${qty}`;
+      currentProduct = prod;
+      modalName.textContent = `Nombre: ${prod.nombre}`;
+      modalPrice.textContent = `Precio unitario: $${prod.precio}`;
+      modalQty.value = 1;
+      productModal.show();
     },
     errorMessage => {
       // console.log("QR scan error: ", errorMessage);
@@ -80,9 +87,22 @@ function scanProduct() {
   });
 }
 
-// Botón para escanear productos
+// Aceptar producto en modal
+modalAccept.addEventListener('click', () => {
+  const qty = parseInt(modalQty.value) || 1;
+  cart.push({
+    nombre: currentProduct.nombre,
+    precio: currentProduct.precio,
+    cantidad: qty
+  });
+  renderCart();
+  statusDiv.textContent = `Producto agregado: ${currentProduct.nombre} x${qty}`;
+  productModal.hide();
+});
+
+// Botón escanear
 document.getElementById('scan-products').addEventListener('click', scanProduct);
 
-// Render inicial
+// Inicial
 renderCart();
 fetchProducts();
