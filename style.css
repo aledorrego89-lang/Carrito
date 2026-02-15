@@ -21,22 +21,24 @@ ul {
   margin-top: 20px;
 }
 
+/* Tamaño real del escáner */
 #qr-reader {
   position: relative;
-  width: 340px !important;
-  height: 140px !important;
-  max-height: 140px !important;
+  width: 340px;
+  height: 140px;
   overflow: hidden;
   border-radius: 12px;
   background: black;
 }
 
+
+
+/* Video ajustado exactamente al tamaño del scanner */
 #qr-reader video {
   width: 100% !important;
   height: 100% !important;
   object-fit: cover;
 }
-
 #qr-reader__dashboard {
   display: none !important;
 }
