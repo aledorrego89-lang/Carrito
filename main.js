@@ -13,6 +13,21 @@ const modalName = document.getElementById('modal-name');
 const modalPrice = document.getElementById('modal-price');
 const modalQty = document.getElementById('modal-qty');
 const modalAccept = document.getElementById('modal-accept');
+const incrementBtn = document.getElementById('increment-btn');
+const decrementBtn = document.getElementById('decrement-btn');
+
+// Incrementar cantidad
+incrementBtn.addEventListener('click', () => {
+  let current = parseInt(modalQty.value) || 1;
+  modalQty.value = current + 1;
+});
+
+// Decrementar cantidad
+decrementBtn.addEventListener('click', () => {
+  let current = parseInt(modalQty.value) || 1;
+  if (current > 1) modalQty.value = current - 1;
+});
+
 let currentProduct = null;
 
 // Render carrito
@@ -22,7 +37,7 @@ function renderCart() {
   cart.forEach(item => {
     const li = document.createElement('li');
     li.className = "list-group-item d-flex justify-content-between align-items-center";
-    li.textContent = `${item.nombre} x${item.cantidad}`;
+    li.textContent = `${item.nombre} x ${item.cantidad}`;
     const span = document.createElement('span');
     span.textContent = `$${item.precio * item.cantidad}`;
     li.appendChild(span);
