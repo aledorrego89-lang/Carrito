@@ -1,38 +1,39 @@
-
 let codigoActual = null;
 let html5QrCode;
 const apiUrl = "https://100.126.169.121/guardar_producto.php";
 
 // ============================
-// ESCANEAR CODIGO
+// INICIAR ESCANEO
 // ============================
 function iniciarEscaneo() {
-  if (html5QrCode) {
-    html5QrCode.stop().then(() => {
-      html5QrCode.clear();
-      startScan();
-    }).catch(err => console.error("Error al reiniciar escáner:", err));
-  } else {
-    startScan();
+  if (!html5QrCode) {
+    html5QrCode = new Html5Qrcode("qr-reader");
   }
-}
-
-function startScan() {
-  html5QrCode = new Html5Qrcode("qr-reader");
 
   html5QrCode.start(
     { facingMode: "environment" },
     { fps: 10, qrbox: { width: 280, height: 100 }, formatsToSupport: [Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.CODE_128] },
     (decodedText) => {
-      // Detener el escaneo después de leer un código
-      html5QrCode.stop().then(() => html5QrCode.clear());
       playBeep();
-
       codigoActual = decodedText.trim();
       document.getElementById("codigo").innerText = codigoActual;
       buscarProductoServidor(codigoActual);
+      
+      // Aquí podés decidir si querés detener después de cada escaneo:
+      // html5QrCode.stop().then(() => html5QrCode.clear());
     }
   ).catch(err => { console.error(err); alert("Error al iniciar cámara"); });
+}
+
+// ============================
+// DETENER ESCANEO (BOTÓN OPCIONAL)
+// ============================
+function detenerEscaneo() {
+  if (html5QrCode) {
+    html5QrCode.stop()
+      .then(() => html5QrCode.clear())
+      .catch(err => console.error("Error al detener escáner:", err));
+  }
 }
 
 // ============================
@@ -98,6 +99,3 @@ function playBeep() {
   oscillator.start();
   oscillator.stop(ctx.currentTime + 0.1);
 }
-
-
-
