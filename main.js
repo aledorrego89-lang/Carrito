@@ -73,10 +73,11 @@ products = data.productos;
 
     statusDiv.textContent = "Productos listos ✅";
     console.log("Productos cargados:", data);
-  } catch(e) {
-    console.error(e);
-    statusDiv.textContent = "Error al cargar productos: " + e;
-  }
+  }catch (e) {
+  console.error("Fetch error:", e);
+  showError(`Error de conexión: ${e.name} - ${e.message}`);
+}
+
 }
 
 // Beep al escanear producto
@@ -143,6 +144,18 @@ if (products.length === 0){
     };
   });
 });
+
+const errorBox = document.getElementById('error-box');
+
+function showError(message) {
+  errorBox.textContent = message;
+  errorBox.classList.remove('d-none');
+}
+
+function clearError() {
+  errorBox.textContent = "";
+  errorBox.classList.add('d-none');
+}
 
 // Inicializar
 renderCart();
