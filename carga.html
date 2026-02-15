@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Administrador de Productos</title>
+  <script src="https://unpkg.com/html5-qrcode"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+
+    button {
+      padding: 8px 15px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+
+    input {
+      display: block;
+      margin-top: 10px;
+      padding: 8px;
+      width: 250px;
+    }
+
+    #qr-reader {
+      width: 320px;
+      height: 120px;
+      margin-top: 20px;
+      border-radius: 10px;
+      overflow: hidden;
+      background: black;
+    }
+
+    #qr-reader video {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: cover;
+    }
+
+    #resultado {
+      margin-top: 15px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Administrador de Productos</h2>
+
+  <button onclick="iniciarEscaneo()">📷 Escanear Código</button>
+
+  <p>Código escaneado: <strong id="codigo"></strong></p>
+
+  <input type="text" id="nombre" placeholder="Nombre del producto">
+  <input type="number" id="precio" placeholder="Precio">
+
+  <button onclick="guardarProducto()">💾 Guardar / Actualizar</button>
+
+  <hr>
+
+  <h3>Buscar producto</h3>
+
+  <input type="text" id="buscarCodigo" placeholder="Código de barras">
+  <button onclick="buscarProducto()">🔎 Buscar</button>
+
+  <p id="resultado"></p>
+
+  <div id="qr-reader"></div>
+
+
+  <script src="carga.js"></script>
+</body>
+</html>
+
