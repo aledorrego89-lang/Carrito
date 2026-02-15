@@ -122,7 +122,7 @@ function playBeep() {
   const gainNode = ctx.createGain();
 
   oscillator.type = 'sine'; // tipo de onda
-  oscillator.frequency.setValueAtTime(1000, ctx.currentTime); // 1000 Hz
+  oscillator.frequency.setValueAtTime(4000, ctx.currentTime); // 1000 Hz
   oscillator.connect(gainNode);
   gainNode.connect(ctx.destination);
 
