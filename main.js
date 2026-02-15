@@ -90,14 +90,16 @@ function playBeep() {
   oscillator.stop(ctx.currentTime + 0.1);
 }
 
-// Escanear QR
 function scanQR(callback) {
   qrReaderDiv.style.display = "block";
   const html5QrCode = new Html5Qrcode("qr-reader");
 
   html5QrCode.start(
     { facingMode: "environment" },
-    { fps: 10, qrbox: 250 },
+    {
+      fps: 10,
+      qrbox: { width: 300, height: 120 } // 👈 más ancho que alto
+    },
     (decodedText) => {
       html5QrCode.stop();
       qrReaderDiv.style.display = "none";
@@ -109,6 +111,7 @@ function scanQR(callback) {
     qrReaderDiv.style.display = "none";
   });
 }
+
 
 // Escanear producto
 document.getElementById('scan-products').addEventListener('click', () => {

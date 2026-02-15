@@ -13,3 +13,23 @@ ul {
   list-style: none;
   padding-left: 0;
 }
+#qr-reader {
+  position: relative;
+}
+
+.scan-line {
+  position: absolute;
+  top: 50%;
+  left: 10%;
+  width: 80%;
+  height: 3px;
+  background: red;
+  transform: translateY(-50%);
+  animation: scanAnim 2s infinite;
+}
+
+@keyframes scanAnim {
+  0% { opacity: 0.3; }
+  50% { opacity: 1; }
+  100% { opacity: 0.3; }
+}
