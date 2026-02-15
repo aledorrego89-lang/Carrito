@@ -1,6 +1,4 @@
-      // Carrito y elementos
 let cart = JSON.parse(localStorage.getItem('cart') || "[]");
-let jsonUrl = "productos.json"; // JSON local en la misma carpeta
 const statusDiv = document.getElementById('status');
 const cartList = document.getElementById('cart-list');
 const totalSpan = document.getElementById('total');
@@ -14,6 +12,9 @@ const modalQty = document.getElementById('modal-qty');
 const decreaseBtn = document.getElementById('decrease');
 const increaseBtn = document.getElementById('increase');
 const acceptBtn = document.getElementById('accept-product');
+
+// JSON de productos local
+const jsonUrl = "productos.json"; // debe estar en la misma carpeta que index.html
 
 // Renderizar carrito
 function renderCart() {
@@ -56,10 +57,9 @@ document.getElementById('clear-cart').addEventListener('click', () => {
   }
 });
 
-// Cargar productos desde JSON local
+// Cargar productos JSON local
 async function fetchProducts() {
   try {
-    statusDiv.textContent = "Cargando productos...";
     const res = await fetch(jsonUrl);
     if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
     const data = await res.json();
@@ -102,19 +102,10 @@ function scanQR(callback) {
   });
 }
 
-// Escanear local
-document.getElementById('scan-local').addEventListener('click', () => {
-  scanQR(url => {
-    jsonUrl = url; // si quieres cambiar el JSON desde QR
-    localStorage.setItem('jsonUrl', jsonUrl);
-    fetchProducts();
-  });
-});
-
 // Escanear producto
 document.getElementById('scan-products').addEventListener('click', () => {
   if (!window.products) {
-    alert("Primero carga los productos");
+    alert("No se han cargado los productos");
     return;
   }
 
@@ -125,19 +116,16 @@ document.getElementById('scan-products').addEventListener('click', () => {
       return;
     }
 
-    playBeep(); // beep al escanear
+    playBeep();
 
-    // Modal con nombre, precio y cantidad
     modalTitle.textContent = prod.nombre;
     modalPrice.textContent = `Precio: $${prod.precio}`;
     modalQty.value = 1;
     productModal.show();
 
-    // Botones + y -
     decreaseBtn.onclick = () => { if(modalQty.value > 1) modalQty.value--; };
     increaseBtn.onclick = () => modalQty.value++;
 
-    // Botón aceptar
     acceptBtn.onclick = () => {
       const cantidad = parseInt(modalQty.value) || 1;
       cart.push({ nombre: prod.nombre, precio: prod.precio, cantidad });
@@ -148,6 +136,6 @@ document.getElementById('scan-products').addEventListener('click', () => {
   });
 });
 
-// Render inicial
+// Inicializar
 renderCart();
 fetchProducts();
