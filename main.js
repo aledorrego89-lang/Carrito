@@ -18,6 +18,27 @@ const acceptBtn = document.getElementById('accept-product');
 let html5QrCode;
 let lastScanned = null;
 
+
+// ============================
+// MOSTRAR NOMBRE DEL NEGOCIO AL INICIAR
+// ============================
+async function mostrarNegocio() {
+  statusDiv.textContent = "Conectando..."; // mensaje provisional
+  try {
+    const res = await fetch("https://100.126.169.121/productos.json");
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    // Solo usamos el mensaje del JSON
+    statusDiv.textContent = data.mensaje || "Conectado";
+  } catch (err) {
+    console.error("Error al conectar con el JSON:", err);
+    statusDiv.textContent = "Error de conexión";
+  }
+}
+
+// Llamamos a la función al cargar la página
+mostrarNegocio();
+
 // ============================
 // RENDER CARRITO
 // ============================
@@ -62,6 +83,8 @@ function playBeep() {
   oscillator.start();
   oscillator.stop(ctx.currentTime + 0.1);
 }
+
+
 
 // ============================
 // ESCANEAR Y CONSULTAR AL SERVIDOR
