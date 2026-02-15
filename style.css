@@ -14,22 +14,30 @@ ul {
   padding-left: 0;
 }
 #qr-reader {
+  width: 100%;
+  max-width: 400px;
+  margin: auto;
   position: relative;
 }
 
-.scan-line {
-  position: absolute;
-  top: 50%;
-  left: 10%;
-  width: 80%;
-  height: 3px;
-  background: red;
-  transform: translateY(-50%);
-  animation: scanAnim 2s infinite;
+#qr-reader video {
+  width: 100% !important;
+  height: auto !important;
 }
 
-@keyframes scanAnim {
-  0% { opacity: 0.3; }
-  50% { opacity: 1; }
-  100% { opacity: 0.3; }
+
+.scan-line {
+  position: absolute;
+  left: 5%;
+  width: 90%;
+  height: 3px;
+  background: red;
+  z-index: 9999;
+  animation: scanMove 2s infinite;
+}
+
+@keyframes scanMove {
+  0% { top: 40%; }
+  50% { top: 60%; }
+  100% { top: 40%; }
 }

@@ -90,7 +90,8 @@ function playBeep() {
   oscillator.stop(ctx.currentTime + 0.1);
 }
 
-function scanQR(callback) {
+ffunction scanQR(callback) {
+
   qrReaderDiv.style.display = "block";
   const html5QrCode = new Html5Qrcode("qr-reader");
 
@@ -98,8 +99,8 @@ function scanQR(callback) {
     { facingMode: "environment" },
     {
       fps: 10,
-      qrbox: { width: 300, height: 120 }, // 👈 más ancho que alto
-         formatsToSupport: [
+      qrbox: { width: 300, height: 120 },
+      formatsToSupport: [
         Html5QrcodeSupportedFormats.EAN_13,
         Html5QrcodeSupportedFormats.CODE_128
       ]
@@ -110,7 +111,18 @@ function scanQR(callback) {
       callback(decodedText);
     },
     errorMessage => {}
-  ).catch(err => {
+  ).then(() => {
+
+    // 👇 Agregar línea roja DESPUÉS de iniciar cámara
+    setTimeout(() => {
+      if (!document.querySelector(".scan-line")) {
+        const line = document.createElement("div");
+        line.className = "scan-line";
+        document.getElementById("qr-reader").appendChild(line);
+      }
+    }, 300);
+
+  }).catch(err => {
     console.error(err);
     qrReaderDiv.style.display = "none";
   });
