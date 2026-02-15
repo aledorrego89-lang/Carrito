@@ -16,11 +16,15 @@ ul {
   padding-left: 0;
 }
 
+
+
+
 #scanner-container {
-  width: 100%;
+    display: none; /* se oculta inicialmente */
+  /* width: 100%;
   display: flex;
   justify-content: center;
-  margin-top: 20px;
+  margin-top: 20px; */
 }
 
 /* Tamaño real del escáner */

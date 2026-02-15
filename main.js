@@ -190,8 +190,10 @@ function clearError() { errorBox.textContent = ""; errorBox.classList.add('d-non
 // BOTÓN ESCANEAR
 // ============================
 document.getElementById('scan-products').addEventListener('click', () => {
-  scanQRServer();
+  document.getElementById('scanner-container').style.display = "block";
+  scanQRServer(); // tu función que inicia el escáner
 });
+
 
 // ============================
 // INICIALIZAR
