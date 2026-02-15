@@ -90,7 +90,7 @@ function playBeep() {
   oscillator.stop(ctx.currentTime + 0.1);
 }
 
-ffunction scanQR(callback) {
+function scanQR(callback) {
 
   qrReaderDiv.style.display = "block";
   const html5QrCode = new Html5Qrcode("qr-reader");
