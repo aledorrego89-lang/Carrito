@@ -26,13 +26,17 @@ async function fetchProducts() {
   try {
     statusDiv.textContent = "Conectando a la base de datos...";
     const res = await fetch(jsonUrl);
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
     const data = await res.json();
     window.products = data.productos;
     statusDiv.textContent = "Conectado a los productos ✅";
+    console.log("Productos cargados:", data);
   } catch (e) {
+    console.error(e);
     statusDiv.textContent = "Error al conectar: " + e;
   }
 }
+
 
 // Función para escanear QR
 function scanQR(callback) {
@@ -72,12 +76,13 @@ document.getElementById('scan-products').addEventListener('click', () => {
     return;
   }
 
-  scanQR(code => {
-    const prod = window.products.find(p => p.codigo === code);
-    if (!prod) {
-      alert("Producto no encontrado");
-      return;
-    }
+scanQR(url => {
+  console.log("URL del QR:", url); // Verifica que sea correcta
+  jsonUrl = url;
+  localStorage.setItem('jsonUrl', jsonUrl);
+  fetchProducts();
+});
+
 
     const qty = parseInt(prompt(`Cantidad de ${prod.nombre}:`, "1")) || 1;
     
