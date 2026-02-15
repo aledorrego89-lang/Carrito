@@ -4,11 +4,7 @@ const cartList = document.getElementById('cart-list');
 const totalSpan = document.getElementById('total');
 const qrReaderDiv = document.getElementById("scanner-container");
 
-
-// JSON relativo
-const jsonUrl = "https://100.126.169.121/productos.json";
-
-let products = [];
+const apiUrl = "https://100.126.169.121/guardar_producto.php";
 
 // Modal Bootstrap
 const productModal = new bootstrap.Modal(document.getElementById('productModal'));
@@ -19,10 +15,12 @@ const decreaseBtn = document.getElementById('decrease');
 const increaseBtn = document.getElementById('increase');
 const acceptBtn = document.getElementById('accept-product');
 
-// JSON de productos local
+let html5QrCode;
+let lastScanned = null;
 
-
-// Renderizar carrito
+// ============================
+// RENDER CARRITO
+// ============================
 function renderCart() {
   cartList.innerHTML = "";
   let total = 0;
@@ -53,34 +51,9 @@ function renderCart() {
   });
 }
 
-// Vaciar carrito
-document.getElementById('clear-cart').addEventListener('click', () => {
-  if (cart.length === 0) return;
-  if (confirm("¿Estás seguro de vaciar todo el carrito?")) {
-    cart = [];
-    renderCart();
-    statusDiv.textContent = "Carrito vacío";
-  }
-});
-
-// Cargar productos JSON local
-async function fetchProducts() {
-  try {
-    const res = await fetch(jsonUrl);
-    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-    const data = await res.json();
-products = data.productos;
-
-    statusDiv.textContent = "Cooperativa Obrera ✅";
-    console.log("Productos cargados:", data);
-  }catch (e) {
-  console.error("Fetch error:", e);
-  showError(`Error de conexión: ${e.name} - ${e.message}`);
-}
-
-}
-
-// Beep al escanear producto
+// ============================
+// BEEP
+// ============================
 function playBeep() {
   const ctx = new (window.AudioContext || window.webkitAudioContext)();
   const oscillator = ctx.createOscillator();
@@ -90,94 +63,91 @@ function playBeep() {
   oscillator.stop(ctx.currentTime + 0.1);
 }
 
-function scanQR(callback) {
-
+// ============================
+// ESCANEAR Y CONSULTAR AL SERVIDOR
+// ============================
+function scanQRServer() {
   qrReaderDiv.style.display = "block";
-  const html5QrCode = new Html5Qrcode("qr-reader");
+
+  if (html5QrCode) html5QrCode.clear();
+
+  html5QrCode = new Html5Qrcode("qr-reader");
 
   html5QrCode.start(
     { facingMode: "environment" },
-    {
-      fps: 10,
-      qrbox: { width: 300, height: 100 },
-      formatsToSupport: [
-        Html5QrcodeSupportedFormats.EAN_13,
-        Html5QrcodeSupportedFormats.CODE_128
-      ]
-    },
-    (decodedText) => {
-      html5QrCode.stop();
+    { fps: 10, qrbox: { width: 300, height: 100 }, formatsToSupport: [Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.CODE_128] },
+    async (decodedText) => {
+      const codigo = decodedText.trim();
+
+      // Evitar procesar el mismo código varias veces
+      if (codigo === lastScanned) return;
+      lastScanned = codigo;
+
+      html5QrCode.stop().then(() => html5QrCode.clear());
       qrReaderDiv.style.display = "none";
-      callback(decodedText);
+      playBeep();
+
+      try {
+        const response = await fetch(`https://100.126.169.121/buscar_producto.php?codigo=${codigo}`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+
+        if (!data.existe) {
+          showError("Producto no encontrado: " + codigo);
+          return;
+        }
+
+        clearError();
+        const prod = data.producto;
+
+        modalTitle.textContent = prod.nombre;
+        modalPrice.textContent = `Precio: $${prod.precio}`;
+        modalQty.value = 1;
+        productModal.show();
+
+        decreaseBtn.onclick = () => { if (modalQty.value > 1) modalQty.value--; };
+        increaseBtn.onclick = () => modalQty.value++;
+
+        acceptBtn.onclick = () => {
+          const cantidad = parseInt(modalQty.value) || 1;
+          cart.push({ nombre: prod.nombre, precio: prod.precio, cantidad });
+          renderCart();
+          statusDiv.textContent = `Producto agregado: ${prod.nombre} x${cantidad}`;
+          productModal.hide();
+        };
+
+      } catch (err) {
+        console.error(err);
+        showError("Error al consultar servidor: " + err.message);
+      }
     }
   ).then(() => {
-
-    // Crear línea roja
+    // efecto línea verde
     const line = document.createElement("div");
-    line.className = "scan-line";
+    line.className = "scan-line-green";
     document.getElementById("qr-reader").appendChild(line);
-
   }).catch(err => {
     console.error(err);
     qrReaderDiv.style.display = "none";
+    showError("Error al iniciar el escáner");
   });
 }
 
+// ============================
+// ERRORES
+// ============================
+const errorBox = document.getElementById('error-box');
+function showError(message) { errorBox.textContent = message; errorBox.classList.remove('d-none'); }
+function clearError() { errorBox.textContent = ""; errorBox.classList.add('d-none'); }
 
-// Escanear producto
+// ============================
+// BOTÓN ESCANEAR
+// ============================
 document.getElementById('scan-products').addEventListener('click', () => {
-if (products.length === 0){
-
-    alert("No se han cargado los productos");
-    return;
-  }
-
-scanQR(code => {
-
-  const cleanCode = String(code).trim();
-
-  const prod = products.find(p =>
-    String(p.codigo).trim() === cleanCode
-  );
-
-  if (!prod) {
-    showError("Producto no encontrado: " + cleanCode);
-    return;
-  }
-
-
-    playBeep();
-
-    modalTitle.textContent = prod.nombre;
-    modalPrice.textContent = `Precio: $${prod.precio}`;
-    modalQty.value = 1;
-    productModal.show();
-
-    decreaseBtn.onclick = () => { if(modalQty.value > 1) modalQty.value--; };
-    increaseBtn.onclick = () => modalQty.value++;
-
-    acceptBtn.onclick = () => {
-      const cantidad = parseInt(modalQty.value) || 1;
-      cart.push({ nombre: prod.nombre, precio: prod.precio, cantidad });
-      renderCart();
-      statusDiv.textContent = `Producto agregado: ${prod.nombre} x${cantidad}`;
-      productModal.hide();
-    };
-  });
+  scanQRServer();
 });
 
-const errorBox = document.getElementById('error-box');
-
-function showError(message) {
-  errorBox.textContent = message;
-  errorBox.classList.remove('d-none');
-}
-
-function clearError() {
-  errorBox.textContent = "";
-  errorBox.classList.add('d-none');
-}
-
-// Inicializar
+// ============================
+// INICIALIZAR
+// ============================
 renderCart();
-fetchProducts();
