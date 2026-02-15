@@ -5,6 +5,7 @@ const totalSpan = document.getElementById('total');
 const qrReaderDiv = document.getElementById("scanner-container");
 
 const apiUrl = "https://100.126.169.121/guardar_producto.php";
+const jsonUrl = "https://100.126.169.121/productos.json";
 
 // Modal Bootstrap
 const productModal = new bootstrap.Modal(document.getElementById('productModal'));
@@ -18,29 +19,8 @@ const acceptBtn = document.getElementById('accept-product');
 let html5QrCode;
 let lastScanned = null;
 
-
 // ============================
-// MOSTRAR NOMBRE DEL NEGOCIO AL INICIAR
-// ============================
-async function mostrarNegocio() {
-  statusDiv.textContent = "Conectando..."; // mensaje provisional
-  try {
-    const res = await fetch("https://100.126.169.121/productos.json");
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    // Solo usamos el mensaje del JSON
-    statusDiv.textContent = data.mensaje || "Conectado";
-  } catch (err) {
-    console.error("Error al conectar con el JSON:", err);
-    statusDiv.textContent = "Error de conexión";
-  }
-}
-
-// Llamamos a la función al cargar la página
-mostrarNegocio();
-
-// ============================
-// RENDER CARRITO
+// Render carrito
 // ============================
 function renderCart() {
   cartList.innerHTML = "";
@@ -73,7 +53,20 @@ function renderCart() {
 }
 
 // ============================
-// BEEP
+// Vaciar carrito
+// ============================
+document.getElementById('clear-cart').addEventListener('click', () => {
+  if (cart.length === 0) return;
+  if (confirm("¿Estás seguro de vaciar todo el carrito?")) {
+    cart = [];
+    localStorage.removeItem('cart');
+    renderCart();
+    statusDiv.textContent = "Carrito vacío";
+  }
+});
+
+// ============================
+// Beep
 // ============================
 function playBeep() {
   const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -84,10 +77,38 @@ function playBeep() {
   oscillator.stop(ctx.currentTime + 0.1);
 }
 
-
+// ============================
+// Mostrar error
+// ============================
+const errorBox = document.getElementById('error-box');
+function showError(message) { errorBox.textContent = message; errorBox.classList.remove('d-none'); }
+function clearError() { errorBox.textContent = ""; errorBox.classList.add('d-none'); }
 
 // ============================
-// ESCANEAR Y CONSULTAR AL SERVIDOR
+// Obtener solo nombre del negocio al cargar
+// ============================
+async function fetchNegocio() {
+  try {
+    const res = await fetch(jsonUrl);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+
+    // Solo mostramos el nombre del negocio al inicio
+    const negocio = data.mensaje || "Desconocido";
+    statusDiv.textContent = `Conectado a ${negocio}`;
+    console.log("Negocio:", negocio);
+
+    return data.productos || [];
+  } catch (e) {
+    console.error("Fetch error:", e);
+    showError(`Error de conexión: ${e.name} - ${e.message}`);
+    statusDiv.textContent = "Error al conectar con servidor";
+    return [];
+  }
+}
+
+// ============================
+// Escanear y consultar al servidor
 // ============================
 async function scanQRServer() {
   qrReaderDiv.style.display = "block";
@@ -101,7 +122,6 @@ async function scanQRServer() {
     { fps: 10, qrbox: { width: 300, height: 100 }, formatsToSupport: [Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.CODE_128] },
     async (decodedText) => {
       const codigo = decodedText.trim();
-
       if (codigo === lastScanned) return;
       lastScanned = codigo;
 
@@ -116,7 +136,7 @@ async function scanQRServer() {
       modalQty.value = 1;
 
       try {
-        const response = await fetch(`https://100.126.169.121/buscar_producto.php?codigo=${codigo}`);
+        const response = await fetch(`https://100.126.238.13/buscar_producto.php?codigo=${codigo}`);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
 
@@ -125,15 +145,13 @@ async function scanQRServer() {
           return;
         }
 
-        // Producto recibido, ahora mostrar modal
         const prod = data.producto;
         modalTitle.textContent = prod.nombre;
         modalPrice.textContent = `Precio: $${prod.precio}`;
         modalQty.value = 1;
-
         productModal.show();
 
-        decreaseBtn.onclick = () => { if (modalQty.value > 1) modalQty.value--; };
+        decreaseBtn.onclick = () => { if(modalQty.value > 1) modalQty.value--; };
         increaseBtn.onclick = () => modalQty.value++;
 
         acceptBtn.onclick = () => {
@@ -161,20 +179,15 @@ async function scanQRServer() {
 }
 
 // ============================
-// ERRORES
-// ============================
-const errorBox = document.getElementById('error-box');
-function showError(message) { errorBox.textContent = message; errorBox.classList.remove('d-none'); }
-function clearError() { errorBox.textContent = ""; errorBox.classList.add('d-none'); }
-
-// ============================
-// BOTÓN ESCANEAR
+// Botón escanear
 // ============================
 document.getElementById('scan-products').addEventListener('click', () => {
   scanQRServer();
 });
 
 // ============================
-// INICIALIZAR
+// Inicializar
 // ============================
 renderCart();
+let products = [];
+fetchNegocio().then(prod => { products = prod; });
