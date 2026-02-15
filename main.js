@@ -95,11 +95,11 @@ function scanQR(callback) {
   qrReaderDiv.style.display = "block";
   const html5QrCode = new Html5Qrcode("qr-reader");
 
-    html5QrCode.start(
+  html5QrCode.start(
     { facingMode: "environment" },
     {
       fps: 10,
-      qrbox: { width: 280, height: 100 },
+      qrbox: { width: 300, height: 100 },
       formatsToSupport: [
         Html5QrcodeSupportedFormats.EAN_13,
         Html5QrcodeSupportedFormats.CODE_128
