@@ -73,7 +73,7 @@ function startScan() {
     (decodedText) => {
       // Detener el escaneo después de leer un código
       html5QrCode.stop().then(() => html5QrCode.clear());
-      
+          playBeep();
       // Guardar código y buscar producto
       codigoActual = decodedText;
       document.getElementById("codigo").innerText = codigoActual;
@@ -125,9 +125,15 @@ function guardarProducto() {
   });
 }
 
+// Beep al escanear producto
+function playBeep() {
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const oscillator = ctx.createOscillator();
+  oscillator.frequency.setValueAtTime(2000, ctx.currentTime);
+  oscillator.connect(ctx.destination);
+  oscillator.start();
+  oscillator.stop(ctx.currentTime + 0.1);
+}
 
-// ============================
-// BUSCAR PRODUCTO
-// ============================
 
 
