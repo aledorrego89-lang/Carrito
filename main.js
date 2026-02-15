@@ -98,7 +98,11 @@ function scanQR(callback) {
     { facingMode: "environment" },
     {
       fps: 10,
-      qrbox: { width: 300, height: 120 } // 👈 más ancho que alto
+      qrbox: { width: 300, height: 120 }, // 👈 más ancho que alto
+         formatsToSupport: [
+        Html5QrcodeSupportedFormats.EAN_13,
+        Html5QrcodeSupportedFormats.CODE_128
+      ]
     },
     (decodedText) => {
       html5QrCode.stop();
