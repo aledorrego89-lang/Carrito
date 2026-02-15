@@ -2,7 +2,7 @@ let cart = JSON.parse(localStorage.getItem('cart') || "[]");
 const statusDiv = document.getElementById('status');
 const cartList = document.getElementById('cart-list');
 const totalSpan = document.getElementById('total');
-const qrReaderDiv = document.getElementById('qr-reader');
+const qrReaderDiv = document.getElementById("scanner-container");
 
 
 // JSON relativo
