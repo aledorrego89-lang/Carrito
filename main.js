@@ -118,12 +118,19 @@ if (products.length === 0){
     return;
   }
 
-  scanQR(code => {
-    const prod = products.find(p => p.codigo === code);
-    if (!prod) {
-      alert("Producto no encontrado");
-      return;
-    }
+scanQR(code => {
+
+  const cleanCode = String(code).trim();
+
+  const prod = products.find(p =>
+    String(p.codigo).trim() === cleanCode
+  );
+
+  if (!prod) {
+    showError("Producto no encontrado: " + cleanCode);
+    return;
+  }
+
 
     playBeep();
 
