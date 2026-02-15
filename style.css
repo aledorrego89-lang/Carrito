@@ -13,6 +13,7 @@ ul {
   list-style: none;
   padding-left: 0;
 }
+
 #scanner-container {
   width: 100%;
   display: flex;
@@ -20,48 +21,27 @@ ul {
   margin-top: 20px;
 }
 
+/* Tamaño real del escáner */
 #qr-reader {
   position: relative;
-  width: 350px;
-  height: 150px;
+  width: 340px;
+  height: 140px;
   overflow: hidden;
   border-radius: 12px;
   background: black;
 }
 
-/* Video ocupa todo el contenedor */
+/* Elimina espacio extra generado por la librería */
+#qr-reader > div {
+  padding: 0 !important;
+}
+
+/* Video ajustado exactamente al tamaño del scanner */
 #qr-reader video {
   width: 100% !important;
   height: 100% !important;
   object-fit: cover;
 }
-
-/* Marco verde estilo lector */
-#qr-reader::before {
-  content: "";
-  position: absolute;
-  top: 10%;
-  left: 5%;
-  width: 90%;
-  height: 80%;
-  border: 2px solid #00ff00;
-  border-radius: 8px;
-  z-index: 5;
-}
-
-/* Línea roja */
-.scan-line {
-  position: absolute;
-  left: 5%;
-  width: 90%;
-  height: 3px;
-  background: red;
-  z-index: 10;
-  animation: scanMove 2s infinite;
-}
-
-@keyframes scanMove {
-  0% { top: 35%; }
-  50% { top: 65%; }
-  100% { top: 35%; }
+#qr-reader__dashboard {
+  display: none !important;
 }
