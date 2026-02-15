@@ -6,7 +6,7 @@ const qrReaderDiv = document.getElementById('qr-reader');
 
 
 // JSON relativo
-const jsonUrl = "http://100.126.169.121/productos.json";
+const jsonUrl = "https://100.126.169.121/productos.json";
 
 let products = [];
 
