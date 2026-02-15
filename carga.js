@@ -23,9 +23,10 @@ function iniciarEscaneo() {
       ]
     },
 (decodedText) => {
-  document.getElementById("codigo").value = decodedText;
-  html5QrCode.stop();
+  codigoActual = decodedText; // actualizar variable global
+  document.getElementById("codigo").innerText = codigoActual;
   buscarProducto(decodedText);
+  // html5QrCode.stop(); // opcional si quieres seguir escaneando
 }
 
   ).catch(err => {

@@ -64,7 +64,8 @@
 <p id="estado" style="font-weight:bold;"></p>
 
   <input type="text" id="buscarCodigo" placeholder="Código de barras">
-  <button onclick="buscarProducto()">🔎 Buscar</button>
+<button onclick="buscarProducto(document.getElementById('buscarCodigo').value)">🔎 Buscar</button>
+
 
   <p id="resultado"></p>
 
