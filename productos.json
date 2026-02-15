@@ -2,8 +2,8 @@
   "productos": [
 
  { "codigo": "7798130953121", "nombre": "Pañuelos descartables", "precio": 1150 },
-   { "codigo": "7501000000002", "nombre": "Banana", "precio": 30 },
-    { "codigo": "7501000000003", "nombre": "Leche Entera 1L", "precio": 120 },
+   { "codigo": "7793913001822", "nombre": "Leche entera Tregar 1 Litro", "precio": 1530 },
+    { "codigo": "7792350067934", "nombre": "Arbejas Inalpa 300g", "precio": 3120 },
     { "codigo": "7501000000004", "nombre": "Pan Integral", "precio": 80 },
     { "codigo": "7501000000005", "nombre": "Huevos x6", "precio": 90 },
     { "codigo": "7501000000006", "nombre": "Queso Cremoso 200g", "precio": 250 },
