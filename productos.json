@@ -1,6 +1,6 @@
 {
   "productos": [
-    { "codigo": "7501000000001", "nombre": "Manzana Roja", "precio": 50 },
+    { "codigo": "7798130953121", "nombre": "Pañuelos descartables", "precio": 1150 },
     { "codigo": "7501000000002", "nombre": "Banana", "precio": 30 },
     { "codigo": "7501000000003", "nombre": "Leche Entera 1L", "precio": 120 },
     { "codigo": "7501000000004", "nombre": "Pan Integral", "precio": 80 },
