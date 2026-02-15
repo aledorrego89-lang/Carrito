@@ -1,140 +1,153 @@
+      // Carrito y elementos
 let cart = JSON.parse(localStorage.getItem('cart') || "[]");
+let jsonUrl = "productos.json"; // JSON local en la misma carpeta
 const statusDiv = document.getElementById('status');
 const cartList = document.getElementById('cart-list');
 const totalSpan = document.getElementById('total');
+const qrReaderDiv = document.getElementById('qr-reader');
 
-// JSON relativo
-const jsonUrl = "productos.json";
-let products = [];
-
-// Modal Bootstrap
+// Modal elementos
 const productModal = new bootstrap.Modal(document.getElementById('productModal'));
-const modalName = document.getElementById('modal-name');
+const modalTitle = document.getElementById('modal-title');
 const modalPrice = document.getElementById('modal-price');
 const modalQty = document.getElementById('modal-qty');
-const modalAccept = document.getElementById('modal-accept');
-const incrementBtn = document.getElementById('increment-btn');
-const decrementBtn = document.getElementById('decrement-btn');
+const decreaseBtn = document.getElementById('decrease');
+const increaseBtn = document.getElementById('increase');
+const acceptBtn = document.getElementById('accept-product');
 
-// Incrementar cantidad
-incrementBtn.addEventListener('click', () => {
-  let current = parseInt(modalQty.value) || 1;
-  modalQty.value = current + 1;
-});
-
-// Decrementar cantidad
-decrementBtn.addEventListener('click', () => {
-  let current = parseInt(modalQty.value) || 1;
-  if (current > 1) modalQty.value = current - 1;
-});
-
-let currentProduct = null;
-
-// Render carrito
+// Renderizar carrito
 function renderCart() {
   cartList.innerHTML = "";
   let total = 0;
-  cart.forEach(item => {
+
+  cart.forEach((item, index) => {
     const li = document.createElement('li');
     li.className = "list-group-item d-flex justify-content-between align-items-center";
-    li.textContent = `${item.nombre} x ${item.cantidad}`;
-    const span = document.createElement('span');
-    span.textContent = `$${item.precio * item.cantidad}`;
-    li.appendChild(span);
+
+    li.innerHTML = `
+      <div>${item.nombre} x${item.cantidad} - $${item.precio * item.cantidad}</div>
+      <button class="btn btn-sm btn-outline-danger remove-btn" data-index="${index}">🗑️</button>
+    `;
+
     cartList.appendChild(li);
     total += item.precio * item.cantidad;
   });
+
   totalSpan.textContent = total;
   localStorage.setItem('cart', JSON.stringify(cart));
+
+  document.querySelectorAll('.remove-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const idx = parseInt(e.currentTarget.getAttribute('data-index'));
+      cart.splice(idx, 1);
+      renderCart();
+      statusDiv.textContent = "Producto eliminado";
+    });
+  });
 }
 
-// Cargar productos
+// Vaciar carrito
+document.getElementById('clear-cart').addEventListener('click', () => {
+  if (cart.length === 0) return;
+  if (confirm("¿Estás seguro de vaciar todo el carrito?")) {
+    cart = [];
+    renderCart();
+    statusDiv.textContent = "Carrito vacío";
+  }
+});
+
+// Cargar productos desde JSON local
 async function fetchProducts() {
   try {
-    statusDiv.textContent = "Conectando a la base de datos...";
+    statusDiv.textContent = "Cargando productos...";
     const res = await fetch(jsonUrl);
     if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
     const data = await res.json();
-    products = data.productos;
-    statusDiv.textContent = "Productos cargados ✅";
-  } catch (e) {
+    window.products = data.productos;
+    statusDiv.textContent = "Productos listos ✅";
+    console.log("Productos cargados:", data);
+  } catch(e) {
     console.error(e);
     statusDiv.textContent = "Error al cargar productos: " + e;
   }
 }
 
-// Escanear producto
-function scanProduct() {
-  if (!products.length) {
-    alert("No se han cargado los productos");
-    return;
-  }
+// Beep al escanear producto
+function playBeep() {
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const oscillator = ctx.createOscillator();
+  oscillator.frequency.setValueAtTime(1000, ctx.currentTime);
+  oscillator.connect(ctx.destination);
+  oscillator.start();
+  oscillator.stop(ctx.currentTime + 0.1);
+}
 
-  const qrReaderDiv = document.getElementById('qr-reader');
+// Escanear QR
+function scanQR(callback) {
   qrReaderDiv.style.display = "block";
   const html5QrCode = new Html5Qrcode("qr-reader");
 
   html5QrCode.start(
     { facingMode: "environment" },
     { fps: 10, qrbox: 250 },
-    (decodedText, decodedResult) => {
+    (decodedText) => {
       html5QrCode.stop();
       qrReaderDiv.style.display = "none";
-
-      const prod = products.find(p => p.codigo === decodedText);
-      if (!prod) {
-        alert("Producto no encontrado");
-        return;
-      }
-playBeep();
-      currentProduct = prod;
-      modalName.textContent = `Nombre: ${prod.nombre}`;
-      modalPrice.textContent = `Precio unitario: $${prod.precio}`;
-      modalQty.value = 1;
-      productModal.show();
+      callback(decodedText);
     },
-    errorMessage => {
-      // console.log("QR scan error: ", errorMessage);
-    }
+    errorMessage => {}
   ).catch(err => {
     console.error(err);
     qrReaderDiv.style.display = "none";
   });
 }
 
-// Aceptar producto en modal
-modalAccept.addEventListener('click', () => {
-  const qty = parseInt(modalQty.value) || 1;
-  cart.push({
-    nombre: currentProduct.nombre,
-    precio: currentProduct.precio,
-    cantidad: qty
+// Escanear local
+document.getElementById('scan-local').addEventListener('click', () => {
+  scanQR(url => {
+    jsonUrl = url; // si quieres cambiar el JSON desde QR
+    localStorage.setItem('jsonUrl', jsonUrl);
+    fetchProducts();
   });
-  renderCart();
-  statusDiv.textContent = `Producto agregado: ${currentProduct.nombre} x${qty}`;
-  productModal.hide();
 });
 
+// Escanear producto
+document.getElementById('scan-products').addEventListener('click', () => {
+  if (!window.products) {
+    alert("Primero carga los productos");
+    return;
+  }
 
-function playBeep() {
-  const ctx = new (window.AudioContext || window.webkitAudioContext)();
-  const oscillator = ctx.createOscillator();
-  const gainNode = ctx.createGain();
+  scanQR(code => {
+    const prod = window.products.find(p => p.codigo === code);
+    if (!prod) {
+      alert("Producto no encontrado");
+      return;
+    }
 
-  oscillator.type = 'sine'; // tipo de onda
-  oscillator.frequency.setValueAtTime(4000, ctx.currentTime); // 1000 Hz
-  oscillator.connect(gainNode);
-  gainNode.connect(ctx.destination);
+    playBeep(); // beep al escanear
 
-  oscillator.start();
-  oscillator.stop(ctx.currentTime + 0.1); // dura 0.1 segundos
-}
+    // Modal con nombre, precio y cantidad
+    modalTitle.textContent = prod.nombre;
+    modalPrice.textContent = `Precio: $${prod.precio}`;
+    modalQty.value = 1;
+    productModal.show();
 
+    // Botones + y -
+    decreaseBtn.onclick = () => { if(modalQty.value > 1) modalQty.value--; };
+    increaseBtn.onclick = () => modalQty.value++;
 
+    // Botón aceptar
+    acceptBtn.onclick = () => {
+      const cantidad = parseInt(modalQty.value) || 1;
+      cart.push({ nombre: prod.nombre, precio: prod.precio, cantidad });
+      renderCart();
+      statusDiv.textContent = `Producto agregado: ${prod.nombre} x${cantidad}`;
+      productModal.hide();
+    };
+  });
+});
 
-// Botón escanear
-document.getElementById('scan-products').addEventListener('click', scanProduct);
-
-// Inicial
+// Render inicial
 renderCart();
 fetchProducts();
