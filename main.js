@@ -86,7 +86,7 @@ function scanProduct() {
         alert("Producto no encontrado");
         return;
       }
-
+playBeep();
       currentProduct = prod;
       modalName.textContent = `Nombre: ${prod.nombre}`;
       modalPrice.textContent = `Precio unitario: $${prod.precio}`;
@@ -114,6 +114,23 @@ modalAccept.addEventListener('click', () => {
   statusDiv.textContent = `Producto agregado: ${currentProduct.nombre} x${qty}`;
   productModal.hide();
 });
+
+
+function playBeep() {
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const oscillator = ctx.createOscillator();
+  const gainNode = ctx.createGain();
+
+  oscillator.type = 'sine'; // tipo de onda
+  oscillator.frequency.setValueAtTime(1000, ctx.currentTime); // 1000 Hz
+  oscillator.connect(gainNode);
+  gainNode.connect(ctx.destination);
+
+  oscillator.start();
+  oscillator.stop(ctx.currentTime + 0.1); // dura 0.1 segundos
+}
+
+
 
 // Botón escanear
 document.getElementById('scan-products').addEventListener('click', scanProduct);
