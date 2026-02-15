@@ -66,7 +66,7 @@ function playBeep() {
 // ============================
 // ESCANEAR Y CONSULTAR AL SERVIDOR
 // ============================
-function scanQRServer() {
+async function scanQRServer() {
   qrReaderDiv.style.display = "block";
 
   if (html5QrCode) html5QrCode.clear();
@@ -79,13 +79,18 @@ function scanQRServer() {
     async (decodedText) => {
       const codigo = decodedText.trim();
 
-      // Evitar procesar el mismo código varias veces
       if (codigo === lastScanned) return;
       lastScanned = codigo;
 
       html5QrCode.stop().then(() => html5QrCode.clear());
       qrReaderDiv.style.display = "none";
       playBeep();
+      clearError();
+
+      // Limpiar modal antes de cargar datos
+      modalTitle.textContent = "Cargando...";
+      modalPrice.textContent = "";
+      modalQty.value = 1;
 
       try {
         const response = await fetch(`https://100.126.169.121/buscar_producto.php?codigo=${codigo}`);
@@ -97,12 +102,12 @@ function scanQRServer() {
           return;
         }
 
-        clearError();
+        // Producto recibido, ahora mostrar modal
         const prod = data.producto;
-
         modalTitle.textContent = prod.nombre;
         modalPrice.textContent = `Precio: $${prod.precio}`;
         modalQty.value = 1;
+
         productModal.show();
 
         decreaseBtn.onclick = () => { if (modalQty.value > 1) modalQty.value--; };
@@ -122,7 +127,6 @@ function scanQRServer() {
       }
     }
   ).then(() => {
-    // efecto línea verde
     const line = document.createElement("div");
     line.className = "scan-line-green";
     document.getElementById("qr-reader").appendChild(line);
