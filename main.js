@@ -71,7 +71,7 @@ async function fetchProducts() {
     const data = await res.json();
 products = data.productos;
 
-    statusDiv.textContent = "Productos listos ✅";
+    statusDiv.textContent = "Cooperativa Obrera ✅";
     console.log("Productos cargados:", data);
   }catch (e) {
   console.error("Fetch error:", e);
@@ -84,7 +84,7 @@ products = data.productos;
 function playBeep() {
   const ctx = new (window.AudioContext || window.webkitAudioContext)();
   const oscillator = ctx.createOscillator();
-  oscillator.frequency.setValueAtTime(1000, ctx.currentTime);
+  oscillator.frequency.setValueAtTime(2000, ctx.currentTime);
   oscillator.connect(ctx.destination);
   oscillator.start();
   oscillator.stop(ctx.currentTime + 0.1);
