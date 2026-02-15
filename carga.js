@@ -61,11 +61,17 @@ function iniciarEscaneo() {
       ]
     },
 (decodedText) => {
-  codigoActual = decodedText; // actualizar variable global
+  codigoActual = decodedText;
   document.getElementById("codigo").innerText = codigoActual;
-  buscarProductoLocal(decodedText); // <<--- aquí
-  // html5QrCode.stop(); // opcional si quieres seguir escaneando
+  buscarProductoLocal(decodedText);
+
+  // Detener escaneo inmediatamente
+  html5QrCode.stop().then(() => {
+    console.log("Escaneo detenido");
+    document.getElementById("qr-reader").style.display = "none";
+  }).catch(err => console.error("Error al detener el escaneo:", err));
 }
+
 
 
   ).catch(err => {
