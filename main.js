@@ -69,7 +69,8 @@ async function fetchProducts() {
     const res = await fetch(jsonUrl);
     if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
     const data = await res.json();
-    window.products = data.productos;
+products = data.productos;
+
     statusDiv.textContent = "Productos listos ✅";
     console.log("Productos cargados:", data);
   } catch(e) {
@@ -110,13 +111,14 @@ function scanQR(callback) {
 
 // Escanear producto
 document.getElementById('scan-products').addEventListener('click', () => {
-  if (!window.products) {
+if (products.length === 0){
+
     alert("No se han cargado los productos");
     return;
   }
 
   scanQR(code => {
-    const prod = window.products.find(p => p.codigo === code);
+    const prod = products.find(p => p.codigo === code);
     if (!prod) {
       alert("Producto no encontrado");
       return;
