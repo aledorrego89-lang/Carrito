@@ -13,31 +13,55 @@ ul {
   list-style: none;
   padding-left: 0;
 }
-#qr-reader {
+#scanner-container {
   width: 100%;
-  max-width: 400px;
-  margin: auto;
-  position: relative;
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
 }
 
+#qr-reader {
+  position: relative;
+  width: 350px;
+  height: 150px;
+  overflow: hidden;
+  border-radius: 12px;
+  background: black;
+}
+
+/* Video ocupa todo el contenedor */
 #qr-reader video {
   width: 100% !important;
-  height: auto !important;
+  height: 100% !important;
+  object-fit: cover;
 }
 
+/* Marco verde estilo lector */
+#qr-reader::before {
+  content: "";
+  position: absolute;
+  top: 10%;
+  left: 5%;
+  width: 90%;
+  height: 80%;
+  border: 2px solid #00ff00;
+  border-radius: 8px;
+  z-index: 5;
+}
 
+/* Línea roja */
 .scan-line {
   position: absolute;
   left: 5%;
   width: 90%;
   height: 3px;
   background: red;
-  z-index: 9999;
+  z-index: 10;
   animation: scanMove 2s infinite;
 }
 
 @keyframes scanMove {
-  0% { top: 40%; }
-  50% { top: 60%; }
-  100% { top: 40%; }
+  0% { top: 35%; }
+  50% { top: 65%; }
+  100% { top: 35%; }
 }

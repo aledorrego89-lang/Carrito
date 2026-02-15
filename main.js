@@ -99,7 +99,7 @@ function scanQR(callback) {
     { facingMode: "environment" },
     {
       fps: 10,
-      qrbox: { width: 300, height: 120 },
+      qrbox: { width: 300, height: 100 },
       formatsToSupport: [
         Html5QrcodeSupportedFormats.EAN_13,
         Html5QrcodeSupportedFormats.CODE_128
@@ -109,18 +109,13 @@ function scanQR(callback) {
       html5QrCode.stop();
       qrReaderDiv.style.display = "none";
       callback(decodedText);
-    },
-    errorMessage => {}
+    }
   ).then(() => {
 
-    // 👇 Agregar línea roja DESPUÉS de iniciar cámara
-    setTimeout(() => {
-      if (!document.querySelector(".scan-line")) {
-        const line = document.createElement("div");
-        line.className = "scan-line";
-        document.getElementById("qr-reader").appendChild(line);
-      }
-    }, 300);
+    // Crear línea roja
+    const line = document.createElement("div");
+    line.className = "scan-line";
+    document.getElementById("qr-reader").appendChild(line);
 
   }).catch(err => {
     console.error(err);
