@@ -47,7 +47,17 @@ cargarProductos();
 // ESCANEAR CODIGO
 // ============================
 function iniciarEscaneo() {
+  if (html5QrCode) {
+    html5QrCode.stop().then(() => {
+      html5QrCode.clear(); // limpiar el lector
+      startScan();          // iniciar nuevo escaneo
+    }).catch(err => console.error("Error al reiniciar escáner:", err));
+  } else {
+    startScan();
+  }
+}
 
+function startScan() {
   html5QrCode = new Html5Qrcode("qr-reader");
 
   html5QrCode.start(
@@ -60,25 +70,21 @@ function iniciarEscaneo() {
         Html5QrcodeSupportedFormats.CODE_128
       ]
     },
-(decodedText) => {
-  codigoActual = decodedText;
-  document.getElementById("codigo").innerText = codigoActual;
-  buscarProductoLocal(decodedText);
-
-  // Detener escaneo inmediatamente
-  html5QrCode.stop().then(() => {
-    console.log("Escaneo detenido");
-    document.getElementById("qr-reader").style.display = "none";
-  }).catch(err => console.error("Error al detener el escaneo:", err));
-}
-
-
-
+    (decodedText) => {
+      // Detener el escaneo después de leer un código
+      html5QrCode.stop().then(() => html5QrCode.clear());
+      
+      // Guardar código y buscar producto
+      codigoActual = decodedText;
+      document.getElementById("codigo").innerText = codigoActual;
+      buscarProductoLocal(decodedText);
+    }
   ).catch(err => {
     console.error(err);
     alert("Error al iniciar cámara");
   });
 }
+
 
 // ============================
 // GUARDAR PRODUCTO
