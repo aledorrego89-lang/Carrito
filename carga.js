@@ -178,12 +178,18 @@ document.addEventListener("DOMContentLoaded", function () {
   const precioInput = document.getElementById("precio");
 
   // ENTER EN CÓDIGO
-  inputManual.addEventListener("keyup", function (e) {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      procesarCodigo(this.value);
-    }
-  });
+inputManual.addEventListener("keyup", function (e) {
+  if (e.key === "Enter") {
+    e.preventDefault();
+
+    const codigo = this.value.trim();
+    if (!codigo) return;
+
+    codigoActual = codigo;   // 🔥 FORZAMOS ASIGNACIÓN
+    procesarCodigo(codigo);
+  }
+});
+
 
   // ENTER EN NOMBRE → PASA A PRECIO
   nombreInput.addEventListener("keyup", function (e) {
