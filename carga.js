@@ -193,6 +193,15 @@ function cancelarProducto() {
     document.getElementById('btnEliminar').style.display = 'none';
 }
 
+function limpiarFormulario() {
+    document.getElementById('nombre').value = '';
+    document.getElementById('precio').value = '';
+    document.getElementById('inputCodigoManual').value = '';
+    document.getElementById('codigo').textContent = '';
+    document.getElementById('estado').textContent = '';
+    document.getElementById('btnEliminar').style.display = 'none';
+}
+
 
 document.addEventListener("DOMContentLoaded", function () {
 
