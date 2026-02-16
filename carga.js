@@ -73,14 +73,14 @@ if (data.existe) {
   precioInput.value = data.producto.precio;
   estado.innerText = "Producto existente en servidor - Puede editarlo";
   estado.style.color = "blue";
-
+ precioInput.focus();
   btnEliminar.style.display = "block"; // mostrar botón
 } else {
   nombreInput.value = "";
   precioInput.value = "";
   estado.innerText = "Producto nuevo";
   estado.style.color = "green";
-
+ precioInput.focus();
   btnEliminar.style.display = "none"; // ocultar botón
 }
 
@@ -108,7 +108,10 @@ function guardarProducto() {
     body: JSON.stringify({ codigo: codigoActual, nombre, precio: parseFloat(precio) })
   })
   .then(res => res.json())
-  .then(data => alert("Producto guardado en servidor ✅"))
+  .then(data => {
+     document.getElementById("inputCodigoManual").focus();
+    alert("Producto guardado en servidor ✅")})
+  
   .catch(err => { console.error(err); alert("Error al guardar en servidor"); });
 }
 
