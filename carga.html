@@ -1,59 +1,94 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Administrador de Productos</title>
-  
-  <!-- Bootstrap 5 -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  
-  <!-- Html5 QR -->
-  <script src="https://unpkg.com/html5-qrcode"></script>
 
-  <style>
-    body { padding: 20px; background: #f8f9fa; }
-    #qr-reader { width: 100%; max-width: 400px; height: 200px; margin: 20px auto; border-radius: 15px; overflow: hidden; background: black; }
-    #qr-reader video { width: 100% !important; height: 100% !important; object-fit: cover; }
-    #estado { font-weight: bold; }
-  </style>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Administrador de Productos</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Html5 QR -->
+    <script src="https://unpkg.com/html5-qrcode"></script>
+
+    <style>
+        body {
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        #qr-reader {
+            width: 100%;
+            max-width: 400px;
+            height: 200px;
+            margin: 20px auto;
+            border-radius: 15px;
+            overflow: hidden;
+            background: black;
+        }
+
+        #qr-reader video {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover;
+        }
+
+        #estado {
+            font-weight: bold;
+        }
+    </style>
 </head>
+
 <body>
 
-<div class="container">
+    <div class="container">
 
-  <h2 class="text-center mb-4">Administrador de Productos</h2>
+        <h2 class="text-center mb-4">Administrador de Productos</h2>
 
-  <!-- Escaneo -->
-  <div class="text-center mb-4">
-    <button class="btn btn-primary btn-lg" onclick="iniciarEscaneo()">📷 Escanear Código</button>
-    <p class="mt-2">Código escaneado: <strong id="codigo"></strong></p>
-  </div>
-
-  <!-- QR Reader -->
-  <div id="qr-reader"></div>
-
-  <!-- Formulario producto -->
-  <div class="card p-3 mt-4 shadow-sm">
-    <h5>Producto</h5>
-    <p id="estado" class="mb-3"></p>
-    <div class="mb-3">
-      <input type="text" id="nombre" class="form-control form-control-lg" placeholder="Nombre del producto">
-    </div>
-    <div class="mb-3">
-      <input type="number" id="precio" class="form-control form-control-lg" placeholder="Precio">
-    </div>
-    <button class="btn btn-success w-100" onclick="guardarProducto()">💾 Guardar / Actualizar</button>
-  </div>
-
-</div>
-
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- Escaneo -->
+        <div class="text-center mb-4">
+            <button class="btn btn-primary btn-lg" onclick="iniciarEscaneo()">📷 Escanear Código</button>
+            <div class="text-center mb-3">
+                <input type="text" id="inputCodigoManual"
+                    class="form-control form-control-lg text-center mt-2 rounded-4" placeholder="Ingrese manual"
+                    autocomplete="off">
 
 
+                <p class="mt-2">Código escaneado: <strong id="codigo"></strong></p>
+            </div>
+
+            <!-- QR Reader -->
+            <div id="qr-reader"></div>
+
+            <!-- Formulario producto -->
+            <div class="card p-3 mt-4 shadow-sm">
+                <h5>Producto</h5>
+                <p id="estado" class="mb-3"></p>
+                <div class="mb-3">
+                    <input type="text" id="nombre" class="form-control form-control-lg"
+                        placeholder="Nombre del producto">
+                </div>
+                <div class="mb-3">
+                    <input type="number" id="precio" class="form-control form-control-lg" placeholder="Precio">
+                </div>
+                <button class="btn btn-success w-100" onclick="guardarProducto()">💾 Guardar / Actualizar</button>
+                <button id="btnEliminar" class="btn btn-danger w-100 mt-2" onclick="eliminarProducto()"
+                    style="display:none;">
+                    🗑 Eliminar Producto
+                </button>
+
+            </div>
+
+        </div>
+
+        <!-- Bootstrap JS -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 
-<script src="carga.js"></script>
+
+
+        <script src="carga.js"></script>
 </body>
+
 </html>

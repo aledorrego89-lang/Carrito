@@ -2,6 +2,24 @@ let codigoActual = null;
 let html5QrCode;
 const apiUrl = "https://100.126.169.121/guardar_producto.php";
 
+
+function procesarCodigo(codigoDetectado) {
+  const codigo = codigoDetectado.trim();
+
+  if (!codigo) return;
+  if (codigo === codigoActual) return;
+
+  codigoActual = codigo;
+  playBeep();
+
+  document.getElementById("codigo").innerText = codigoActual;
+  buscarProductoServidor(codigoActual);
+
+  // Limpiar input manual
+  const inputManual = document.getElementById("inputCodigoManual");
+  if (inputManual) inputManual.value = "";
+}
+
 // ============================
 // INICIAR ESCANEO
 // ============================
@@ -14,15 +32,12 @@ function iniciarEscaneo() {
     { facingMode: "environment" },
     { fps: 10, qrbox: { width: 280, height: 100 }, formatsToSupport: [Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.CODE_128] },
     (decodedText) => {
-      const codigoDetectado = decodedText.trim();
+
 
       // Evitar procesar el mismo código varias veces seguidas
-      if (codigoDetectado === codigoActual) return;
+procesarCodigo(decodedText);
 
-      codigoActual = codigoDetectado;
-      playBeep();
-      document.getElementById("codigo").innerText = codigoActual;
-      buscarProductoServidor(codigoActual);
+
     }
   ).catch(err => { console.error(err); alert("Error al iniciar cámara"); });
 }
@@ -51,17 +66,24 @@ async function buscarProductoServidor(codigo) {
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
 
-    if (data.existe) {
-      nombreInput.value = data.producto.nombre;
-      precioInput.value = data.producto.precio;
-      estado.innerText = "Producto existente en servidor - Puede editarlo";
-      estado.style.color = "blue";
-    } else {
-      nombreInput.value = "";
-      precioInput.value = "";
-      estado.innerText = "Producto nuevo";
-      estado.style.color = "green";
-    }
+   const btnEliminar = document.getElementById("btnEliminar");
+
+if (data.existe) {
+  nombreInput.value = data.producto.nombre;
+  precioInput.value = data.producto.precio;
+  estado.innerText = "Producto existente en servidor - Puede editarlo";
+  estado.style.color = "blue";
+
+  btnEliminar.style.display = "block"; // mostrar botón
+} else {
+  nombreInput.value = "";
+  precioInput.value = "";
+  estado.innerText = "Producto nuevo";
+  estado.style.color = "green";
+
+  btnEliminar.style.display = "none"; // ocultar botón
+}
+
   } catch (err) {
     console.error("Error buscando producto en servidor:", err);
     estado.innerText = "Error al consultar servidor";
@@ -90,6 +112,49 @@ function guardarProducto() {
   .catch(err => { console.error(err); alert("Error al guardar en servidor"); });
 }
 
+
+
+function eliminarProducto() {
+  if (!codigoActual) {
+    alert("Escaneá un código primero");
+    return;
+  }
+
+  if (!confirm("¿Seguro que querés eliminar este producto?")) {
+    return;
+  }
+
+  fetch("https://100.126.169.121/eliminar_producto.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ codigo: codigoActual })
+  })
+  .then(res => res.json()) // 👈 ESTA LÍNEA FALTABA
+  .then(data => {
+    if (data.success) {
+      alert("Producto eliminado ✅");
+    } else {
+      alert("Error: " + (data.error || "Desconocido"));
+      return;
+    }
+
+    // Limpiar todo
+    document.getElementById("nombre").value = "";
+    document.getElementById("precio").value = "";
+    document.getElementById("codigo").innerText = "";
+    document.getElementById("estado").innerText = "";
+    document.getElementById("btnEliminar").style.display = "none";
+
+    codigoActual = null;
+
+    document.getElementById("inputCodigoManual").focus();
+  })
+  .catch(err => {
+    console.error(err);
+    alert("Error al eliminar");
+  });
+}
+
 // ============================
 // BEEP
 // ============================
@@ -101,3 +166,13 @@ function playBeep() {
   oscillator.start();
   oscillator.stop(ctx.currentTime + 0.1);
 }
+document.getElementById("inputCodigoManual").addEventListener("keydown", function(e) {
+  if (e.key === "Enter") {
+    procesarCodigo(this.value);
+  }
+});
+document.getElementById("precio").addEventListener("keydown", function(e) {
+  if (e.key === "Enter") {
+    guardarProducto(this.value);
+  }
+});
