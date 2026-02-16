@@ -168,17 +168,23 @@ function playBeep() {
 }
 
 
-document.getElementById("inputCodigoManual").addEventListener("keydown", function(e) {
-  if (e.key === "Enter" || e.keyCode === 13) {
-    e.preventDefault(); // 🔥 evita que cambie el foco o recargue
-    procesarCodigo(this.value);
-  }
-});
+document.addEventListener("DOMContentLoaded", function () {
 
+  const inputManual = document.getElementById("inputCodigoManual");
+  const inputPrecio = document.getElementById("precio");
 
+  inputManual.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      procesarCodigo(this.value);
+    }
+  });
 
-document.getElementById("precio").addEventListener("keydown", function(e) {
-  if (e.key === "Enter" || e.keyCode === 13) {  
-      guardarProducto(this.value);
-  }
+  inputPrecio.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      guardarProducto();
+    }
+  });
+
 });
