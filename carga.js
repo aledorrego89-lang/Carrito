@@ -168,11 +168,13 @@ function playBeep() {
 }
 
 
-document.getElementById("formCodigoManual").addEventListener("submit", function(e) {
-  e.preventDefault(); // 🚫 evita que cambie el foco
-  const codigo = document.getElementById("inputCodigoManual").value;
-  procesarCodigo(codigo);
+document.getElementById("inputCodigoManual").addEventListener("keydown", function(e) {
+  if (e.key === "Enter" || e.keyCode === 13) {
+    e.preventDefault(); // 🔥 evita que cambie el foco o recargue
+    procesarCodigo(this.value);
+  }
 });
+
 
 
 document.getElementById("precio").addEventListener("keydown", function(e) {
