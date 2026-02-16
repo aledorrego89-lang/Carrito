@@ -167,12 +167,12 @@ function playBeep() {
   oscillator.stop(ctx.currentTime + 0.1);
 }
 document.getElementById("inputCodigoManual").addEventListener("keydown", function(e) {
-  if (e.key === "Enter") {
-    procesarCodigo(this.value);
+  if (e.key === "Enter" || e.keyCode === 13) {
+        procesarCodigo(this.value);
   }
 });
 document.getElementById("precio").addEventListener("keydown", function(e) {
-  if (e.key === "Enter") {
-    guardarProducto(this.value);
+  if (e.key === "Enter" || e.keyCode === 13) {  
+      guardarProducto(this.value);
   }
 });
