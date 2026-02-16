@@ -1,6 +1,7 @@
 let codigoActual = null;
 let html5QrCode;
 const apiUrl = "https://100.126.169.121/guardar_producto.php";
+let timeoutBusqueda = null;
 
 
 function procesarCodigo(codigoDetectado) {
@@ -184,6 +185,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const inputManual = document.getElementById("inputCodigoManual");
   const nombreInput = document.getElementById("nombre");
   const precioInput = document.getElementById("precio");
+   const btnProcesar = document.getElementById("btnProcesarCodigo");
 
   // ENTER EN CÓDIGO
   inputManual.addEventListener("keyup", function (e) {
@@ -192,6 +194,13 @@ document.addEventListener("DOMContentLoaded", function () {
       procesarCodigo(this.value);
     }
   });
+
+  btnProcesar.addEventListener("click", function () {
+  const codigo = inputManual.value.trim();
+  if (!codigo) return;
+
+  procesarCodigo(codigo);
+});
 
   // ENTER EN NOMBRE → PASA A PRECIO
   nombreInput.addEventListener("keyup", function (e) {
