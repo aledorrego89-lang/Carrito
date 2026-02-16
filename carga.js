@@ -119,7 +119,9 @@ function guardarProducto() {
   .then(res => res.json())
   .then(data => {
      document.getElementById("inputCodigoManual").focus();
-    alert("Producto guardado en servidor ✅")})
+    alert("Producto guardado en servidor ✅")
+    limpiarFormulario();
+})
   
   .catch(err => { console.error(err); alert("Error al guardar en servidor"); });
 }
