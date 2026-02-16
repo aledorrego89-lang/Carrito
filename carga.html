@@ -51,7 +51,7 @@
             <button class="btn btn-primary btn-lg" onclick="iniciarEscaneo()">📷 Escanear Código</button>
             <div class="text-center mb-3">
                 <input type="number" id="inputCodigoManual"
-                    class="form-control form-control-lg text-center mt-2 rounded-4" placeholder="Ingrese manual"
+                    class="form-control form-control-lg text-center mt-2 rounded-4" placeholder="Ingrese manual"  enterkeyhint="done"
                     autocomplete="off">
 
 
@@ -67,10 +67,10 @@
                 <p id="estado" class="mb-3"></p>
                 <div class="mb-3">
                     <input type="text" id="nombre" class="form-control form-control-lg"
-                        placeholder="Nombre del producto">
+                        placeholder="Nombre del producto"  enterkeyhint="done">
                 </div>
                 <div class="mb-3">
-                    <input type="number" id="precio" class="form-control form-control-lg" placeholder="Precio">
+                    <input type="number" id="precio" class="form-control form-control-lg" placeholder="Precio"  enterkeyhint="done">
                 </div>
                 <button class="btn btn-success w-100" onclick="guardarProducto()">💾 Guardar / Actualizar</button>
                 <button id="btnEliminar" class="btn btn-danger w-100 mt-2" onclick="eliminarProducto()"
