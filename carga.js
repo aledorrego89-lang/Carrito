@@ -179,6 +179,18 @@ function playBeep() {
   oscillator.stop(ctx.currentTime + 0.1);
 }
 
+function cancelarProducto() {
+    // Limpiar todos los campos
+    document.getElementById('nombre').value = '';
+    document.getElementById('precio').value = '';
+    document.getElementById('inputCodigoManual').value = '';
+    document.getElementById('codigo').textContent = '';
+    document.getElementById('estado').textContent = '';
+
+    // Ocultar botón eliminar si estaba visible
+    document.getElementById('btnEliminar').style.display = 'none';
+}
+
 
 document.addEventListener("DOMContentLoaded", function () {
 
