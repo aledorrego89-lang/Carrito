@@ -95,7 +95,15 @@ if (data.existe) {
 // GUARDAR PRODUCTO
 // ============================
 function guardarProducto() {
-  if (!codigoActual) { alert("Escaneá un código primero"); return; }
+  if (!codigoActual) {
+  const codigoManual = document.getElementById("inputCodigoManual").value.trim();
+  if (!codigoManual) {
+    alert("Ingresá o escaneá un código primero");
+    return;
+  }
+  codigoActual = codigoManual; // 🔥 lo asignamos automáticamente
+}
+
 
   const nombre = document.getElementById("nombre").value;
   const precio = document.getElementById("precio").value;
