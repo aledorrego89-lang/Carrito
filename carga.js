@@ -7,7 +7,6 @@ function procesarCodigo(codigoDetectado) {
   const codigo = codigoDetectado.trim();
 
   if (!codigo) return;
-  if (codigo === codigoActual) return;
 
   codigoActual = codigo;
   playBeep();
@@ -15,10 +14,10 @@ function procesarCodigo(codigoDetectado) {
   document.getElementById("codigo").innerText = codigoActual;
   buscarProductoServidor(codigoActual);
 
-  // Limpiar input manual
   const inputManual = document.getElementById("inputCodigoManual");
   if (inputManual) inputManual.value = "";
 }
+
 
 // ============================
 // INICIAR ESCANEO
