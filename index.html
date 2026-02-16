@@ -53,28 +53,30 @@
   <!-- Modal Bootstrap para confirmar producto -->
 <div class="modal fade" id="productModal" tabindex="-1">
   <div class="modal-dialog">
-    <div class="modal-content text-center"> <!-- Centramos todo el contenido -->
+    <div class="modal-content text-center">
       <div class="modal-header justify-content-center">
-        <h5 class="modal-title" id="modal-title">Agregar producto</h5>
+        <h5 class="modal-title" id="modal-title">Producto</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
+        <!-- Precio -->
         <p id="modal-price" class="fw-bold mb-4">Precio: $0</p>
 
-        <div class="d-flex justify-content-center align-items-center gap-2">
+        <!-- Cantidad -->
+        <label for="modal-qty" class="form-label fw-bold">Cantidad</label>
+        <div class="d-flex justify-content-center align-items-center gap-2 mt-2">
           <button class="btn btn-outline-secondary btn-lg" id="decrease">-</button>
-          <input type="number" id="modal-qty" class="form-control text-center" value="1" min="1" style="width: 70px; height: 50px; font-size: 1.5rem;">
+          <input type="number" id="modal-qty" class="form-control text-center quantity-input" value="1" min="1">
           <button class="btn btn-outline-secondary btn-lg" id="increase">+</button>
         </div>
       </div>
-      <div class="modal-footer justify-content-center">
+      <div class="modal-footer justify-content-center gap-3">
         <button type="button" class="btn btn-secondary btn-lg" data-bs-dismiss="modal">Rechazar</button>
         <button type="button" class="btn btn-primary btn-lg" id="accept-product">Agregar</button>
       </div>
     </div>
   </div>
 </div>
-
 
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
