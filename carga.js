@@ -176,14 +176,14 @@ document.addEventListener("DOMContentLoaded", function () {
   const inputManual = document.getElementById("inputCodigoManual");
   const inputPrecio = document.getElementById("precio");
 
-  inputManual.addEventListener("keydown", function (e) {
+  inputManual.addEventListener("keyup", function (e) {
     if (e.key === "Enter") {
       e.preventDefault();
       procesarCodigo(this.value);
     }
   });
 
-  inputPrecio.addEventListener("keydown", function (e) {
+  inputPrecio.addEventListener("keyup", function (e) {
     if (e.key === "Enter") {
       e.preventDefault();
       guardarProducto();
