@@ -73,14 +73,14 @@ if (data.existe) {
   precioInput.value = data.producto.precio;
   estado.innerText = "Producto existente en servidor - Puede editarlo";
   estado.style.color = "blue";
- precioInput.focus();
+ nombreInput.focus();
   btnEliminar.style.display = "block"; // mostrar botón
 } else {
   nombreInput.value = "";
   precioInput.value = "";
   estado.innerText = "Producto nuevo";
   estado.style.color = "green";
- precioInput.focus();
+ nombreInput.focus();
   btnEliminar.style.display = "none"; // ocultar botón
 }
 
@@ -174,8 +174,10 @@ function playBeep() {
 document.addEventListener("DOMContentLoaded", function () {
 
   const inputManual = document.getElementById("inputCodigoManual");
-  const inputPrecio = document.getElementById("precio");
+  const nombreInput = document.getElementById("nombre");
+  const precioInput = document.getElementById("precio");
 
+  // ENTER EN CÓDIGO
   inputManual.addEventListener("keyup", function (e) {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -183,7 +185,17 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  inputPrecio.addEventListener("keyup", function (e) {
+  // ENTER EN NOMBRE → PASA A PRECIO
+  nombreInput.addEventListener("keyup", function (e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      precioInput.focus();
+      precioInput.select();
+    }
+  });
+
+  // ENTER EN PRECIO → GUARDA
+  precioInput.addEventListener("keyup", function (e) {
     if (e.key === "Enter") {
       e.preventDefault();
       guardarProducto();
