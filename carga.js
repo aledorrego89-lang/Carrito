@@ -166,11 +166,15 @@ function playBeep() {
   oscillator.start();
   oscillator.stop(ctx.currentTime + 0.1);
 }
-document.getElementById("inputCodigoManual").addEventListener("keydown", function(e) {
-  if (e.key === "Enter" || e.keyCode === 13) {
-        procesarCodigo(this.value);
-  }
+
+
+document.getElementById("formCodigoManual").addEventListener("submit", function(e) {
+  e.preventDefault(); // 🚫 evita que cambie el foco
+  const codigo = document.getElementById("inputCodigoManual").value;
+  procesarCodigo(codigo);
 });
+
+
 document.getElementById("precio").addEventListener("keydown", function(e) {
   if (e.key === "Enter" || e.keyCode === 13) {  
       guardarProducto(this.value);

@@ -50,9 +50,17 @@
         <div class="text-center mb-4">
             <button class="btn btn-primary btn-lg" onclick="iniciarEscaneo()">📷 Escanear Código</button>
             <div class="text-center mb-3">
-                <input type="number" id="inputCodigoManual"
-                    class="form-control form-control-lg text-center mt-2 rounded-4" placeholder="Ingrese manual"  enterkeyhint="done"
-                    autocomplete="off">
+<form id="formCodigoManual">
+  <input 
+    type="number" 
+    id="inputCodigoManual"
+    class="form-control form-control-lg text-center mt-2 rounded-4"
+    placeholder="Ingrese manual"
+    autocomplete="off"
+    enterkeyhint="done"
+  >
+</form>
+
 
 
                 <p class="mt-2">Código escaneado: <strong id="codigo"></strong></p>
