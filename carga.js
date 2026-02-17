@@ -99,8 +99,7 @@ function guardarProducto() {
   if (!codigoActual) {
   const codigoManual = document.getElementById("inputCodigoManual").value.trim();
   if (!codigoManual) {
-    alert("Ingresá o escaneá un código primero");
-    return;
+mostrarToast("Ingresá o escaneá un código primero", "info");    return;
   }
   codigoActual = codigoManual; // 🔥 lo asignamos automáticamente
 }
@@ -109,7 +108,10 @@ function guardarProducto() {
   const nombre = document.getElementById("nombre").value;
   const precio = document.getElementById("precio").value;
 
-  if (!nombre || !precio) { alert("Completá nombre y precio"); return; }
+  if (!nombre || !precio) { 
+    
+    mostrarToast("Completá nombre y precio", "info");
+    return; }
 
   fetch(apiUrl, {
     method: "POST",
@@ -119,11 +121,13 @@ function guardarProducto() {
   .then(res => res.json())
   .then(data => {
      document.getElementById("inputCodigoManual").focus();
-    alert("Producto guardado en servidor ✅")
+mostrarToast("Producto guardado en servidor ✅", "success");
     limpiarFormulario();
 })
   
-  .catch(err => { console.error(err); alert("Error al guardar en servidor"); });
+  .catch(err => { console.error(err);
+mostrarToast("Error al guardar en servidor", "error");
+     });
 }
 
 
@@ -146,8 +150,7 @@ function eliminarProducto() {
   .then(res => res.json()) // 👈 ESTA LÍNEA FALTABA
   .then(data => {
     if (data.success) {
-      alert("Producto eliminado ✅");
-    } else {
+mostrarToast("Producto eliminado ✅", "success");    } else {
       alert("Error: " + (data.error || "Desconocido"));
       return;
     }
@@ -209,6 +212,24 @@ function limpiarFormulario() {
     document.getElementById('codigo').textContent = '';
     document.getElementById('estado').textContent = '';
     document.getElementById('btnEliminar').style.display = 'none';
+}
+
+
+function mostrarToast(mensaje, tipo = "info") {
+    let color = "#2196F3"; // azul por defecto (info)
+
+    if (tipo === "success") color = "#4CAF50";
+    else if (tipo === "error") color = "#f44336";
+
+    Toastify({
+        text: mensaje,
+        duration: 3000,           // tiempo en ms
+        close: true,              // botón de cerrar
+        gravity: "bottom",        // top o bottom
+        position: "right",        // left, center, right
+        backgroundColor: color,
+        stopOnFocus: true         // pausa el toast si pasás el mouse
+    }).showToast();
 }
 
 
