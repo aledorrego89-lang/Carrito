@@ -124,6 +124,7 @@ mostrarToast("Ingresá o escaneá un código primero", "info");    return;
   .then(data => {
     // document.getElementById("inputCodigoManual").focus();
 mostrarToast("Producto guardado en servidor ✅", "success");
+  codigoActual = null;
     limpiarFormulario();
 })
   
@@ -232,7 +233,7 @@ function limpiarFormulario() {
 
 
 function mostrarToast(mensaje, tipo = "info") {
-    let color = "#2196F3"; // azul por defecto (info)
+    let color = "#f3f321"; // azul por defecto (info)
 
     if (tipo === "success") color = "#4CAF50";
     else if (tipo === "error") color = "#f44336";
