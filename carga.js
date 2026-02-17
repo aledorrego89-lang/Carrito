@@ -40,7 +40,9 @@ procesarCodigo(decodedText);
 
 
     }
-  ).catch(err => { console.error(err); alert("Error al iniciar cámara"); });
+  ).catch(err => { console.error(err); 
+    mostrarToast("Error al iniciar cámara", "error");
+});
 }
 
 // ============================
@@ -134,42 +136,57 @@ mostrarToast("Error al guardar en servidor", "error");
 
 function eliminarProducto() {
   if (!codigoActual) {
-mostrarToast("Ingresá o escaneá un código primero", "info");    return;
-  }
-
-  if (!confirm("¿Seguro que querés eliminar este producto?")) {
+    mostrarToast("Ingresá o escaneá un código primero", "info");
     return;
   }
 
-  fetch("https://100.126.169.121/eliminar_producto.php", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ codigo: codigoActual })
-  })
-  .then(res => res.json()) // 👈 ESTA LÍNEA FALTABA
-  .then(data => {
-    if (data.success) {
-mostrarToast("Producto eliminado ✅", "success");    } else {
-      alert("Error: " + (data.error || "Desconocido"));
-      return;
+  // Confirmación elegante
+  Swal.fire({
+    title: '¿Seguro que querés eliminar este producto?',
+    text: "Esta acción no se puede deshacer",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33', // rojo
+    cancelButtonColor: '#3085d6', // azul
+    confirmButtonText: 'Sí, eliminar',
+    cancelButtonText: 'Cancelar',
+    reverseButtons: true
+  }).then((result) => {
+    if (result.isConfirmed) {
+      // 🔹 Aquí empieza la promesa de eliminación
+      fetch("https://100.126.169.121/eliminar_producto.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ codigo: codigoActual })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          mostrarToast("Producto eliminado ✅", "success");
+        } else {
+          mostrarToast("Error: " + (data.error || "Desconocido"), "error");
+          return;
+        }
+
+        // Limpiar todo
+        document.getElementById("nombre").value = "";
+        document.getElementById("precio").value = "";
+        document.getElementById("codigo").innerText = "";
+        document.getElementById("estado").innerText = "";
+        document.getElementById("btnEliminar").style.display = "none";
+
+        codigoActual = null;
+        document.getElementById("inputCodigoManual").focus();
+      })
+      .catch(err => {
+        console.error(err);
+        mostrarToast("Error al eliminar", "error");
+      });
+      // 🔹 Cierra la promesa correctamente
     }
-
-    // Limpiar todo
-    document.getElementById("nombre").value = "";
-    document.getElementById("precio").value = "";
-    document.getElementById("codigo").innerText = "";
-    document.getElementById("estado").innerText = "";
-    document.getElementById("btnEliminar").style.display = "none";
-
-    codigoActual = null;
-
-    document.getElementById("inputCodigoManual").focus();
-  })
-  .catch(err => {
-    console.error(err);
-    mostrarToast("Error al eliminar", "error");
   });
 }
+
 
 // ============================
 // BEEP

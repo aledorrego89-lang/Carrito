@@ -83,13 +83,27 @@ function renderCart() {
 // ============================
 document.getElementById('clear-cart').addEventListener('click', () => {
   if (cart.length === 0) return; // Si ya está vacío, no hace nada
-  if (confirm("¿Estás seguro de vaciar todo el carrito?")) {
-    cart = [];
-    localStorage.removeItem('cart'); // Limpiar almacenamiento local
-    renderCart();
-    statusDiv.textContent = "Carrito vacío";
-  }
+
+  Swal.fire({
+    title: '¿Estás seguro?',
+    text: "Se vaciará todo el carrito",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6', // azul
+    cancelButtonColor: '#d33',     // rojo
+    confirmButtonText: 'Sí, vaciar',
+    cancelButtonText: 'Cancelar',
+    reverseButtons: true
+  }).then((result) => {
+    if (result.isConfirmed) {
+      cart = [];
+      localStorage.removeItem('cart'); // Limpiar almacenamiento local
+      renderCart();
+      mostrarToast("Carrito vacío", "info"); // Usando tu toast
+    }
+  });
 });
+
 
 // ============================
 // BEEP
