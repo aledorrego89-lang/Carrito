@@ -147,10 +147,12 @@ async function scanQRServer() {
       modalPrice.textContent = "";
       modalQty.value = 1;
 
-      try {
-fetch(`/api/buscar_producto.php?codigo=${codigo}`)
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const data = await response.json();
+   
+try {
+    const response = await fetch(`/api/buscar_producto.php?codigo=${codigo}`);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+
 
         if (!data.existe) {
           showError("Producto no encontrado: " + codigo);
