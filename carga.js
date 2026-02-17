@@ -1,6 +1,6 @@
 let codigoActual = null;
 let html5QrCode;
-const apiUrl = "https://100.126.169.121/guardar_producto.php";
+const apiUrl = "/api/guardar_producto.php";
 let timeoutBusqueda = null;
 
 
@@ -65,7 +65,7 @@ async function buscarProductoServidor(codigo) {
   const estado = document.getElementById("estado");
 
   try {
-    const response = await fetch(`https://100.126.169.121/buscar_producto.php?codigo=${codigo}`);
+    const response = await fetch(`/api/buscar_producto.php?codigo=${codigo}`);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
 
@@ -168,7 +168,7 @@ function eliminarProducto() {
   }).then((result) => {
     if (result.isConfirmed) {
       // 🔹 Aquí empieza la promesa de eliminación
-      fetch("https://100.126.169.121/eliminar_producto.php", {
+      fetch("/api/eliminar_producto.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ codigo: codigoActual })
