@@ -4,8 +4,7 @@ const cartList = document.getElementById('cart-list');
 const totalSpan = document.getElementById('total');
 const qrReaderDiv = document.getElementById("scanner-container");
 
-const apiUrl = "https://100.126.169.121/guardar_producto.php";
-
+const apiUrl = "/api/guardar_producto.php";
 // Modal Bootstrap
 const productModal = new bootstrap.Modal(document.getElementById('productModal'));
 const modalTitle = document.getElementById('modal-title');
@@ -149,7 +148,7 @@ async function scanQRServer() {
       modalQty.value = 1;
 
       try {
-        const response = await fetch(`https://100.126.169.121/buscar_producto.php?codigo=${codigo}`);
+fetch(`/api/buscar_producto.php?codigo=${codigo}`)
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
 
