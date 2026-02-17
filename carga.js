@@ -122,7 +122,7 @@ mostrarToast("Ingresá o escaneá un código primero", "info");    return;
   })
   .then(res => res.json())
   .then(data => {
-     document.getElementById("inputCodigoManual").focus();
+    // document.getElementById("inputCodigoManual").focus();
 mostrarToast("Producto guardado en servidor ✅", "success");
     limpiarFormulario();
 })
@@ -176,7 +176,7 @@ function eliminarProducto() {
         document.getElementById("btnEliminar").style.display = "none";
 
         codigoActual = null;
-        document.getElementById("inputCodigoManual").focus();
+   //     document.getElementById("inputCodigoManual").focus();
       })
       .catch(err => {
         console.error(err);
