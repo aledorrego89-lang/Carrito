@@ -191,6 +191,15 @@ function cancelarProducto() {
 
     // Ocultar botón eliminar si estaba visible
     document.getElementById('btnEliminar').style.display = 'none';
+
+      codigoActual = null;
+
+    // DETENER ESCANEO si está activo
+    if (html5QrCode) {
+        html5QrCode.stop()
+            .then(() => html5QrCode.clear())
+            .catch(err => console.error("Error al detener escáner:", err));
+    }
 }
 
 function limpiarFormulario() {
