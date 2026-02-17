@@ -241,8 +241,8 @@ function mostrarToast(mensaje, tipo = "info") {
         text: mensaje,
         duration: 3000,           // tiempo en ms
         close: true,              // botón de cerrar
-        gravity: "bottom",        // top o bottom
-        position: "right",        // left, center, right
+        gravity: "top",        // top o bottom
+        position: "center",        // left, center, right
         backgroundColor: color,
         stopOnFocus: true         // pausa el toast si pasás el mouse
     }).showToast();
