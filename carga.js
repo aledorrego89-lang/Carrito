@@ -25,34 +25,22 @@ function procesarCodigo(codigoDetectado) {
 // INICIAR ESCANEO
 // ============================
 function iniciarEscaneo() {
-    const qrReader = document.getElementById('qr-reader');
-    
-    // Mostrar el QR Reader
-    qrReader.style.display = 'block';
+  if (!html5QrCode) {
+    html5QrCode = new Html5Qrcode("qr-reader");
+  }
 
-    // Inicializar Html5QR
-    if (!window.html5QrCode) {
-        window.html5QrCode = new Html5Qrcode("qr-reader");
+  html5QrCode.start(
+    { facingMode: "environment" },
+    { fps: 10, qrbox: { width: 350, height: 100 }, formatsToSupport: [Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.CODE_128] },
+    (decodedText) => {
+
+
+      // Evitar procesar el mismo código varias veces seguidas
+procesarCodigo(decodedText);
+
+
     }
-
-    const config = { fps: 10, qrbox: 250 };
-
-    window.html5QrCode.start(
-        { facingMode: "environment" }, 
-        config,
-        (decodedText, decodedResult) => {
-            document.getElementById('codigo').textContent = decodedText;
-            // Opcional: detener escaneo automáticamente al detectar
-            window.html5QrCode.stop();
-            qrReader.style.display = 'none'; // ocultar después de escanear
-        },
-        (errorMessage) => {
-            // errores de escaneo
-            console.log(errorMessage);
-        }
-    ).catch(err => {
-        console.error("Error iniciando QR scanner:", err);
-    });
+  ).catch(err => { console.error(err); alert("Error al iniciar cámara"); });
 }
 
 // ============================
