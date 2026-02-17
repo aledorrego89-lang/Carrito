@@ -115,27 +115,35 @@ mostrarToast("Ingresá o escaneá un código primero", "info");    return;
     mostrarToast("Completá nombre y precio", "info");
     return; }
 
-  fetch(apiUrl, {
+fetch(apiUrl, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ codigo: codigoActual, nombre, precio: parseFloat(precio) })
-  })
-  .then(res => res.json())
-.then(data => {
+})
+.then(async res => {
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    
+    // Intentar parsear JSON solo si es correcto
+    let data;
+    try {
+        data = await res.json();
+    } catch(e) {
+        console.warn("Respuesta no es JSON, pero todo bien");
+        data = {}; // fallback
+    }
+
+    // Limpiar y mostrar éxito
     codigoActual = null;
     limpiarFormulario();
     mostrarToast("Producto guardado en servidor ✅", "success");
 
-    // Reiniciar escáner (solo si estaba activo)
-    if (html5QrCode) {
-        html5QrCode.clear(); // limpiar caja de escaneo
-    }
+    if (html5QrCode) html5QrCode.clear();
 })
+.catch(err => {
+    console.error(err);
+    mostrarToast("Error al guardar en servidor", "error");
+});
 
-  
-  .catch(err => { console.error(err);
-mostrarToast("Error al guardar en servidor", "error");
-     });
 }
 
 
@@ -250,7 +258,11 @@ function mostrarToast(mensaje, tipo = "info") {
         gravity: "top",        // top o bottom
         position: "center",        // left, center, right
         backgroundColor: color,
-        stopOnFocus: true         // pausa el toast si pasás el mouse
+        stopOnFocus: true  ,       // pausa el toast si pasás el mouse
+          style: {
+            color: "#000",        // texto negro
+            fontWeight: "bold"
+        }
     }).showToast();
 }
 
