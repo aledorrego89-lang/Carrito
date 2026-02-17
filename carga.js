@@ -134,8 +134,7 @@ mostrarToast("Error al guardar en servidor", "error");
 
 function eliminarProducto() {
   if (!codigoActual) {
-    alert("Escaneá un código primero");
-    return;
+mostrarToast("Ingresá o escaneá un código primero", "info");    return;
   }
 
   if (!confirm("¿Seguro que querés eliminar este producto?")) {
@@ -168,7 +167,7 @@ mostrarToast("Producto eliminado ✅", "success");    } else {
   })
   .catch(err => {
     console.error(err);
-    alert("Error al eliminar");
+    mostrarToast("Error al eliminar", "error");
   });
 }
 
