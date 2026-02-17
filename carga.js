@@ -121,12 +121,17 @@ mostrarToast("Ingresá o escaneá un código primero", "info");    return;
     body: JSON.stringify({ codigo: codigoActual, nombre, precio: parseFloat(precio) })
   })
   .then(res => res.json())
-  .then(data => {
-    // document.getElementById("inputCodigoManual").focus();
-mostrarToast("Producto guardado en servidor ✅", "success");
-  codigoActual = null;
+.then(data => {
+    codigoActual = null;
     limpiarFormulario();
+    mostrarToast("Producto guardado en servidor ✅", "success");
+
+    // Reiniciar escáner (solo si estaba activo)
+    if (html5QrCode) {
+        html5QrCode.clear(); // limpiar caja de escaneo
+    }
 })
+
   
   .catch(err => { console.error(err);
 mostrarToast("Error al guardar en servidor", "error");
