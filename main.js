@@ -21,9 +21,9 @@ let lastScanned = null;
 // ============================
 // MOSTRAR NOMBRE DEL NEGOCIO AL INICIAR
 // ============================
-async function mostrarNegocio() {
-    statusDiv.textContent = "Conectando..."; // mensaje provisional
-    console.log("entro a la funcion")
+async function mostrarNegocio(statusDiv) {
+    statusDiv.textContent = "Conectando...";
+    console.log("entro a la funcion");
     try {
         const baseUrl = window.location.origin; // https://local2.simplescanner.com.ar
         const url = `${baseUrl}/productos.json?t=${Date.now()}`;
@@ -227,8 +227,10 @@ renderCart();
 
 // Llamamos a mostrarNegocio() cuando el DOM esté listo
 document.addEventListener("DOMContentLoaded", () => {
+    const statusDiv = document.getElementById('status');
     console.log("DOM listo, iniciando mostrarNegocio");
-    mostrarNegocio();
+    mostrarNegocio(statusDiv);
 });
+
 
 
