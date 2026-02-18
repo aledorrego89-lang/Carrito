@@ -174,7 +174,7 @@ async function guardarProducto() {
         try {
             data = await res.json();
         } catch {
-            mostrarToast("Error: respuesta inválida del servidor", "error");
+       //     mostrarToast("Error: respuesta inválida del servidor", "error");
             guardando = false;
             return;
         }
@@ -191,7 +191,7 @@ async function guardarProducto() {
 
     } catch (err) {
         console.error(err);
-        mostrarToast("Error al guardar en servidor", "error");
+      //  mostrarToast("Error al guardar en servidor", "error");
     } finally {
         guardando = false; // liberamos para el próximo envío
     }
