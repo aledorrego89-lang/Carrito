@@ -174,7 +174,7 @@ async function guardarProducto() {
         try {
             data = await res.json();
         } catch {
-       //     mostrarToast("Error: respuesta inválida del servidor", "error");
+            mostrarToast("Error: respuesta inválida del servidor", "error");
             guardando = false;
             return;
         }
@@ -186,12 +186,12 @@ async function guardarProducto() {
             mostrarToast("Producto guardado en servidor ✅", "success");
             if (html5QrCode) html5QrCode.clear();
         } else {
-            //mostrarToast("Error al guardar: " + (data.error || "Desconocido"), "error");
+            mostrarToast("Error al guardar: " + (data.error || "Desconocido"), "error");
         }
 
     } catch (err) {
         console.error(err);
-      //  mostrarToast("Error al guardar en servidor", "error");
+       mostrarToast("Error al guardar en servidor", "error");
     } finally {
         guardando = false; // liberamos para el próximo envío
     }
