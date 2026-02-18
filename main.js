@@ -21,31 +21,34 @@ let lastScanned = null;
 // ============================
 // MOSTRAR NOMBRE DEL NEGOCIO AL INICIAR
 // ============================
-// ============================
-// MOSTRAR NOMBRE DEL NEGOCIO AL INICIAR
-// ============================
 async function mostrarNegocio() {
-  statusDiv.textContent = "Conectando..."; // mensaje provisional
-  try {
-    const res = await fetch("https://100.126.169.121/productos.json");
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    
-    // Solo usamos el mensaje del JSON
-    statusDiv.textContent = data.mensaje || "Conectado";
-    
-    // Guardar los productos para más adelante cuando escanees
-    window.products = data.productos || [];
-    
-  } catch (err) {
-    console.error("Error al conectar con el JSON:", err);
-    statusDiv.textContent = "Error de conexión";
-  }
+    statusDiv.textContent = "Conectando..."; // mensaje provisional
+    console.log("entro a la funcion")
+    try {
+        const baseUrl = window.location.origin; // https://local2.simplescanner.com.ar
+        const url = `${baseUrl}/productos.json?t=${Date.now()}`;
+        console.log("Intentando cargar JSON desde:", url);
+
+        const res = await fetch(url);
+
+        console.log("Respuesta del fetch:", res);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        const data = await res.json();
+        console.log("Datos recibidos del JSON:", data);
+
+        // Solo usamos el mensaje del JSON
+        statusDiv.textContent = data.mensaje || "Conectado";
+
+        // Guardar los productos para más adelante
+        window.products = data.productos || [];
+        console.log("Productos guardados en window.products:", window.products);
+
+    } catch (err) {
+        console.error("Error al conectar con el JSON:", err);
+        statusDiv.textContent = "Error de conexión";
+    }
 }
-
-// Llamamos a la función al cargar la página
-mostrarNegocio();
-
 
 
 // Llamamos a la función al cargar la página
