@@ -25,7 +25,10 @@ async function mostrarNegocio() {
     statusDiv.textContent = "Conectando..."; // mensaje provisional
     try {
         // Ruta consistente
-        const res = await fetch("/productos.json");
+    //    const res = await fetch("/productos.json");
+    const baseUrl = window.location.origin; // https://local2.simplescanner.com.ar
+const res = await fetch(`${baseUrl}/productos.json?t=${Date.now()}`);
+
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
 
