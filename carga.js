@@ -186,7 +186,7 @@ async function guardarProducto() {
             mostrarToast("Producto guardado en servidor ✅", "success");
             if (html5QrCode) html5QrCode.clear();
         } else {
-            mostrarToast("Error al guardar: " + (data.error || "Desconocido"), "error");
+            //mostrarToast("Error al guardar: " + (data.error || "Desconocido"), "error");
         }
 
     } catch (err) {
