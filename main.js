@@ -24,7 +24,8 @@ let lastScanned = null;
 async function mostrarNegocio() {
   statusDiv.textContent = "Conectando..."; // mensaje provisional
   try {
-    const res = await fetch("/api/productos.json");
+   // const res = await fetch("/api/productos.json");
+   const res = await fetch(`productos.json?t=${Date.now()}`); // <--- evita caché
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     
