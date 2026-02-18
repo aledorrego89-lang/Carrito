@@ -219,9 +219,15 @@ document.getElementById('scan-products').addEventListener('click', () => {
   scanQRServer(); // tu función que inicia el escáner
 });
 
-mostrarNegocio();
 // ============================
 // INICIALIZAR
 // ============================
 renderCart();
+
+// Llamamos a mostrarNegocio() cuando el DOM esté listo
+document.addEventListener("DOMContentLoaded", () => {
+    console.log("DOM listo, iniciando mostrarNegocio");
+    mostrarNegocio();
+});
+
 
