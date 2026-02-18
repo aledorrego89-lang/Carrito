@@ -121,23 +121,22 @@ fetch(apiUrl, {
     body: JSON.stringify({ codigo: codigoActual, nombre, precio: parseFloat(precio) })
 })
 .then(async res => {
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    
-    // Intentar parsear JSON solo si es correcto
     let data;
     try {
         data = await res.json();
     } catch(e) {
-        console.warn("Respuesta no es JSON, pero todo bien");
-        data = {}; // fallback
+        console.warn("Respuesta no es JSON");
+        data = {};
     }
 
-    // Limpiar y mostrar éxito
-    codigoActual = null;
-    limpiarFormulario();
-    mostrarToast("Producto guardado en servidor ✅", "success");
-
-    if (html5QrCode) html5QrCode.clear();
+    if (data.success) {
+        codigoActual = null;
+        limpiarFormulario();
+        mostrarToast("Producto guardado en servidor ✅", "success");
+        if (html5QrCode) html5QrCode.clear();
+    } else {
+        mostrarToast("Error al guardar: " + (data.error || "desconocido"), "error");
+    }
 })
 .catch(err => {
     console.error(err);
