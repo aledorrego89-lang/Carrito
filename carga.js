@@ -161,12 +161,15 @@ function guardarProducto() {
     })
     .then(res => res.json())
     .then(data => {
-        codigoActual = null;
-        limpiarFormulario();
-        mostrarToast("Producto guardado en servidor ✅", "success");
-
-        if (html5QrCode) {
-            html5QrCode.clear();
+        // Validamos que la API indique éxito
+        if (data.success) {
+            codigoActual = null;
+            limpiarFormulario();
+            mostrarToast("Producto guardado en servidor ✅", "success");
+            if (html5QrCode) html5QrCode.clear();
+        } else {
+            // Si la API devuelve un error
+            mostrarToast("Error al guardar: " + (data.error || "Desconocido"), "error");
         }
     })
     .catch(err => {
@@ -206,19 +209,18 @@ function eliminarProducto() {
         })
         .then(res => res.json())
         .then(data => {
-
-            if (!data.success) {
-                mostrarToast("Error: " + (data.error || "Desconocido"), "error");
-                return;
+            // Validamos que la API indique éxito
+            if (data.success) {
+                mostrarToast("Producto eliminado ✅", "success");
+                limpiarFormulario();
+                codigoActual = null;
+            } else {
+                mostrarToast("Error al eliminar: " + (data.error || "Desconocido"), "error");
             }
-
-            mostrarToast("Producto eliminado ✅", "success");
-            limpiarFormulario();
-            codigoActual = null;
         })
         .catch(err => {
             console.error(err);
-            mostrarToast("Error al eliminar", "error");
+            mostrarToast("Error al eliminar en servidor", "error");
         });
     });
 }
