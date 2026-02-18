@@ -1,12 +1,11 @@
-let codigoActual = null;
+let codigoActual = null; 
 let html5QrCode;
 const apiUrl = "/api/guardar_producto.php";
 let timeoutBusqueda = null;
-
+let guardando = false; // 🔹 FLAG para evitar doble envío
 
 function procesarCodigo(codigoDetectado) {
   const codigo = codigoDetectado.trim();
-
   if (!codigo) return;
   if (codigo === codigoActual) return;
 
@@ -16,7 +15,6 @@ function procesarCodigo(codigoDetectado) {
   document.getElementById("codigo").innerText = codigoActual;
   buscarProductoServidor(codigoActual);
 
-  // Limpiar input manual
   const inputManual = document.getElementById("inputCodigoManual");
   if (inputManual) inputManual.value = "";
 }
@@ -25,24 +23,16 @@ function procesarCodigo(codigoDetectado) {
 // INICIAR ESCANEO
 // ============================
 function iniciarEscaneo() {
-  if (!html5QrCode) {
-    html5QrCode = new Html5Qrcode("qr-reader");
-  }
+  if (!html5QrCode) html5QrCode = new Html5Qrcode("qr-reader");
 
   html5QrCode.start(
     { facingMode: "environment" },
     { fps: 10, qrbox: { width: 300, height: 100 }, formatsToSupport: [Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.CODE_128] },
-    (decodedText) => {
-
-
-      // Evitar procesar el mismo código varias veces seguidas
-procesarCodigo(decodedText);
-
-
-    }
-  ).catch(err => { console.error(err); 
+    (decodedText) => procesarCodigo(decodedText)
+  ).catch(err => { 
+    console.error(err); 
     mostrarToast("Error al iniciar cámara", "error");
-});
+  });
 }
 
 // ============================
@@ -63,30 +53,27 @@ async function buscarProductoServidor(codigo) {
   const nombreInput = document.getElementById("nombre");
   const precioInput = document.getElementById("precio");
   const estado = document.getElementById("estado");
+  const btnEliminar = document.getElementById("btnEliminar");
 
   try {
     const response = await fetch(`/api/buscar_producto.php?codigo=${codigo}`);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
 
-   const btnEliminar = document.getElementById("btnEliminar");
-
-if (data.existe) {
-  nombreInput.value = data.producto.nombre;
-  precioInput.value = data.producto.precio;
-  estado.innerText = "Producto existente en servidor - Puede editarlo";
-  estado.style.color = "blue";
- nombreInput.focus();
-  btnEliminar.style.display = "block"; // mostrar botón
-} else {
-  nombreInput.value = "";
-  precioInput.value = "";
-  estado.innerText = "Producto nuevo";
-  estado.style.color = "green";
- nombreInput.focus();
-  btnEliminar.style.display = "none"; // ocultar botón
-}
-
+    if (data.existe) {
+      nombreInput.value = data.producto.nombre;
+      precioInput.value = data.producto.precio;
+      estado.innerText = "Producto existente en servidor - Puede editarlo";
+      estado.style.color = "blue";
+      btnEliminar.style.display = "block";
+    } else {
+      nombreInput.value = "";
+      precioInput.value = "";
+      estado.innerText = "Producto nuevo";
+      estado.style.color = "green";
+      btnEliminar.style.display = "none";
+    }
+    nombreInput.focus();
   } catch (err) {
     console.error("Error buscando producto en servidor:", err);
     estado.innerText = "Error al consultar servidor";
@@ -97,116 +84,100 @@ if (data.existe) {
 // ============================
 // GUARDAR PRODUCTO
 // ============================
-function guardarProducto() {
+async function guardarProducto() {
+  if (guardando) return; // 🔹 evitar doble submit
+  guardando = true;
+
   if (!codigoActual) {
-  const codigoManual = document.getElementById("inputCodigoManual").value.trim();
-  if (!codigoManual) {
-mostrarToast("Ingresá o escaneá un código primero", "info");    return;
-  }
-  codigoActual = codigoManual; // 🔥 lo asignamos automáticamente
-}
-
-
-  const nombre = document.getElementById("nombre").value;
-  const precio = document.getElementById("precio").value;
-
-  if (!nombre || !precio) { 
-    
-    mostrarToast("Completá nombre y precio", "info");
-    return; }
-
-fetch(apiUrl, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ codigo: codigoActual, nombre, precio: parseFloat(precio) })
-})
-.then(async res => {
-    let data;
-    try {
-        data = await res.json();
-    } catch(e) {
-        console.warn("Respuesta no es JSON");
-        data = {};
+    const codigoManual = document.getElementById("inputCodigoManual").value.trim();
+    if (!codigoManual) {
+      mostrarToast("Ingresá o escaneá un código primero", "info");
+      guardando = false;
+      return;
     }
+    codigoActual = codigoManual;
+  }
+
+  const nombre = document.getElementById("nombre").value.trim();
+  const precio = parseFloat(document.getElementById("precio").value);
+
+  if (!nombre || !precio) {
+    mostrarToast("Completá nombre y precio", "info");
+    guardando = false;
+    return;
+  }
+
+  try {
+    const res = await fetch(apiUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ codigo: codigoActual, nombre, precio })
+    });
+    const data = await res.json();
 
     if (data.success) {
-        codigoActual = null;
-        limpiarFormulario();
-        mostrarToast("Producto guardado en servidor ✅", "success");
-        if (html5QrCode) html5QrCode.clear();
+      mostrarToast("Producto guardado en servidor ✅", "success");
+      limpiarFormulario();
+      if (html5QrCode) html5QrCode.clear();
+      codigoActual = null;
     } else {
-        mostrarToast("Error al guardar: " + (data.error || "desconocido"), "error");
+      mostrarToast("Error al guardar: " + (data.error || "desconocido"), "error");
     }
-})
-.catch(err => {
+  } catch (err) {
     console.error(err);
     mostrarToast("Error al guardar en servidor", "error");
-});
-
+  } finally {
+    guardando = false;
+  }
 }
 
-
-
+// ============================
+// ELIMINAR PRODUCTO
+// ============================
 function eliminarProducto() {
   if (!codigoActual) {
     mostrarToast("Ingresá o escaneá un código primero", "info");
     return;
   }
 
-  // Confirmación elegante
   Swal.fire({
     title: '¿Seguro que querés eliminar este producto?',
     text: "Esta acción no se puede deshacer",
     icon: 'warning',
     showCancelButton: true,
-    confirmButtonColor: '#d33', // rojo
-    cancelButtonColor: '#3085d6', // azul
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#3085d6',
     confirmButtonText: 'Sí, eliminar',
     cancelButtonText: 'Cancelar',
     reverseButtons: true
-  }).then((result) => {
+  }).then(async (result) => {
     if (result.isConfirmed) {
-      // 🔹 Aquí empieza la promesa de eliminación
-      fetch("/api/eliminar_producto.php", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ codigo: codigoActual })
-      })
-      .then(res => res.json())
-      .then(data => {
-       if (data.success) {
-    mostrarToast("Producto guardado en servidor ✅", "success");
-    // limpiar todo después de mostrar el toast
-    codigoActual = null;
-    if (html5QrCode) html5QrCode.clear();
-    setTimeout(() => limpiarFormulario(), 300); // 300ms para dejar que el toast se vea
-} else {
-    mostrarToast("Error al guardar: " + (data.error || "desconocido"), "error");
-}
+      try {
+        const res = await fetch("/api/eliminar_producto.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ codigo: codigoActual })
+        });
+        const data = await res.json();
 
-
-        // Limpiar todo
-        document.getElementById("nombre").value = "";
-        document.getElementById("precio").value = "";
-        document.getElementById("codigo").innerText = "";
-        document.getElementById("estado").innerText = "";
-        document.getElementById("btnEliminar").style.display = "none";
-
-        codigoActual = null;
-   //     document.getElementById("inputCodigoManual").focus();
-      })
-      .catch(err => {
+        if (data.success) {
+          mostrarToast("Producto eliminado ✅", "success"); // 🔹 CORREGIDO
+          limpiarFormulario();
+          if (html5QrCode) html5QrCode.clear();
+          codigoActual = null;
+        } else {
+          mostrarToast("Error al eliminar: " + (data.error || "desconocido"), "error");
+        }
+      } catch (err) {
         console.error(err);
         mostrarToast("Error al eliminar", "error");
-      });
-      // 🔹 Cierra la promesa correctamente
+      }
     }
   });
 }
 
-
 // ============================
-// BEEP
+// OTROS
 // ============================
 function playBeep() {
   const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -217,96 +188,11 @@ function playBeep() {
   oscillator.stop(ctx.currentTime + 0.1);
 }
 
-function cancelarProducto() {
-    // Limpiar todos los campos
-    document.getElementById('nombre').value = '';
-    document.getElementById('precio').value = '';
-    document.getElementById('inputCodigoManual').value = '';
-    document.getElementById('codigo').textContent = '';
-    document.getElementById('estado').textContent = '';
-
-    // Ocultar botón eliminar si estaba visible
-    document.getElementById('btnEliminar').style.display = 'none';
-
-      codigoActual = null;
-
-    // DETENER ESCANEO si está activo
-    if (html5QrCode) {
-        html5QrCode.stop()
-            .then(() => html5QrCode.clear())
-            .catch(err => console.error("Error al detener escáner:", err));
-    }
-}
-
 function limpiarFormulario() {
-    document.getElementById('nombre').value = '';
-    document.getElementById('precio').value = '';
-    document.getElementById('inputCodigoManual').value = '';
-    document.getElementById('codigo').textContent = '';
-    document.getElementById('estado').textContent = '';
-    document.getElementById('btnEliminar').style.display = 'none';
+  document.getElementById('nombre').value = '';
+  document.getElementById('precio').value = '';
+  document.getElementById('inputCodigoManual').value = '';
+  document.getElementById('codigo').textContent = '';
+  document.getElementById('estado').textContent = '';
+  document.getElementById('btnEliminar').style.display = 'none';
 }
-
-
-function mostrarToast(mensaje, tipo = "info") {
-    let color = "#f3f321"; // azul por defecto (info)
-
-    if (tipo === "success") color = "#4CAF50";
-    else if (tipo === "error") color = "#f44336";
-
-    Toastify({
-        text: mensaje,
-        duration: 3000,           // tiempo en ms
-        close: true,              // botón de cerrar
-        gravity: "top",        // top o bottom
-        position: "center",        // left, center, right
-        backgroundColor: color,
-        stopOnFocus: true  ,       // pausa el toast si pasás el mouse
-          style: {
-            color: "#000",        // texto negro
-            fontWeight: "bold"
-        }
-    }).showToast();
-}
-
-
-document.addEventListener("DOMContentLoaded", function () {
-
-  const inputManual = document.getElementById("inputCodigoManual");
-  const nombreInput = document.getElementById("nombre");
-  const precioInput = document.getElementById("precio");
-   const btnProcesar = document.getElementById("btnProcesarCodigo");
-
-  // ENTER EN CÓDIGO
-  inputManual.addEventListener("keyup", function (e) {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      procesarCodigo(this.value);
-    }
-  });
-
-  btnProcesar.addEventListener("click", function () {
-  const codigo = inputManual.value.trim();
-  if (!codigo) return;
-
-  procesarCodigo(codigo);
-});
-
-  // ENTER EN NOMBRE → PASA A PRECIO
-  nombreInput.addEventListener("keyup", function (e) {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      precioInput.focus();
-      precioInput.select();
-    }
-  });
-
-  // ENTER EN PRECIO → GUARDA
-  precioInput.addEventListener("keyup", function (e) {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      guardarProducto();
-    }
-  });
-
-});
