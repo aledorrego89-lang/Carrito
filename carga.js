@@ -3,6 +3,32 @@ let html5QrCode;
 const apiUrl = "/api/guardar_producto.php";
 let timeoutBusqueda = null;
 
+
+// ============================
+// TOAST
+// ============================
+function mostrarToast(mensaje, tipo = "info") {
+    let color = "#f3f321"; // amarillo por defecto
+
+    if (tipo === "success") color = "#4CAF50";
+    else if (tipo === "error") color = "#f44336";
+
+    Toastify({
+        text: mensaje,
+        duration: 3000,
+        close: true,
+        gravity: "top",
+        position: "center",
+        backgroundColor: color,
+        stopOnFocus: true,
+        style: {
+            color: "#000",
+            fontWeight: "bold"
+        }
+    }).showToast();
+}
+
+
 // ============================
 // PROCESAR CÓDIGO
 // ============================
@@ -232,29 +258,8 @@ function limpiarFormulario() {
     document.getElementById("btnEliminar").style.display = "none";
 }
 
-// ============================
-// TOAST
-// ============================
-function mostrarToast(mensaje, tipo = "info") {
 
-    let color = "#f3f321";
 
-    if (tipo === "success") color = "#4CAF50";
-    else if (tipo === "error") color = "#f44336";
-
-    Toastify({
-        text: mensaje,
-        duration: 3000,
-        close: true,
-        gravity: "top",
-        position: "center",
-        backgroundColor: color,
-        stopOnFocus: true,
-        style: {
-            color: "#000"
-        }
-    }).showToast();
-}
 
 // ============================
 // EVENTOS
