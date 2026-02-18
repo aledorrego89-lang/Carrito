@@ -1,49 +1,31 @@
+// ============================
+// VARIABLES GLOBALES
+// ============================
 let cart = JSON.parse(localStorage.getItem('cart') || "[]");
-//const statusDiv = document.getElementById('status');
-const cartList = document.getElementById('cart-list');
-const totalSpan = document.getElementById('total');
-const qrReaderDiv = document.getElementById("scanner-container");
-
-const apiUrl = "/api/guardar_producto.php";
-// Modal Bootstrap
-const productModal = new bootstrap.Modal(document.getElementById('productModal'));
-const modalTitle = document.getElementById('modal-title');
-const modalPrice = document.getElementById('modal-price');
-const modalQty = document.getElementById('modal-qty');
-const decreaseBtn = document.getElementById('decrease');
-const increaseBtn = document.getElementById('increase');
-const acceptBtn = document.getElementById('accept-product');
-
 let html5QrCode;
 let lastScanned = null;
 
+// ============================
+// FUNCIONES
+// ============================
 
-// ============================
-// MOSTRAR NOMBRE DEL NEGOCIO AL INICIAR
-// ============================
+// Mostrar nombre del negocio y cargar productos
 async function mostrarNegocio(statusDiv) {
     statusDiv.textContent = "Conectando...";
-    console.log("entro a la funcion");
     try {
-        const baseUrl = window.location.origin; // https://local2.simplescanner.com.ar
+        const baseUrl = window.location.origin;
         const url = `${baseUrl}/productos.json?t=${Date.now()}`;
-        console.log("Intentando cargar JSON desde:", url);
-
         const res = await fetch(url);
 
-        console.log("Respuesta del fetch:", res);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
         const data = await res.json();
-        console.log("Datos recibidos del JSON:", data);
 
-        // Solo usamos el mensaje del JSON
         console.log("Mensaje del JSON:", data.mensaje);
         statusDiv.textContent = data.mensaje || "Conectado";
 
-        // Guardar los productos para más adelante
+        // Guardamos los productos globalmente
         window.products = data.productos || [];
-        console.log("Productos guardados en window.products:", window.products);
+        console.log("Productos:", window.products);
 
     } catch (err) {
         console.error("Error al conectar con el JSON:", err);
@@ -51,187 +33,185 @@ async function mostrarNegocio(statusDiv) {
     }
 }
 
+// Renderizar carrito
+function renderCart(cartList, totalSpan, statusDiv) {
+    cartList.innerHTML = "";
+    let total = 0;
 
-// Llamamos a la función al cargar la página
-
-
-
-// ============================
-// RENDER CARRITO
-// ============================
-function renderCart() {
-  cartList.innerHTML = "";
-  let total = 0;
-
-  cart.forEach((item, index) => {
-    const li = document.createElement('li');
-    li.className = "list-group-item d-flex justify-content-between align-items-center";
-
-    li.innerHTML = `
-      <div>${item.nombre} x ${item.cantidad} - $${item.precio * item.cantidad}</div>
-      <button class="btn btn-sm btn-outline-danger remove-btn" data-index="${index}">🗑️</button>
-    `;
-
-    cartList.appendChild(li);
-    total += item.precio * item.cantidad;
-  });
-
-  totalSpan.textContent = total;
-  localStorage.setItem('cart', JSON.stringify(cart));
-
-  document.querySelectorAll('.remove-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      const idx = parseInt(e.currentTarget.getAttribute('data-index'));
-      cart.splice(idx, 1);
-      renderCart();
-      statusDiv.textContent = "Producto eliminado";
+    cart.forEach((item, index) => {
+        const li = document.createElement('li');
+        li.className = "list-group-item d-flex justify-content-between align-items-center";
+        li.innerHTML = `
+            <div>${item.nombre} x ${item.cantidad} - $${item.precio * item.cantidad}</div>
+            <button class="btn btn-sm btn-outline-danger remove-btn" data-index="${index}">🗑️</button>
+        `;
+        cartList.appendChild(li);
+        total += item.precio * item.cantidad;
     });
-  });
+
+    totalSpan.textContent = total;
+    localStorage.setItem('cart', JSON.stringify(cart));
+
+    document.querySelectorAll('.remove-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const idx = parseInt(e.currentTarget.getAttribute('data-index'));
+            cart.splice(idx, 1);
+            renderCart(cartList, totalSpan, statusDiv);
+            statusDiv.textContent = "Producto eliminado";
+        });
+    });
 }
 
-// ============================
-// BOTÓN VACÍAR CARRITO
-// ============================
-document.getElementById('clear-cart').addEventListener('click', () => {
-  if (cart.length === 0) return; // Si ya está vacío, no hace nada
-
-  Swal.fire({
-    title: '¿Estás seguro?',
-    text: "Se vaciará todo el carrito",
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonColor: '#3085d6', // azul
-    cancelButtonColor: '#d33',     // rojo
-    confirmButtonText: 'Sí, vaciar',
-    cancelButtonText: 'Cancelar',
-    reverseButtons: true
-  }).then((result) => {
-    if (result.isConfirmed) {
-      cart = [];
-      localStorage.removeItem('cart'); // Limpiar almacenamiento local
-      renderCart();
-      mostrarToast("Carrito vacío", "info"); // Usando tu toast
-    }
-  });
-});
-
-
-// ============================
-// BEEP
-// ============================
+// Beep
 function playBeep() {
-  const ctx = new (window.AudioContext || window.webkitAudioContext)();
-  const oscillator = ctx.createOscillator();
-  oscillator.frequency.setValueAtTime(2000, ctx.currentTime);
-  oscillator.connect(ctx.destination);
-  oscillator.start();
-  oscillator.stop(ctx.currentTime + 0.1);
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = ctx.createOscillator();
+    oscillator.frequency.setValueAtTime(2000, ctx.currentTime);
+    oscillator.connect(ctx.destination);
+    oscillator.start();
+    oscillator.stop(ctx.currentTime + 0.1);
 }
 
+// Mostrar errores
+function showError(errorBox, message) {
+    errorBox.textContent = message;
+    errorBox.classList.remove('d-none');
+}
+function clearError(errorBox) {
+    errorBox.textContent = "";
+    errorBox.classList.add('d-none');
+}
 
+// Escanear QR y consultar servidor
+async function scanQRServer(qrReaderDiv, modalElements, statusDiv, errorBox) {
+    qrReaderDiv.style.display = "block";
 
-// ============================
-// ESCANEAR Y CONSULTAR AL SERVIDOR
-// ============================
-async function scanQRServer() {
-  qrReaderDiv.style.display = "block";
+    if (html5QrCode) html5QrCode.clear();
+    html5QrCode = new Html5Qrcode("qr-reader");
 
-  if (html5QrCode) html5QrCode.clear();
+    html5QrCode.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: { width: 300, height: 100 }, formatsToSupport: [Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.CODE_128] },
+        async (decodedText) => {
+            const codigo = decodedText.trim();
+            if (codigo === lastScanned) return;
+            lastScanned = codigo;
 
-  html5QrCode = new Html5Qrcode("qr-reader");
+            html5QrCode.stop().then(() => html5QrCode.clear());
+            qrReaderDiv.style.display = "none";
+            playBeep();
+            clearError(errorBox);
 
-  html5QrCode.start(
-    { facingMode: "environment" },
-    { fps: 10, qrbox: { width: 300, height: 100 }, formatsToSupport: [Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.CODE_128] },
-    async (decodedText) => {
-      const codigo = decodedText.trim();
+            // Limpiar modal antes de cargar datos
+            modalElements.modalTitle.textContent = "Cargando...";
+            modalElements.modalPrice.textContent = "";
+            modalElements.modalQty.value = 1;
 
-      if (codigo === lastScanned) return;
-      lastScanned = codigo;
+            try {
+                const response = await fetch(`/api/buscar_producto.php?codigo=${codigo}`);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const data = await response.json();
 
-      html5QrCode.stop().then(() => html5QrCode.clear());
-      qrReaderDiv.style.display = "none";
-      playBeep();
-      clearError();
+                if (!data.existe) {
+                    showError(errorBox, "Producto no encontrado: " + codigo);
+                    return;
+                }
 
-      // Limpiar modal antes de cargar datos
-      modalTitle.textContent = "Cargando...";
-      modalPrice.textContent = "";
-      modalQty.value = 1;
+                const prod = data.producto;
+                modalElements.modalTitle.textContent = prod.nombre;
+                modalElements.modalPrice.textContent = `Precio: $${prod.precio}`;
+                modalElements.modalQty.value = 1;
 
+                modalElements.productModal.show();
 
-try {
-    const response = await fetch(`/api/buscar_producto.php?codigo=${codigo}`);
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const data = await response.json();
+                modalElements.decreaseBtn.onclick = () => { if (modalElements.modalQty.value > 1) modalElements.modalQty.value--; };
+                modalElements.increaseBtn.onclick = () => modalElements.modalQty.value++;
+                modalElements.acceptBtn.onclick = () => {
+                    const cantidad = parseInt(modalElements.modalQty.value) || 1;
+                    cart.push({ nombre: prod.nombre, precio: prod.precio, cantidad });
+                    renderCart(modalElements.cartList, modalElements.totalSpan, statusDiv);
+                    statusDiv.textContent = `Producto agregado: ${prod.nombre} x${cantidad}`;
+                    modalElements.productModal.hide();
+                };
 
-
-        if (!data.existe) {
-          showError("Producto no encontrado: " + codigo);
-          return;
+            } catch (err) {
+                console.error(err);
+                showError(errorBox, "Error al consultar servidor: " + err.message);
+            }
         }
-
-        // Producto recibido, ahora mostrar modal
-        const prod = data.producto;
-        modalTitle.textContent = prod.nombre;
-        modalPrice.textContent = `Precio: $${prod.precio}`;
-        modalQty.value = 1;
-
-        productModal.show();
-
-        decreaseBtn.onclick = () => { if (modalQty.value > 1) modalQty.value--; };
-        increaseBtn.onclick = () => modalQty.value++;
-
-        acceptBtn.onclick = () => {
-          const cantidad = parseInt(modalQty.value) || 1;
-          cart.push({ nombre: prod.nombre, precio: prod.precio, cantidad });
-          renderCart();
-          statusDiv.textContent = `Producto agregado: ${prod.nombre} x${cantidad}`;
-          productModal.hide();
-        };
-
-      } catch (err) {
+    ).then(() => {
+        const line = document.createElement("div");
+        line.className = "scan-line-green";
+        document.getElementById("qr-reader").appendChild(line);
+    }).catch(err => {
         console.error(err);
-        showError("Error al consultar servidor: " + err.message);
-      }
-    }
-  ).then(() => {
-    const line = document.createElement("div");
-    line.className = "scan-line-green";
-    document.getElementById("qr-reader").appendChild(line);
-  }).catch(err => {
-    console.error(err);
-    qrReaderDiv.style.display = "none";
-    showError("Error al iniciar el escáner");
-  });
+        qrReaderDiv.style.display = "none";
+        showError(errorBox, "Error al iniciar el escáner");
+    });
 }
 
 // ============================
-// ERRORES
+// INICIALIZACIÓN AL CARGAR DOM
 // ============================
-const errorBox = document.getElementById('error-box');
-function showError(message) { errorBox.textContent = message; errorBox.classList.remove('d-none'); }
-function clearError() { errorBox.textContent = ""; errorBox.classList.add('d-none'); }
-
-// ============================
-// BOTÓN ESCANEAR
-// ============================
-document.getElementById('scan-products').addEventListener('click', () => {
- document.getElementById('scanner-container').style.display = "block";
-  scanQRServer(); // tu función que inicia el escáner
-});
-
-// ============================
-// INICIALIZAR
-// ============================
-renderCart();
-
-// Llamamos a mostrarNegocio() cuando el DOM esté listo
 document.addEventListener("DOMContentLoaded", () => {
     const statusDiv = document.getElementById('status');
-    console.log("DOM listo, iniciando mostrarNegocio");
+    const cartList = document.getElementById('cart-list');
+    const totalSpan = document.getElementById('total');
+    const qrReaderDiv = document.getElementById("scanner-container");
+    const errorBox = document.getElementById('error-box');
+
+    // Modal Bootstrap
+    const productModal = new bootstrap.Modal(document.getElementById('productModal'));
+    const modalElements = {
+        productModal,
+        modalTitle: document.getElementById('modal-title'),
+        modalPrice: document.getElementById('modal-price'),
+        modalQty: document.getElementById('modal-qty'),
+        decreaseBtn: document.getElementById('decrease'),
+        increaseBtn: document.getElementById('increase'),
+        acceptBtn: document.getElementById('accept-product'),
+        cartList,
+        totalSpan
+    };
+
+    // Inicializar carrito
+    renderCart(cartList, totalSpan, statusDiv);
+
+    // Mostrar nombre del negocio
     mostrarNegocio(statusDiv);
+
+    // Botón escanear QR
+    const scanBtn = document.getElementById('scan-products');
+    if (scanBtn) {
+        scanBtn.addEventListener('click', () => {
+            qrReaderDiv.style.display = "block";
+            scanQRServer(qrReaderDiv, modalElements, statusDiv, errorBox);
+        });
+    }
+
+    // Botón vaciar carrito
+    const clearBtn = document.getElementById('clear-cart');
+    if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+            if (cart.length === 0) return;
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: "Se vaciará todo el carrito",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, vaciar',
+                cancelButtonText: 'Cancelar',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    cart = [];
+                    localStorage.removeItem('cart');
+                    renderCart(cartList, totalSpan, statusDiv);
+                    mostrarToast("Carrito vacío", "info");
+                }
+            });
+        });
+    }
 });
-
-
-
