@@ -1,15 +1,5 @@
 {
   "productos": [
 
- { "codigo": "7798130953121", "nombre": "Pañuelos descartables", "precio": 1150 },
-   { "codigo": "7793913001822", "nombre": "Leche entera Tregar 1 Litro", "precio": 1530 },
-    { "codigo": "7792350067934", "nombre": "Arbejas Inalpa 300g", "precio": 3120 },
-    { "codigo": "7501000000004", "nombre": "Pan Integral", "precio": 80 },
-    { "codigo": "7501000000005", "nombre": "Huevos x6", "precio": 90 },
-    { "codigo": "7501000000006", "nombre": "Queso Cremoso 200g", "precio": 250 },
-    { "codigo": "7501000000007", "nombre": "Arroz 1kg", "precio": 150 },
-    { "codigo": "7501000000008", "nombre": "Fideos 500g", "precio": 70 },
-    { "codigo": "7501000000009", "nombre": "Aceite Girasol 1L", "precio": 300 },
-    { "codigo": "7501000000010", "nombre": "Azúcar 1kg", "precio": 100 }
   ]
 }

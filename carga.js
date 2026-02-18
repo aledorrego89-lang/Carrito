@@ -176,6 +176,25 @@ function eliminarProducto() {
   });
 }
 
+function mostrarToast(mensaje, tipo = "info") {
+  let icono = "info";
+
+  if (tipo === "success") icono = "success";
+  if (tipo === "error") icono = "error";
+  if (tipo === "info") icono = "info";
+
+  Swal.fire({
+    toast: true,
+    position: "top-end",
+    icon: icono,
+    title: mensaje,
+    showConfirmButton: false,
+    timer: 2000,
+    timerProgressBar: true
+  });
+}
+
+
 // ============================
 // OTROS
 // ============================
