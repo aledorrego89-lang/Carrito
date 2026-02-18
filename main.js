@@ -24,19 +24,24 @@ let lastScanned = null;
 async function mostrarNegocio() {
     statusDiv.textContent = "Conectando..."; // mensaje provisional
     try {
-        // Ruta consistente
-    //    const res = await fetch("/productos.json");
-    const baseUrl = window.location.origin; // https://local2.simplescanner.com.ar
-const res = await fetch(`${baseUrl}/productos.json?t=${Date.now()}`);
+        const baseUrl = window.location.origin; // https://local2.simplescanner.com.ar
+        const url = `${baseUrl}/productos.json?t=${Date.now()}`;
+        console.log("Intentando cargar JSON desde:", url);
 
+        const res = await fetch(url);
+
+        console.log("Respuesta del fetch:", res);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
         const data = await res.json();
+        console.log("Datos recibidos del JSON:", data);
 
         // Solo usamos el mensaje del JSON
         statusDiv.textContent = data.mensaje || "Conectado";
 
         // Guardar los productos para más adelante
         window.products = data.productos || [];
+        console.log("Productos guardados en window.products:", window.products);
 
     } catch (err) {
         console.error("Error al conectar con el JSON:", err);
@@ -44,8 +49,9 @@ const res = await fetch(`${baseUrl}/productos.json?t=${Date.now()}`);
     }
 }
 
+
 // Llamamos a la función al cargar la página
-mostrarNegocio();
+
 
 
 // ============================
@@ -213,7 +219,7 @@ document.getElementById('scan-products').addEventListener('click', () => {
   scanQRServer(); // tu función que inicia el escáner
 });
 
-
+mostrarNegocio();
 // ============================
 // INICIALIZAR
 // ============================
