@@ -1,5 +1,5 @@
 let cart = JSON.parse(localStorage.getItem('cart') || "[]");
-const statusDiv = document.getElementById('status');
+//const statusDiv = document.getElementById('status');
 const cartList = document.getElementById('cart-list');
 const totalSpan = document.getElementById('total');
 const qrReaderDiv = document.getElementById("scanner-container");
@@ -38,6 +38,7 @@ async function mostrarNegocio(statusDiv) {
         console.log("Datos recibidos del JSON:", data);
 
         // Solo usamos el mensaje del JSON
+        console.log("Mensaje del JSON:", data.mensaje);
         statusDiv.textContent = data.mensaje || "Conectado";
 
         // Guardar los productos para más adelante
