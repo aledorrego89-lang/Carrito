@@ -131,51 +131,70 @@ async function buscarProductoServidor(codigo) {
 // ============================
 // GUARDAR PRODUCTO
 // ============================
-function guardarProducto() {
+let guardando = false; // evita doble envío
 
-    if (!codigoActual) {
-        const codigoManual = document.getElementById("inputCodigoManual").value.trim();
-        if (!codigoManual) {
-            mostrarToast("Ingresá o escaneá un código primero", "info");
+async function guardarProducto() {
+    if (guardando) return; // ya estamos guardando
+    guardando = true;
+
+    try {
+        // Validar código
+        if (!codigoActual) {
+            const codigoManual = document.getElementById("inputCodigoManual").value.trim();
+            if (!codigoManual) {
+                mostrarToast("Ingresá o escaneá un código primero", "info");
+                guardando = false;
+                return;
+            }
+            codigoActual = codigoManual;
+        }
+
+        const nombre = document.getElementById("nombre").value.trim();
+        const precio = document.getElementById("precio").value.trim();
+
+        if (!nombre || !precio) {
+            mostrarToast("Completá nombre y precio", "info");
+            guardando = false;
             return;
         }
-        codigoActual = codigoManual;
-    }
 
-    const nombre = document.getElementById("nombre").value;
-    const precio = document.getElementById("precio").value;
+        // Llamada al servidor
+        const res = await fetch(apiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                codigo: codigoActual,
+                nombre,
+                precio: parseFloat(precio)
+            })
+        });
 
-    if (!nombre || !precio) {
-        mostrarToast("Completá nombre y precio", "info");
-        return;
-    }
+        // Validar que sea JSON
+        let data;
+        try {
+            data = await res.json();
+        } catch {
+            mostrarToast("Error: respuesta inválida del servidor", "error");
+            guardando = false;
+            return;
+        }
 
-    fetch(apiUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            codigo: codigoActual,
-            nombre,
-            precio: parseFloat(precio)
-        })
-    })
-    .then(res => res.json())
-    .then(data => {
-        // Validamos que la API indique éxito
-        if (data.success) {
+        // Mostrar toast según éxito o error
+        if (data.success === true) {
             codigoActual = null;
             limpiarFormulario();
             mostrarToast("Producto guardado en servidor ✅", "success");
             if (html5QrCode) html5QrCode.clear();
         } else {
-            // Si la API devuelve un error
             mostrarToast("Error al guardar: " + (data.error || "Desconocido"), "error");
         }
-    })
-    .catch(err => {
+
+    } catch (err) {
         console.error(err);
         mostrarToast("Error al guardar en servidor", "error");
-    });
+    } finally {
+        guardando = false; // liberamos para el próximo envío
+    }
 }
 
 // ============================
