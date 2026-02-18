@@ -2,7 +2,6 @@ let cart = JSON.parse(localStorage.getItem('cart') || "[]");
 const cartList = document.getElementById('cart-list');
 const totalSpan = document.getElementById('total');
 const qrReaderDiv = document.getElementById("scanner-container");
-
 const apiUrl = "/api/guardar_producto.php";
 
 // Modal Bootstrap
@@ -16,43 +15,31 @@ const acceptBtn = document.getElementById('accept-product');
 
 let html5QrCode;
 let lastScanned = null;
-let nombreLocal = null; // Guardamos el nombre del local
+let currentProduct = null;
 
 // ============================
-// VERIFICAR CONEXIÓN CON EL LOCAL
+// MOSTRAR NOMBRE DEL NEGOCIO AL INICIAR
 // ============================
 async function verificarLocal(statusDiv) {
     statusDiv.textContent = "Conectando al local...";
+
     try {
         const url = `/api/status_local.php?t=${Date.now()}`;
         const res = await fetch(url, { cache: "no-store" });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
         const data = await res.json();
-        nombreLocal = data.mensaje;
-        statusDiv.textContent = `Conectado a ${nombreLocal} ✔️`;
+        statusDiv.textContent = `Conectado a ${data.mensaje} ✔️`;
     } catch (err) {
         console.error("No se pudo conectar con la Raspi:", err);
         statusDiv.textContent = "Error de conexión ❌";
-        nombreLocal = null;
     }
 }
 
-// ============================
-// MOSTRAR MENSAJE TEMPORAL
-// ============================
-function mostrarStatus(message, duracion = 3000) {
+document.addEventListener("DOMContentLoaded", () => {
     const statusDiv = document.getElementById('status');
-    statusDiv.textContent = message;
-
-    setTimeout(() => {
-        if (nombreLocal) {
-            statusDiv.textContent = `Conectado a ${nombreLocal} ✔️`;
-        } else {
-            statusDiv.textContent = "Error de conexión ❌";
-        }
-    }, duracion);
-}
+    verificarLocal(statusDiv);
+});
 
 // ============================
 // RENDER CARRITO
@@ -82,7 +69,8 @@ function renderCart() {
             const idx = parseInt(e.currentTarget.getAttribute('data-index'));
             cart.splice(idx, 1);
             renderCart();
-            mostrarStatus("Producto eliminado");
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = "Producto eliminado";
         });
     });
 }
@@ -108,7 +96,7 @@ document.getElementById('clear-cart').addEventListener('click', () => {
             cart = [];
             localStorage.removeItem('cart');
             renderCart();
-            mostrarStatus("Carrito vacío");
+            mostrarToast("Carrito vacío", "info");
         }
     });
 });
@@ -124,6 +112,13 @@ function playBeep() {
     oscillator.start();
     oscillator.stop(ctx.currentTime + 0.1);
 }
+
+// ============================
+// ERRORES
+// ============================
+const errorBox = document.getElementById('error-box');
+function showError(message) { errorBox.textContent = message; errorBox.classList.remove('d-none'); }
+function clearError() { errorBox.textContent = ""; errorBox.classList.add('d-none'); }
 
 // ============================
 // ESCANEAR Y CONSULTAR AL SERVIDOR
@@ -149,6 +144,7 @@ async function scanQRServer() {
             playBeep();
             clearError();
 
+            // Limpiar modal antes de cargar datos
             modalTitle.textContent = "Cargando...";
             modalPrice.textContent = "";
             modalQty.value = 1;
@@ -163,24 +159,13 @@ async function scanQRServer() {
                     return;
                 }
 
-                const prod = data.producto;
-                modalTitle.textContent = prod.nombre;
-                modalPrice.textContent = `Precio: $${prod.precio}`;
+                // Guardamos producto globalmente
+                currentProduct = data.producto;
+                modalTitle.textContent = currentProduct.nombre;
+                modalPrice.textContent = `Precio: $${currentProduct.precio}`;
                 modalQty.value = 1;
 
                 productModal.show();
-
-                decreaseBtn.onclick = () => { if (modalQty.value > 1) modalQty.value--; };
-                increaseBtn.onclick = () => modalQty.value++;
-
-                acceptBtn.onclick = () => {
-                    const cantidad = parseInt(modalQty.value) || 1;
-                    cart.push({ nombre: prod.nombre, precio: prod.precio, cantidad });
-                    renderCart();
-                    mostrarStatus(`Producto agregado: ${prod.nombre} x${cantidad}`);
-                    productModal.hide();
-                };
-
             } catch (err) {
                 console.error(err);
                 showError("Error al consultar servidor: " + err.message);
@@ -198,13 +183,6 @@ async function scanQRServer() {
 }
 
 // ============================
-// ERRORES
-// ============================
-const errorBox = document.getElementById('error-box');
-function showError(message) { errorBox.textContent = message; errorBox.classList.remove('d-none'); }
-function clearError() { errorBox.textContent = ""; errorBox.classList.add('d-none'); }
-
-// ============================
 // BOTÓN ESCANEAR
 // ============================
 document.getElementById('scan-products').addEventListener('click', () => {
@@ -213,12 +191,31 @@ document.getElementById('scan-products').addEventListener('click', () => {
 });
 
 // ============================
+// BOTONES DEL MODAL
+// ============================
+decreaseBtn.addEventListener('click', () => {
+    if (modalQty.value > 1) modalQty.value--;
+});
+
+increaseBtn.addEventListener('click', () => {
+    modalQty.value++;
+});
+
+acceptBtn.addEventListener('click', (event) => {
+    event.preventDefault(); // evita recargar la página
+    if (!currentProduct) return;
+
+    const cantidad = parseInt(modalQty.value) || 1;
+    cart.push({ nombre: currentProduct.nombre, precio: currentProduct.precio, cantidad });
+    renderCart();
+    const statusDiv = document.getElementById('status');
+    statusDiv.textContent = `Producto agregado: ${currentProduct.nombre} x${cantidad}`;
+    productModal.hide();
+    currentProduct = null;
+    lastScanned = null;
+});
+
+// ============================
 // INICIALIZAR
 // ============================
 renderCart();
-
-// Verificar conexión al local al cargar la página
-document.addEventListener("DOMContentLoaded", () => {
-    const statusDiv = document.getElementById('status');
-    verificarLocal(statusDiv);
-});
