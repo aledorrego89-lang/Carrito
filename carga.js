@@ -174,12 +174,16 @@ function eliminarProducto() {
       })
       .then(res => res.json())
       .then(data => {
-        if (data.success) {
-          mostrarToast("Producto eliminado ✅", "success");
-        } else {
-          mostrarToast("Error: " + (data.error || "Desconocido"), "error");
-          return;
-        }
+       if (data.success) {
+    mostrarToast("Producto guardado en servidor ✅", "success");
+    // limpiar todo después de mostrar el toast
+    codigoActual = null;
+    if (html5QrCode) html5QrCode.clear();
+    setTimeout(() => limpiarFormulario(), 300); // 300ms para dejar que el toast se vea
+} else {
+    mostrarToast("Error al guardar: " + (data.error || "desconocido"), "error");
+}
+
 
         // Limpiar todo
         document.getElementById("nombre").value = "";
