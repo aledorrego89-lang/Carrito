@@ -22,23 +22,23 @@ let lastScanned = null;
 // MOSTRAR NOMBRE DEL NEGOCIO AL INICIAR
 // ============================
 async function mostrarNegocio() {
-  statusDiv.textContent = "Conectando..."; // mensaje provisional
-  try {
-   // const res = await fetch("/api/productos.json");
-   const res = await fetch(`productos.json?t=${Date.now()}`); // <--- evita caché
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    
-    // Solo usamos el mensaje del JSON
-    statusDiv.textContent = data.mensaje || "Conectado";
-    
-    // Guardar los productos para más adelante cuando escanees
-    window.products = data.productos || [];
-    
-  } catch (err) {
-    console.error("Error al conectar con el JSON:", err);
-    statusDiv.textContent = "Error de conexión";
-  }
+    statusDiv.textContent = "Conectando..."; // mensaje provisional
+    try {
+        // Ruta consistente
+        const res = await fetch("/productos.json?t=" + Date.now());
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+
+        // Solo usamos el mensaje del JSON
+        statusDiv.textContent = data.mensaje || "Conectado";
+
+        // Guardar los productos para más adelante
+        window.products = data.productos || [];
+
+    } catch (err) {
+        console.error("Error al conectar con el JSON:", err);
+        statusDiv.textContent = "Error de conexión";
+    }
 }
 
 // Llamamos a la función al cargar la página
@@ -148,7 +148,7 @@ async function scanQRServer() {
       modalPrice.textContent = "";
       modalQty.value = 1;
 
-   
+
 try {
     const response = await fetch(`/api/buscar_producto.php?codigo=${codigo}`);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -215,3 +215,4 @@ document.getElementById('scan-products').addEventListener('click', () => {
 // INICIALIZAR
 // ============================
 renderCart();
+
