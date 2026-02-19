@@ -139,25 +139,40 @@ function clearError() { errorBox.textContent = ""; errorBox.classList.add('d-non
 // Escaneo QR
 // ============================
 async function scanQR() {
-    qrReaderDiv.style.display = "block";
     clearError();
+    qrReaderDiv.style.display = "block"; // Mostrar el contenedor
 
-    if (html5QrCode) await html5QrCode.stop().catch(()=>{}), html5QrCode.clear();
+    // Detener y limpiar si hay una instancia previa
+    if (html5QrCode) {
+        try { await html5QrCode.stop(); } catch(e){console.log(e);}
+        html5QrCode.clear();
+        html5QrCode = null;
+    }
+
     html5QrCode = new Html5Qrcode("qr-reader");
 
     html5QrCode.start(
         { facingMode: "environment" },
-        { fps: 10, qrbox: { width: 300, height: 100 },
-          formatsToSupport: [Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.CODE_128] },
-        async decodedText => {
+        {
+            fps: 10,
+            qrbox: { width: 300, height: 100 },
+            formatsToSupport: [
+                Html5QrcodeSupportedFormats.EAN_13,
+                Html5QrcodeSupportedFormats.CODE_128
+            ]
+        },
+        async (decodedText) => {
             const codigo = decodedText.trim();
+
             if (codigo === lastScanned) return;
             lastScanned = codigo;
 
-            await html5QrCode.stop().catch(()=>{});
+            // Detener scanner para mostrar modal
+            try { await html5QrCode.stop(); } catch(e){console.log(e);}
             html5QrCode.clear();
             qrReaderDiv.style.display = "none";
             playBeep();
+            clearError();
 
             // Limpiar modal
             modalTitle.textContent = "Cargando...";
@@ -193,6 +208,7 @@ async function scanQR() {
 
 // Botón escanear
 document.getElementById('scan-products').addEventListener('click', scanQR);
+
 
 // ============================
 // Botones del modal
