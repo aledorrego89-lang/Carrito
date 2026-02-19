@@ -387,33 +387,41 @@ tr.addEventListener("click", () => {
 
 
 
-document.getElementById("btnLinterna").addEventListener("click", () => {
-    if (!html5QrCode || !html5QrCode.getRunningTrack()) return;
 
-    const track = html5QrCode.getRunningTrack(); // devuelve el track de video activo
+let trackLinterna = null;
 
-    const imageCapture = new ImageCapture(track);
-    imageCapture.getPhotoCapabilities().then(capabilities => {
-        if (!capabilities.torch) {
-            mostrarToast("Tu cámara no soporta linterna", "info");
+document.getElementById("btnLinterna").addEventListener("click", async () => {
+    if (!trackLinterna) {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: "environment" }
+            });
+            trackLinterna = stream.getVideoTracks()[0];
+        } catch (err) {
+            console.error(err);
+            mostrarToast("No se pudo acceder a la cámara", "error");
             return;
         }
+    }
 
-        linternaEncendida = !linternaEncendida;
+    const capabilities = trackLinterna.getCapabilities();
+    if (!capabilities.torch) {
+        mostrarToast("Tu cámara no soporta linterna", "info");
+        return;
+    }
 
-        track.applyConstraints({
-            advanced: [{ torch: linternaEncendida }]
-        }).catch(err => {
-            console.error("Error al cambiar linterna:", err);
-            mostrarToast("No se pudo activar linterna", "error");
-        });
+    linternaEncendida = !linternaEncendida;
 
-        mostrarToast(linternaEncendida ? "Linterna ON" : "Linterna OFF", "success");
+    trackLinterna.applyConstraints({
+        advanced: [{ torch: linternaEncendida }]
     }).catch(err => {
-        console.error(err);
-        mostrarToast("Error verificando linterna", "error");
+        console.error("Error al cambiar linterna:", err);
+        mostrarToast("No se pudo activar linterna", "error");
     });
+
+    mostrarToast(linternaEncendida ? "Linterna ON" : "Linterna OFF", "success");
 });
+
 
 
 
