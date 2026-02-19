@@ -12,6 +12,8 @@ const modalQty = document.getElementById('modal-qty');
 const decreaseBtn = document.getElementById('decrease');
 const increaseBtn = document.getElementById('increase');
 const acceptBtn = document.getElementById('accept-product');
+const searchInput = document.getElementById('search-cart');
+const totalItemsSpan = document.getElementById('total-items');
 
 let html5QrCode;
 let lastScanned = null;
