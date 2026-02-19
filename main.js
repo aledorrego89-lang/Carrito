@@ -19,7 +19,8 @@ let html5QrCode;
 let lastScanned = null;
 let currentProduct = null;
 let currentProductIndex = null;
-
+let linternaEncendida = false;
+let trackLinterna = null;
 // ============================
 // Inicialización
 // ============================
@@ -271,6 +272,44 @@ function playBeep() {
     osc.start();
     osc.stop(ctx.currentTime + 0.1);
 }
+
+
+// ============================
+// LINTERNA
+// ============================
+
+
+document.getElementById("btnLinterna").addEventListener("click", async () => {
+    if (!trackLinterna) {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: "environment" }
+            });
+            trackLinterna = stream.getVideoTracks()[0];
+        } catch (err) {
+            console.error(err);
+            mostrarToast("No se pudo acceder a la cámara", "error");
+            return;
+        }
+    }
+
+    const capabilities = trackLinterna.getCapabilities();
+    if (!capabilities.torch) {
+        mostrarToast("Tu cámara no soporta linterna", "info");
+        return;
+    }
+
+    linternaEncendida = !linternaEncendida;
+
+    trackLinterna.applyConstraints({
+        advanced: [{ torch: linternaEncendida }]
+    }).catch(err => {
+        console.error("Error al cambiar linterna:", err);
+        mostrarToast("No se pudo activar linterna", "error");
+    });
+
+    mostrarToast(linternaEncendida ? "Linterna ON" : "Linterna OFF", "success");
+});
 
 // ============================
 // Manejo errores

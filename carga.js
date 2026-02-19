@@ -387,7 +387,9 @@ tr.addEventListener("click", () => {
 
 
 
-
+// ============================
+// LINTERNA
+// ============================
 let trackLinterna = null;
 
 document.getElementById("btnLinterna").addEventListener("click", async () => {
