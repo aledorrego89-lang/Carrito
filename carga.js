@@ -311,7 +311,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         lista.forEach(p => {
             const tr = document.createElement("tr");
-            tr.innerHTML = `<td>${p.codigo}</td><td>${p.nombre}</td><td>${p.precio}</td>`;
+            tr.innerHTML = `<td>${p.nombre}</td><td>${p.precio}</td><td>${p.codigo}</td>`;
             tbody.appendChild(tr);
         });
     }
