@@ -213,23 +213,42 @@ document.getElementById('scan-products').addEventListener('click', scanQR);
 // ============================
 // Botones del modal
 // ============================
-decreaseBtn.addEventListener('click', () => { if (modalQty.value > 1) modalQty.value--; });
-increaseBtn.addEventListener('click', () => { modalQty.value++; });
+let currentProductIndex = null; // índice del producto abierto en modal
 
-acceptBtn.addEventListener('click', () => {
+// CLICK para editar producto
+li.addEventListener('click', (e) => {
+    if (e.target.classList.contains('remove-btn')) return;
+
+    currentProduct = item;
+    currentProductIndex = index; // guardamos índice
+    modalTitle.textContent = item.nombre;
+    modalPrice.textContent = `Precio: $${item.precio}`;
+    modalQty.value = item.cantidad;
+    productModal.show();
+});
+
+// BOTÓN AGREGAR / ACTUALIZAR PRODUCTO
+acceptBtn.addEventListener('click', (event) => {
+    event.preventDefault();
     if (!currentProduct) return;
+
     const cantidad = parseInt(modalQty.value) || 1;
 
-    // Evitar duplicados
-    const existing = cart.find(item => item.nombre === currentProduct.nombre);
-    if (existing) {
-        existing.cantidad += cantidad;
+    if (currentProductIndex !== null) {
+        // actualizar cantidad existente
+        cart[currentProductIndex].cantidad = cantidad;
     } else {
+        // agregar nuevo producto
         cart.push({ nombre: currentProduct.nombre, precio: currentProduct.precio, cantidad });
     }
 
-    renderCart(searchInput.value);
-    currentProduct = null;
-    lastScanned = null;
+    renderCart();
+    const statusDiv = document.getElementById('status');
+    statusDiv.textContent = `Producto agregado/actualizado: ${currentProduct.nombre} x${cantidad}`;
+
     productModal.hide();
+    currentProduct = null;
+    currentProductIndex = null;
+    lastScanned = null;
 });
+
