@@ -347,18 +347,19 @@ tr.addEventListener("click", () => {
     // ============================
     // Filtrar productos
     // ============================
- function filtrarProductos() {
+function filtrarProductos() {
     const nombre = document.getElementById("filtroNombre").value.toLowerCase();
     const codigo = document.getElementById("filtroCodigo").value.toLowerCase();
-    const precioFiltro = parseFloat(document.getElementById("filtroPrecio").value);
+    const precioFiltro = document.getElementById("filtroPrecio").value; // string
 
     const filtrados = productos.filter(p => {
         const matchNombre = p.nombre.toLowerCase().includes(nombre);
         const matchCodigo = p.codigo.toLowerCase().includes(codigo);
 
         let matchPrecio = true;
-        if (!isNaN(precioFiltro)) {
-            matchPrecio = parseFloat(p.precio) === precioFiltro;
+        if (precioFiltro) {
+            // Convertimos el precio del producto a string y buscamos coincidencia parcial
+            matchPrecio = p.precio.toString().startsWith(precioFiltro);
         }
 
         return matchNombre && matchCodigo && matchPrecio;
@@ -366,6 +367,7 @@ tr.addEventListener("click", () => {
 
     mostrarProductos(filtrados);
 }
+
 
 
     // ============================
