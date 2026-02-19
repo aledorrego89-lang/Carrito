@@ -6,7 +6,7 @@ const totalSpan = document.getElementById('total');
 const totalItemsSpan = document.getElementById('total-items');
 const qrReaderDiv = document.getElementById("scanner-container");
 const searchInput = document.getElementById('search-cart');
-const apiUrl = "/api/guardar_producto.php";
+const statusDiv = document.getElementById('status');
 
 // Modal Bootstrap
 const productModal = new bootstrap.Modal(document.getElementById('productModal'));
@@ -20,12 +20,20 @@ const acceptBtn = document.getElementById('accept-product');
 let html5QrCode;
 let lastScanned = null;
 let currentProduct = null;
-let currentProductIndex = null; // índice del producto abierto en modal
+let currentProductIndex = null;
+
+// ============================
+// Inicialización
+// ============================
+document.addEventListener("DOMContentLoaded", async () => {
+    await verificarLocal();
+    renderCart();
+});
 
 // ============================
 // Verificar conexión con el local
 // ============================
-async function verificarLocal(statusDiv) {
+async function verificarLocal() {
     statusDiv.textContent = "Conectando al local...";
     try {
         const res = await fetch(`/api/status_local.php?t=${Date.now()}`, { cache: "no-store" });
@@ -56,12 +64,10 @@ function renderCart(filter = "") {
             <button class="btn btn-sm btn-outline-danger remove-btn" data-index="${index}">🗑️</button>
         `;
 
-        // CLICK para editar producto
-        li.addEventListener('click', (e) => {
+        li.addEventListener('click', e => {
             if (e.target.classList.contains('remove-btn')) return;
-
             currentProduct = item;
-            currentProductIndex = index; // guardamos índice
+            currentProductIndex = index;
             modalTitle.textContent = item.nombre;
             modalPrice.textContent = `Precio: $${item.precio}`;
             modalQty.value = item.cantidad;
@@ -77,9 +83,8 @@ function renderCart(filter = "") {
     totalItemsSpan.textContent = totalItems;
     localStorage.setItem('cart', JSON.stringify(cart));
 
-    // Botones eliminar
     document.querySelectorAll('.remove-btn').forEach(btn => {
-        btn.onclick = (e) => {
+        btn.onclick = e => {
             e.stopPropagation();
             const idx = parseInt(btn.getAttribute('data-index'));
             cart.splice(idx, 1);
@@ -89,34 +94,96 @@ function renderCart(filter = "") {
 }
 
 // ============================
-// Filtrar productos
+// Escanear QR
 // ============================
-searchInput.addEventListener('input', () => renderCart(searchInput.value));
+async function scanQR() {
+    clearError();
+    qrReaderDiv.style.display = "block";
+
+    if (html5QrCode) {
+        try { await html5QrCode.stop(); } catch(e){console.log(e);}
+        html5QrCode.clear();
+        html5QrCode = null;
+    }
+
+    html5QrCode = new Html5Qrcode("qr-reader");
+
+    html5QrCode.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: { width: 300, height: 100 }, formatsToSupport: [Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.CODE_128] },
+        async (decodedText) => {
+            const codigo = decodedText.trim();
+            if (codigo === lastScanned) return;
+            lastScanned = codigo;
+
+            try { await html5QrCode.stop(); } catch(e){console.log(e);}
+            html5QrCode.clear();
+            qrReaderDiv.style.display = "none";
+            playBeep();
+            clearError();
+
+            modalTitle.textContent = "Cargando...";
+            modalPrice.textContent = "";
+            modalQty.value = 1;
+
+            try {
+                const res = await fetch(`/api/buscar_producto.php?codigo=${codigo}`);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+
+                if (!data.existe) {
+                    showError("Producto no encontrado: " + codigo);
+                    return;
+                }
+
+                currentProduct = data.producto;
+                currentProductIndex = null;
+                modalTitle.textContent = currentProduct.nombre;
+                modalPrice.textContent = `Precio: $${currentProduct.precio}`;
+                modalQty.value = 1;
+                productModal.show();
+
+            } catch (err) {
+                showError("Error al consultar servidor: " + err.message);
+            }
+        }
+    ).catch(err => {
+        console.error(err);
+        qrReaderDiv.style.display = "none";
+        showError("Error al iniciar el escáner");
+    });
+}
+
+// Botón escanear
+document.getElementById('scan-products').addEventListener('click', scanQR);
 
 // ============================
-// Vaciar carrito
+// Botones del modal
 // ============================
-document.getElementById('clear-cart').addEventListener('click', () => {
-    if (!cart.length) return;
-    Swal.fire({
-        title: '¿Estás seguro?',
-        text: "Se vaciará todo el carrito",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Sí, vaciar',
-        cancelButtonText: 'Cancelar',
-        reverseButtons: true
-    }).then(result => {
-        if (result.isConfirmed) {
-            cart = [];
-            localStorage.removeItem('cart');
-            renderCart();
-        }
-    });
+decreaseBtn.addEventListener('click', () => { if (modalQty.value > 1) modalQty.value--; });
+increaseBtn.addEventListener('click', () => { modalQty.value++; });
+
+acceptBtn.addEventListener('click', e => {
+    e.preventDefault();
+    if (!currentProduct) return;
+
+    const cantidad = parseInt(modalQty.value) || 1;
+
+    if (currentProductIndex !== null) {
+        cart[currentProductIndex].cantidad = cantidad;
+    } else {
+        cart.push({ nombre: currentProduct.nombre, precio: currentProduct.precio, cantidad });
+    }
+
+    renderCart(searchInput.value);
+    currentProduct = null;
+    currentProductIndex = null;
+    lastScanned = null;
+    productModal.hide();
 });
 
 // ============================
-// Beep al escanear
+// Beep
 // ============================
 function playBeep() {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
