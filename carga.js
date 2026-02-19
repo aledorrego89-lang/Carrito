@@ -325,8 +325,9 @@ function mostrarProductos(lista) {
         // Al hacer click en la fila, se carga el producto en el formulario
         tr.style.cursor = "pointer";
 tr.addEventListener("click", () => {
-    codigoActual = p.codigo;
-    buscarProductoServidor(p.codigo, "precio");  // <-- Foco en precio
+    codigoActual = p.codigo;                          // Seteamos el código actual
+    document.getElementById("inputCodigoManual").value = p.codigo; // <-- cargamos input manual
+    buscarProductoServidor(p.codigo, "precio");       // Carga nombre, precio y da foco a precio
 
     // Hacer scroll al formulario
     document.getElementById("nombre").scrollIntoView({ behavior: "smooth", block: "center" });
