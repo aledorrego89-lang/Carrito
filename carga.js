@@ -2,7 +2,7 @@ let codigoActual = null;
 let html5QrCode;
 const apiUrl = "/api/guardar_producto.php";
 let timeoutBusqueda = null;
-
+let linternaEncendida = false;
 
 // ============================
 // TOAST
@@ -385,6 +385,35 @@ tr.addEventListener("click", () => {
 });
 
 
+
+
+document.getElementById("btnLinterna").addEventListener("click", () => {
+    if (!html5QrCode || !html5QrCode.getRunningTrack()) return;
+
+    const track = html5QrCode.getRunningTrack(); // devuelve el track de video activo
+
+    const imageCapture = new ImageCapture(track);
+    imageCapture.getPhotoCapabilities().then(capabilities => {
+        if (!capabilities.torch) {
+            mostrarToast("Tu cámara no soporta linterna", "info");
+            return;
+        }
+
+        linternaEncendida = !linternaEncendida;
+
+        track.applyConstraints({
+            advanced: [{ torch: linternaEncendida }]
+        }).catch(err => {
+            console.error("Error al cambiar linterna:", err);
+            mostrarToast("No se pudo activar linterna", "error");
+        });
+
+        mostrarToast(linternaEncendida ? "Linterna ON" : "Linterna OFF", "success");
+    }).catch(err => {
+        console.error(err);
+        mostrarToast("Error verificando linterna", "error");
+    });
+});
 
 
 
