@@ -90,7 +90,7 @@ function detenerEscaneo() {
 // ============================
 // BUSCAR PRODUCTO EN SERVIDOR
 // ============================
-async function buscarProductoServidor(codigo) {
+async function buscarProductoServidor(codigo, focoEn = "nombre") {
     const nombreInput = document.getElementById("nombre");
     const precioInput = document.getElementById("precio");
     const estado = document.getElementById("estado");
@@ -119,6 +119,15 @@ async function buscarProductoServidor(codigo) {
             estado.style.color = "green";
             nombreInput.focus();
             btnEliminar.style.display = "none";
+        }
+
+                // Hacer foco según parámetro
+        if (focoEn === "nombre") {
+            nombreInput.focus();
+            nombreInput.select();
+        } else if (focoEn === "precio") {
+            precioInput.focus();
+            precioInput.select();
         }
 
     } catch (err) {
@@ -316,16 +325,11 @@ function mostrarProductos(lista) {
         // Al hacer click en la fila, se carga el producto en el formulario
         tr.style.cursor = "pointer";
 tr.addEventListener("click", () => {
-    codigoActual = p.codigo;                     // Seteamos el código actual
-    buscarProductoServidor(p.codigo);            // Carga nombre, precio y estado
+    codigoActual = p.codigo;
+    buscarProductoServidor(p.codigo, "precio");  // <-- Foco en precio
 
     // Hacer scroll al formulario
     document.getElementById("nombre").scrollIntoView({ behavior: "smooth", block: "center" });
-
-    // Dar foco al input de precio
-    const precioInput = document.getElementById("precio");
-    precioInput.focus();
-    precioInput.select(); // Selecciona el valor para reemplazarlo rápidamente
 });
 
 
