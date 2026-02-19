@@ -204,15 +204,28 @@ async (decodedText) => {
 
             const existingIndex = cart.findIndex(p => p.nombre === currentProduct.nombre);
 
-            if (existingIndex !== -1) {
-                cart[existingIndex].cantidad += 1;
-            } else {
-                cart.push({
-                    nombre: currentProduct.nombre,
-                    precio: currentProduct.precio,
-                    cantidad: 1
-                });
-            }
+if (existingIndex !== -1) {
+
+    // 🔥 1. Incrementar cantidad
+    cart[existingIndex].cantidad += 1;
+
+    // 🔥 2. Sacarlo de su posición actual
+    const productoActualizado = cart.splice(existingIndex, 1)[0];
+
+    // 🔥 3. Insertarlo al inicio del array
+    cart.unshift(productoActualizado);
+
+} else {
+
+    // 🔥 Nuevo producto → agregarlo arriba directamente
+    cart.unshift({
+        nombre: currentProduct.nombre,
+        precio: currentProduct.precio,
+        cantidad: 1
+    });
+
+}
+
 
             renderCart(searchInput.value);
 
