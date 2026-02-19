@@ -347,19 +347,26 @@ tr.addEventListener("click", () => {
     // ============================
     // Filtrar productos
     // ============================
-    function filtrarProductos() {
-        const nombre = document.getElementById("filtroNombre").value.toLowerCase();
-        const codigo = document.getElementById("filtroCodigo").value.toLowerCase();
-        const precio = document.getElementById("filtroPrecio").value.toLowerCase();
+ function filtrarProductos() {
+    const nombre = document.getElementById("filtroNombre").value.toLowerCase();
+    const codigo = document.getElementById("filtroCodigo").value.toLowerCase();
+    const precioFiltro = parseFloat(document.getElementById("filtroPrecio").value);
 
-        const filtrados = productos.filter(p =>
-            p.nombre.toLowerCase().includes(nombre) &&
-            p.codigo.toLowerCase().includes(codigo) &&
-            p.precio.toString().includes(precio)
-        );
+    const filtrados = productos.filter(p => {
+        const matchNombre = p.nombre.toLowerCase().includes(nombre);
+        const matchCodigo = p.codigo.toLowerCase().includes(codigo);
 
-        mostrarProductos(filtrados);
-    }
+        let matchPrecio = true;
+        if (!isNaN(precioFiltro)) {
+            matchPrecio = parseFloat(p.precio) === precioFiltro;
+        }
+
+        return matchNombre && matchCodigo && matchPrecio;
+    });
+
+    mostrarProductos(filtrados);
+}
+
 
     // ============================
     // Eventos de filtros
