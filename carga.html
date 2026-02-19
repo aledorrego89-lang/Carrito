@@ -123,35 +123,30 @@
 
 
 
- <div class="card p-3">
+ <div class="card p-3 mb-2">
   <h5>Listado de Productos</h5>
 
   <button id="btnListarProductos" class="btn btn-success w-100 mb-2">Listar productos</button>
 
-  <!-- Filtros -->
-  <div class="row mb-2 g-2">
-    <div class="col">
-      <input type="text" id="filtroNombre" class="form-control" placeholder="Filtrar por nombre">
-    </div>
-    <div class="col">
-      <input type="text" id="filtroPrecio" class="form-control" placeholder="Filtrar por precio">
-    </div>
-    <div class="col">
-      <input type="text" id="filtroCodigo" class="form-control" placeholder="Filtrar por código">
-    </div>
-  </div>
+<!-- Contenedor de filtros -->
+<div class="d-flex mb-2">
+  <input type="text" id="filtroNombre" class="form-control me-1" placeholder="Filtrar por nombre" style="flex: 2;">
+  <input type="text" id="filtroPrecio" class="form-control me-1" placeholder="Filtrar por precio" style="flex: 1;">
+  <input type="text" id="filtroCodigo" class="form-control" placeholder="Filtrar por código" style="flex: 2;">
+</div>
 
-  <!-- Tabla -->
-  <table class="table table-striped" id="tablaProductos">
-    <thead>
-      <tr>
-        <th>Nombre</th>
-        <th>Precio</th>
-        <th>Código</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+<!-- Tabla -->
+<table class="table table-striped" id="tablaProductos">
+  <thead>
+    <tr>
+      <th style="width:40%;">Nombre</th>
+      <th style="width:20%;">Precio</th>
+      <th style="width:40%;">Código</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
 
   <button id="btnExportExcel" class="btn btn-success w-100 mt-2">📥 Exportar a Excel</button>
 </div>
