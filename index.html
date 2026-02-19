@@ -20,69 +20,64 @@
   <div class="container">
     <h1 class="mb-3">Mi Carrito</h1>
     <div id="error-box" class="alert alert-danger d-none"></div>
-
     <div id="status" class="alert alert-info">Cargando productos...</div>
 
-    <div class="mb-3">
-      <div class="mb-3 d-flex justify-content-center">
-        <button id="scan-products" class="btn btn-success btn-lg">Escanear Producto</button>
-      </div>
-
+    <!-- Botón escanear -->
+    <div class="mb-3 d-flex justify-content-center">
+      <button id="scan-products" class="btn btn-success btn-lg">Escanear Producto</button>
     </div>
 
-    <div id="scanner-container">
+    <!-- Contenedor QR -->
+    <div id="scanner-container" style="display:none;">
       <div id="qr-reader"></div>
     </div>
 
+    <!-- Buscar productos -->
+    <input type="text" id="search-cart" class="form-control mb-2" placeholder="Buscar producto en el carrito...">
 
-
+    <!-- Totales -->
     <div class="text-center mt-2">
       <h2>Productos en carrito</h2>
-      
+      <h4>Total unidades: <span id="total-items">0</span></h4>
+      <h3>Total: $<span id="total">0</span></h3>
     </div>
 
     <ul id="cart-list" class="list-group mb-3"></ul>
 
-    <div class="text-center mt-2">
-<h3>Total: $<span id="total">0</span></h3>
-</div>
+    <div class="text-center mt-4">
+      <button id="clear-cart" class="btn btn-danger btn-sm">Vaciar carrito</button>
+    </div>
 
-<div class="text-center mt-4">
-  <button id="clear-cart" class="btn btn-danger btn-sm">Vaciar carrito</button>
-</div>
-
-
-  <!-- Modal Bootstrap para confirmar producto -->
-<div class="modal fade" id="productModal" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content text-center">
-      <div class="modal-header justify-content-center">
-        <h5 class="modal-title" id="modal-title">Producto</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <!-- Precio -->
-        <p id="modal-price" class="fw-bold mb-4">Precio: $0</p>
-
-        <!-- Cantidad -->
-        <label for="modal-qty" class="form-label fw-bold">Cantidad</label>
-        <div class="d-flex justify-content-center align-items-center gap-2 mt-2">
-          <button class="btn btn-outline-secondary btn-lg" id="decrease">-</button>
-          <input type="number" id="modal-qty" class="form-control text-center quantity-input" value="1" min="1">
-          <button class="btn btn-outline-secondary btn-lg" id="increase">+</button>
+    <!-- Modal Bootstrap -->
+    <div class="modal fade" id="productModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content text-center">
+          <div class="modal-header justify-content-center">
+            <h5 class="modal-title" id="modal-title">Producto</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <p id="modal-price" class="fw-bold mb-4">Precio: $0</p>
+            <label for="modal-qty" class="form-label fw-bold">Cantidad</label>
+            <div class="d-flex justify-content-center align-items-center gap-2 mt-2">
+              <button class="btn btn-outline-secondary btn-lg" id="decrease">-</button>
+              <input type="number" id="modal-qty" class="form-control text-center quantity-input" value="1" min="1">
+              <button class="btn btn-outline-secondary btn-lg" id="increase">+</button>
+            </div>
+          </div>
+          <div class="modal-footer justify-content-center gap-3">
+            <button type="button" class="btn btn-secondary btn-lg" data-bs-dismiss="modal">Rechazar</button>
+            <button type="button" class="btn btn-primary btn-lg" id="accept-product">Agregar</button>
+          </div>
         </div>
       </div>
-      <div class="modal-footer justify-content-center gap-3">
-        <button type="button" class="btn btn-secondary btn-lg" data-bs-dismiss="modal">Rechazar</button>
-        <button type="button" class="btn btn-primary btn-lg" id="accept-product">Agregar</button>
-      </div>
     </div>
+
   </div>
-</div>
 
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="/main.js"></script>
+  <script src="/main.js"></script>
 </body>
 
 </html>
