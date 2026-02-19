@@ -142,10 +142,15 @@ function clearError() { errorBox.textContent = ""; errorBox.classList.add('d-non
 // ESCANEO QR
 // ============================
 async function scanQR() {
-    qrReaderDiv.style.display = "block";
+    qrReaderDiv.style.display = "block"; // importante que esté visible
 
-    if (html5QrCode) html5QrCode.clear();
-    html5QrCode = new Html5Qrcode("qr-reader");
+
+ if (html5QrCode) {
+    await html5QrCode.stop();
+    html5QrCode.clear();
+}
+html5QrCode = new Html5Qrcode("qr-reader");
+;
 
     html5QrCode.start(
         { facingMode: "environment" },
