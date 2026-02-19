@@ -273,33 +273,37 @@ document.getElementById('scan-products').addEventListener('click', scanQR);
 // ============================
 // Botones del modal
 // ============================
-decreaseBtn.addEventListener('click', () => {
-    if (modalQty.value > 1) modalQty.value--;
-});
-increaseBtn.addEventListener('click', () => {
-    modalQty.value++;
-});
+// ============================
+// Botones del modal
+// ============================
+decreaseBtn.onclick = () => {
+    modalQty.value = Math.max(1, parseInt(modalQty.value) - 1);
+};
 
-acceptBtn.addEventListener('click', (e) => {
+increaseBtn.onclick = () => {
+    modalQty.value = parseInt(modalQty.value) + 1;
+};
+
+acceptBtn.onclick = (e) => {
     e.preventDefault();
     if (!currentProduct) return;
 
     const cantidad = parseInt(modalQty.value) || 1;
 
     if (currentProductIndex !== null) {
-        // actualizar producto existente
         cart[currentProductIndex].cantidad = cantidad;
     } else {
-        // agregar nuevo producto
         cart.push({ nombre: currentProduct.nombre, precio: currentProduct.precio, cantidad });
     }
 
     renderCart(searchInput.value);
+
     currentProduct = null;
     currentProductIndex = null;
     lastScanned = null;
     productModal.hide();
-});
+};
+
 
 // ============================
 // Inicializar
