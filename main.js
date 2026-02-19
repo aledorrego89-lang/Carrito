@@ -213,42 +213,44 @@ document.getElementById('scan-products').addEventListener('click', scanQR);
 // ============================
 // Botones del modal
 // ============================
-let currentProductIndex = null; // índice del producto abierto en modal
+function renderCart() {
+    cartList.innerHTML = "";
+    let total = 0;
 
-// CLICK para editar producto
-li.addEventListener('click', (e) => {
-    if (e.target.classList.contains('remove-btn')) return;
+    cart.forEach((item, index) => {
+        const li = document.createElement('li');
+        li.className = "list-group-item d-flex justify-content-between align-items-center";
 
-    currentProduct = item;
-    currentProductIndex = index; // guardamos índice
-    modalTitle.textContent = item.nombre;
-    modalPrice.textContent = `Precio: $${item.precio}`;
-    modalQty.value = item.cantidad;
-    productModal.show();
-});
+        li.innerHTML = `
+            <div>${item.nombre} x ${item.cantidad} - $${item.precio * item.cantidad}</div>
+            <button class="btn btn-sm btn-outline-danger remove-btn" data-index="${index}">🗑️</button>
+        `;
 
-// BOTÓN AGREGAR / ACTUALIZAR PRODUCTO
-acceptBtn.addEventListener('click', (event) => {
-    event.preventDefault();
-    if (!currentProduct) return;
+        // CLICK para editar producto
+        li.addEventListener('click', (e) => {
+            if (e.target.classList.contains('remove-btn')) return;
 
-    const cantidad = parseInt(modalQty.value) || 1;
+            currentProduct = item;
+            currentProductIndex = index; // guardamos índice
+            modalTitle.textContent = item.nombre;
+            modalPrice.textContent = `Precio: $${item.precio}`;
+            modalQty.value = item.cantidad;
+            productModal.show();
+        });
 
-    if (currentProductIndex !== null) {
-        // actualizar cantidad existente
-        cart[currentProductIndex].cantidad = cantidad;
-    } else {
-        // agregar nuevo producto
-        cart.push({ nombre: currentProduct.nombre, precio: currentProduct.precio, cantidad });
-    }
+        cartList.appendChild(li);
+        total += item.precio * item.cantidad;
+    });
 
-    renderCart();
-    const statusDiv = document.getElementById('status');
-    statusDiv.textContent = `Producto agregado/actualizado: ${currentProduct.nombre} x${cantidad}`;
+    totalSpan.textContent = total;
+    localStorage.setItem('cart', JSON.stringify(cart));
 
-    productModal.hide();
-    currentProduct = null;
-    currentProductIndex = null;
-    lastScanned = null;
-});
-
+    // Botones eliminar
+    document.querySelectorAll('.remove-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const idx = parseInt(e.currentTarget.getAttribute('data-index'));
+            cart.splice(idx, 1);
+            renderCart();
+        });
+    });
+}
