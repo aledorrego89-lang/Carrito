@@ -276,12 +276,61 @@ document.getElementById('scan-products').addEventListener('click', scanQR);
 // ============================
 // Botones del modal
 // ============================
+
+function renderCart(filter = "") {
+    cartList.innerHTML = "";
+    let total = 0;
+    let totalItems = 0;
+
+    cart.forEach((item, index) => {
+        if (!item.nombre.toLowerCase().includes(filter.toLowerCase())) return;
+
+        const li = document.createElement('li');
+        li.className = "list-group-item d-flex justify-content-between align-items-center";
+        li.innerHTML = `
+            <div>${item.nombre} x ${item.cantidad} - $${item.precio * item.cantidad}</div>
+            <button class="btn btn-sm btn-outline-danger remove-btn" data-index="${index}">🗑️</button>
+        `;
+
+        // CLICK para abrir modal (solo una vez por li)
+        li.onclick = (e) => {
+            if (e.target.classList.contains('remove-btn')) return;
+
+            currentProductIndex = index;
+            currentProduct = item;
+            modalTitle.textContent = item.nombre;
+            modalPrice.textContent = `Precio: $${item.precio}`;
+            modalQty.value = item.cantidad;
+            productModal.show();
+        };
+
+        cartList.appendChild(li);
+        total += item.precio * item.cantidad;
+        totalItems += item.cantidad;
+
+        // Botón eliminar (solo una vez)
+        li.querySelector('.remove-btn').onclick = (e) => {
+            e.stopPropagation();
+            cart.splice(index, 1);
+            renderCart(searchInput.value);
+        };
+    });
+
+    totalSpan.textContent = total;
+    totalItemsSpan.textContent = totalItems;
+    localStorage.setItem('cart', JSON.stringify(cart));
+}
+
+// ============================
+// Botones del modal (una sola vez)
+// ============================
 decreaseBtn.onclick = () => {
+    modalQty.value = Math.max(1, parseInt(modalQty.value));
     modalQty.value = Math.max(1, parseInt(modalQty.value) - 1);
 };
 
 increaseBtn.onclick = () => {
-    modalQty.value = parseInt(modalQty.value) + 1;
+    modalQty.value = Math.max(1, parseInt(modalQty.value) + 1);
 };
 
 acceptBtn.onclick = (e) => {
@@ -291,8 +340,10 @@ acceptBtn.onclick = (e) => {
     const cantidad = parseInt(modalQty.value) || 1;
 
     if (currentProductIndex !== null) {
+        // Actualizar producto existente
         cart[currentProductIndex].cantidad = cantidad;
     } else {
+        // Agregar producto nuevo
         cart.push({ nombre: currentProduct.nombre, precio: currentProduct.precio, cantidad });
     }
 
@@ -303,6 +354,7 @@ acceptBtn.onclick = (e) => {
     lastScanned = null;
     productModal.hide();
 };
+
 
 
 // ============================
