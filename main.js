@@ -20,6 +20,7 @@ const acceptBtn = document.getElementById('accept-product');
 let html5QrCode;
 let lastScanned = null;
 let currentProduct = null;
+let currentProductIndex = null; // índice del producto abierto en modal
 
 // ============================
 // Verificar conexión con el local
@@ -36,12 +37,6 @@ async function verificarLocal(statusDiv) {
         statusDiv.textContent = "Error de conexión ❌";
     }
 }
-
-document.addEventListener("DOMContentLoaded", () => {
-    const statusDiv = document.getElementById('status');
-    verificarLocal(statusDiv);
-    renderCart();
-});
 
 // ============================
 // Renderizar carrito
@@ -61,9 +56,12 @@ function renderCart(filter = "") {
             <button class="btn btn-sm btn-outline-danger remove-btn" data-index="${index}">🗑️</button>
         `;
 
-        li.addEventListener('click', e => {
+        // CLICK para editar producto
+        li.addEventListener('click', (e) => {
             if (e.target.classList.contains('remove-btn')) return;
+
             currentProduct = item;
+            currentProductIndex = index; // guardamos índice
             modalTitle.textContent = item.nombre;
             modalPrice.textContent = `Precio: $${item.precio}`;
             modalQty.value = item.cantidad;
@@ -79,13 +77,14 @@ function renderCart(filter = "") {
     totalItemsSpan.textContent = totalItems;
     localStorage.setItem('cart', JSON.stringify(cart));
 
+    // Botones eliminar
     document.querySelectorAll('.remove-btn').forEach(btn => {
-        btn.addEventListener('click', e => {
+        btn.onclick = (e) => {
             e.stopPropagation();
             const idx = parseInt(btn.getAttribute('data-index'));
             cart.splice(idx, 1);
             renderCart(searchInput.value);
-        });
+        };
     });
 }
 
@@ -140,9 +139,9 @@ function clearError() { errorBox.textContent = ""; errorBox.classList.add('d-non
 // ============================
 async function scanQR() {
     clearError();
-    qrReaderDiv.style.display = "block"; // Mostrar el contenedor
+    qrReaderDiv.style.display = "block";
 
-    // Detener y limpiar si hay una instancia previa
+    // Detener scanner anterior
     if (html5QrCode) {
         try { await html5QrCode.stop(); } catch(e){console.log(e);}
         html5QrCode.clear();
@@ -156,25 +155,19 @@ async function scanQR() {
         {
             fps: 10,
             qrbox: { width: 300, height: 100 },
-            formatsToSupport: [
-                Html5QrcodeSupportedFormats.EAN_13,
-                Html5QrcodeSupportedFormats.CODE_128
-            ]
+            formatsToSupport: [Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.CODE_128]
         },
         async (decodedText) => {
             const codigo = decodedText.trim();
-
             if (codigo === lastScanned) return;
             lastScanned = codigo;
 
-            // Detener scanner para mostrar modal
             try { await html5QrCode.stop(); } catch(e){console.log(e);}
             html5QrCode.clear();
             qrReaderDiv.style.display = "none";
             playBeep();
             clearError();
 
-            // Limpiar modal
             modalTitle.textContent = "Cargando...";
             modalPrice.textContent = "";
             modalQty.value = 1;
@@ -190,6 +183,7 @@ async function scanQR() {
                 }
 
                 currentProduct = data.producto;
+                currentProductIndex = null; // nuevo producto
                 modalTitle.textContent = currentProduct.nombre;
                 modalPrice.textContent = `Precio: $${currentProduct.precio}`;
                 modalQty.value = 1;
@@ -209,48 +203,38 @@ async function scanQR() {
 // Botón escanear
 document.getElementById('scan-products').addEventListener('click', scanQR);
 
-
 // ============================
 // Botones del modal
 // ============================
-function renderCart() {
-    cartList.innerHTML = "";
-    let total = 0;
+decreaseBtn.addEventListener('click', () => {
+    if (modalQty.value > 1) modalQty.value--;
+});
+increaseBtn.addEventListener('click', () => {
+    modalQty.value++;
+});
 
-    cart.forEach((item, index) => {
-        const li = document.createElement('li');
-        li.className = "list-group-item d-flex justify-content-between align-items-center";
+acceptBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (!currentProduct) return;
 
-        li.innerHTML = `
-            <div>${item.nombre} x ${item.cantidad} - $${item.precio * item.cantidad}</div>
-            <button class="btn btn-sm btn-outline-danger remove-btn" data-index="${index}">🗑️</button>
-        `;
+    const cantidad = parseInt(modalQty.value) || 1;
 
-        // CLICK para editar producto
-        li.addEventListener('click', (e) => {
-            if (e.target.classList.contains('remove-btn')) return;
+    if (currentProductIndex !== null) {
+        // actualizar producto existente
+        cart[currentProductIndex].cantidad = cantidad;
+    } else {
+        // agregar nuevo producto
+        cart.push({ nombre: currentProduct.nombre, precio: currentProduct.precio, cantidad });
+    }
 
-            currentProduct = item;
-            currentProductIndex = index; // guardamos índice
-            modalTitle.textContent = item.nombre;
-            modalPrice.textContent = `Precio: $${item.precio}`;
-            modalQty.value = item.cantidad;
-            productModal.show();
-        });
+    renderCart(searchInput.value);
+    currentProduct = null;
+    currentProductIndex = null;
+    lastScanned = null;
+    productModal.hide();
+});
 
-        cartList.appendChild(li);
-        total += item.precio * item.cantidad;
-    });
-
-    totalSpan.textContent = total;
-    localStorage.setItem('cart', JSON.stringify(cart));
-
-    // Botones eliminar
-    document.querySelectorAll('.remove-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const idx = parseInt(e.currentTarget.getAttribute('data-index'));
-            cart.splice(idx, 1);
-            renderCart();
-        });
-    });
-}
+// ============================
+// Inicializar
+// ============================
+document.addEventListener('DOMContentLoaded', () => renderCart());
