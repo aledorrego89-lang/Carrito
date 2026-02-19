@@ -52,44 +52,46 @@ function procesarCodigo(codigoDetectado) {
 // ============================
 // INICIAR ESCANEO
 // ============================
-function iniciarEscaneo() {
+async function iniciarEscaneo() {
     if (!html5QrCode) {
         html5QrCode = new Html5Qrcode("qr-reader");
     }
 
-    html5QrCode.start(
-        { facingMode: "environment" },
-        {
-            fps: 10,
-            qrbox: { width: 300, height: 100 },
-            formatsToSupport: [
-                Html5QrcodeSupportedFormats.EAN_13,
-                Html5QrcodeSupportedFormats.CODE_128
-            ]
-        },
-        (decodedText) => {
-            procesarCodigo(decodedText);
+    try {
+        await html5QrCode.start(
+            { facingMode: "environment" },
+            {
+                fps: 10,
+                qrbox: { width: 300, height: 100 },
+                formatsToSupport: [
+                    Html5QrcodeSupportedFormats.EAN_13,
+                    Html5QrcodeSupportedFormats.CODE_128
+                ]
+            },
+            (decodedText) => procesarCodigo(decodedText)
+        );
+
+        // Aplicar zoom 2x si la cámara lo soporta
+        const track = html5QrCode._qrVideoEl.srcObject.getVideoTracks()[0];
+        const capabilities = track.getCapabilities();
+
+        if (capabilities.zoom) {
+            const zoomValor = Math.min(2, capabilities.zoom.max);
+            await track.applyConstraints({ advanced: [{ zoom: zoomValor }] });
+            console.log(`Zoom aplicado: ${zoomValor}x`);
+        } else {
+            console.log("Tu cámara no soporta zoom");
         }
-    ).then(async () => {
-        // Intentamos aplicar zoom 2x al track
-        try {
-            const track = html5QrCode.getState().stream.getVideoTracks()[0];
-            const capabilities = track.getCapabilities();
-            if (capabilities.zoom) {
-                const zoomValor = Math.min(2, capabilities.zoom.max);
-                await track.applyConstraints({ advanced: [{ zoom: zoomValor }] });
-                console.log(`Zoom aplicado: ${zoomValor}x`);
-            } else {
-                console.log("Tu cámara no soporta zoom");
-            }
-        } catch (err) {
-            console.error("Error aplicando zoom:", err);
-        }
-    }).catch(err => {
-        console.error(err);
+
+        // Guardamos track para linterna
+        trackLinterna = track;
+
+    } catch (err) {
+        console.error("Error iniciando escáner:", err);
         mostrarToast("Error al iniciar cámara", "error");
-    });
+    }
 }
+
 
 // ============================
 // DETENER ESCANEO
