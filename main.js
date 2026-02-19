@@ -12,8 +12,6 @@ const modalQty = document.getElementById('modal-qty');
 const decreaseBtn = document.getElementById('decrease');
 const increaseBtn = document.getElementById('increase');
 const acceptBtn = document.getElementById('accept-product');
-const searchInput = document.getElementById('search-cart');
-const totalItemsSpan = document.getElementById('total-items');
 
 let html5QrCode;
 let lastScanned = null;
@@ -46,77 +44,59 @@ document.addEventListener("DOMContentLoaded", () => {
 // ============================
 // RENDER CARRITO
 // ============================
-function renderCart(filter = "") {
+function renderCart() {
     cartList.innerHTML = "";
     let total = 0;
-    let totalItems = 0;
 
     cart.forEach((item, index) => {
-        if (!item.nombre.toLowerCase().includes(filter.toLowerCase())) return;
-
         const li = document.createElement('li');
         li.className = "list-group-item d-flex justify-content-between align-items-center";
+
         li.innerHTML = `
             <div>${item.nombre} x ${item.cantidad} - $${item.precio * item.cantidad}</div>
             <button class="btn btn-sm btn-outline-danger remove-btn" data-index="${index}">🗑️</button>
         `;
 
-        // CLICK PARA EDITAR
-        li.addEventListener('click', (e) => {
-            if (e.target.classList.contains('remove-btn')) return;
-            currentProduct = item;
-            modalTitle.textContent = item.nombre;
-            modalPrice.textContent = `Precio: $${item.precio}`;
-            modalQty.value = item.cantidad;
-            productModal.show();
-        });
-
         cartList.appendChild(li);
         total += item.precio * item.cantidad;
-        totalItems += item.cantidad;
     });
 
     totalSpan.textContent = total;
-    totalSpan.classList.add("text-success");
-    setTimeout(() => totalSpan.classList.remove("text-success"), 500);
-    totalItemsSpan.textContent = totalItems;
-
     localStorage.setItem('cart', JSON.stringify(cart));
 
     document.querySelectorAll('.remove-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
-            e.stopPropagation();
             const idx = parseInt(e.currentTarget.getAttribute('data-index'));
             cart.splice(idx, 1);
-            renderCart(searchInput.value);
+            renderCart();
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = "Producto eliminado";
         });
     });
 }
 
-
 // ============================
-// FILTRAR PRODUCTOS
-// ============================
-searchInput.addEventListener('input', () => renderCart(searchInput.value));
-
-// ============================
-// VACÍAR CARRITO
+// BOTÓN VACÍAR CARRITO
 // ============================
 document.getElementById('clear-cart').addEventListener('click', () => {
-    if (!cart.length) return;
+    if (cart.length === 0) return;
+
     Swal.fire({
         title: '¿Estás seguro?',
         text: "Se vaciará todo el carrito",
         icon: 'warning',
         showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
         confirmButtonText: 'Sí, vaciar',
         cancelButtonText: 'Cancelar',
         reverseButtons: true
-    }).then(result => {
+    }).then((result) => {
         if (result.isConfirmed) {
             cart = [];
             localStorage.removeItem('cart');
             renderCart();
+            mostrarToast("Carrito vacío", "info");
         }
     });
 });
@@ -141,67 +121,74 @@ function showError(message) { errorBox.textContent = message; errorBox.classList
 function clearError() { errorBox.textContent = ""; errorBox.classList.add('d-none'); }
 
 // ============================
-// ESCANEO QR
+// ESCANEAR Y CONSULTAR AL SERVIDOR
 // ============================
-async function scanQR() {
-    qrReaderDiv.style.display = "block"; // importante que esté visible
+async function scanQRServer() {
+    qrReaderDiv.style.display = "block";
 
+    if (html5QrCode) html5QrCode.clear();
 
- if (html5QrCode) {
-    await html5QrCode.stop();
-    html5QrCode.clear();
-}
-html5QrCode = new Html5Qrcode("qr-reader");
-;
+    html5QrCode = new Html5Qrcode("qr-reader");
 
     html5QrCode.start(
         { facingMode: "environment" },
         { fps: 10, qrbox: { width: 300, height: 100 }, formatsToSupport: [Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.CODE_128] },
         async (decodedText) => {
             const codigo = decodedText.trim();
+
             if (codigo === lastScanned) return;
             lastScanned = codigo;
 
             html5QrCode.stop().then(() => html5QrCode.clear());
             qrReaderDiv.style.display = "none";
             playBeep();
+            clearError();
 
+            // Limpiar modal antes de cargar datos
             modalTitle.textContent = "Cargando...";
             modalPrice.textContent = "";
             modalQty.value = 1;
 
             try {
-                const res = await fetch(`/api/buscar_producto.php?codigo=${codigo}`);
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                const data = await res.json();
+                const response = await fetch(`/api/buscar_producto.php?codigo=${codigo}`);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const data = await response.json();
 
                 if (!data.existe) {
-                    statusDiv.textContent = `Producto no encontrado: ${codigo}`;
+                    showError("Producto no encontrado: " + codigo);
                     return;
                 }
 
+                // Guardamos producto globalmente
                 currentProduct = data.producto;
                 modalTitle.textContent = currentProduct.nombre;
                 modalPrice.textContent = `Precio: $${currentProduct.precio}`;
                 modalQty.value = 1;
-                productModal.show();
 
+                productModal.show();
             } catch (err) {
                 console.error(err);
-                statusDiv.textContent = "Error al consultar servidor";
+                showError("Error al consultar servidor: " + err.message);
             }
         }
-    ).catch(err => {
+    ).then(() => {
+        const line = document.createElement("div");
+        line.className = "scan-line-green";
+        document.getElementById("qr-reader").appendChild(line);
+    }).catch(err => {
         console.error(err);
         qrReaderDiv.style.display = "none";
-        statusDiv.textContent = "Error al iniciar el escáner";
+        showError("Error al iniciar el escáner");
     });
 }
+
 // ============================
 // BOTÓN ESCANEAR
 // ============================
-document.getElementById('scan-products').addEventListener('click', () => scanQR());
-
+document.getElementById('scan-products').addEventListener('click', () => {
+    qrReaderDiv.style.display = "block";
+    scanQRServer();
+});
 
 // ============================
 // BOTONES DEL MODAL
@@ -209,24 +196,23 @@ document.getElementById('scan-products').addEventListener('click', () => scanQR(
 decreaseBtn.addEventListener('click', () => {
     if (modalQty.value > 1) modalQty.value--;
 });
-increaseBtn.addEventListener('click', () => modalQty.value++);
 
-acceptBtn.addEventListener('click', () => {
+increaseBtn.addEventListener('click', () => {
+    modalQty.value++;
+});
+
+acceptBtn.addEventListener('click', (event) => {
+    event.preventDefault(); // evita recargar la página
     if (!currentProduct) return;
+
     const cantidad = parseInt(modalQty.value) || 1;
-
-    // Evitar duplicados
-    const existing = cart.find(item => item.nombre === currentProduct.nombre);
-    if (existing) {
-        existing.cantidad += cantidad;
-    } else {
-        cart.push({ nombre: currentProduct.nombre, precio: currentProduct.precio, cantidad });
-    }
-
-    renderCart(searchInput.value);
+    cart.push({ nombre: currentProduct.nombre, precio: currentProduct.precio, cantidad });
+    renderCart();
+    const statusDiv = document.getElementById('status');
+    statusDiv.textContent = `Producto agregado: ${currentProduct.nombre} x${cantidad}`;
+    productModal.hide();
     currentProduct = null;
     lastScanned = null;
-    productModal.hide();
 });
 
 // ============================
