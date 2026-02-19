@@ -280,6 +280,63 @@ function limpiarFormulario() {
 }
 
 
+// ============================
+// Lista y busqueda de productos
+// ============================
+
+let productos = []; // Se llenará con fetch desde el servidor
+
+async function cargarProductos() {
+    try {
+        const res = await fetch("/api/listar_productos.php");
+        productos = await res.json();
+        mostrarProductos(productos);
+    } catch (err) {
+        console.error("Error cargando productos:", err);
+    }
+}
+
+function mostrarProductos(lista) {
+    const tbody = document.querySelector("#tablaProductos tbody");
+    tbody.innerHTML = "";
+
+    lista.forEach(p => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${p.codigo}</td><td>${p.nombre}</td><td>${p.precio}</td>`;
+        tbody.appendChild(tr);
+    });
+}
+
+// Filtros
+document.getElementById("filtroNombre").addEventListener("keyup", filtrarProductos);
+document.getElementById("filtroCodigo").addEventListener("keyup", filtrarProductos);
+document.getElementById("filtroPrecio").addEventListener("keyup", filtrarProductos);
+
+function filtrarProductos() {
+    const nombre = document.getElementById("filtroNombre").value.toLowerCase();
+    const codigo = document.getElementById("filtroCodigo").value.toLowerCase();
+    const precio = document.getElementById("filtroPrecio").value.toLowerCase();
+
+    const filtrados = productos.filter(p =>
+        p.nombre.toLowerCase().includes(nombre) &&
+        p.codigo.toLowerCase().includes(codigo) &&
+        p.precio.toString().includes(precio)
+    );
+
+    mostrarProductos(filtrados);
+}
+
+// Cargar al inicio
+document.addEventListener("DOMContentLoaded", cargarProductos);
+
+
+document.getElementById("btnExportExcel").addEventListener("click", () => {
+    const ws = XLSX.utils.json_to_sheet(productos);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Productos");
+    XLSX.writeFile(wb, "productos.xlsx");
+});
+
 
 
 // ============================

@@ -115,12 +115,51 @@
             <button class="btn btn-secondary w-100 mb-2" onclick="cancelarProducto()">❌ Cancelar</button>
             <button id="btnEliminar" class="btn btn-danger w-100 mt-2" onclick="eliminarProducto()" style="display:none;">🗑 Eliminar Producto</button>
         </div>
+
+
+        <div class="card p-3 mt-4 shadow-sm">
+    <h5>Listado de Productos</h5>
+
+    <!-- Filtros -->
+    <div class="row mb-2">
+        <div class="col">
+            <input type="text" id="filtroNombre" class="form-control" placeholder="Filtrar por nombre">
+        </div>
+        <div class="col">
+            <input type="text" id="filtroCodigo" class="form-control" placeholder="Filtrar por código">
+        </div>
+        <div class="col">
+            <input type="text" id="filtroPrecio" class="form-control" placeholder="Filtrar por precio">
+        </div>
+    </div>
+
+    <!-- Tabla -->
+    <table class="table table-striped" id="tablaProductos">
+        <thead>
+            <tr>
+                <th>Código</th>
+                <th>Nombre</th>
+                <th>Precio</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Se llenará dinámicamente -->
+        </tbody>
+    </table>
+
+    <button class="btn btn-success mt-2" id="btnExportExcel">📥 Exportar a Excel</button>
+</div>
+
+
+
     </div>
 </div>
 
 <!-- Scripts al final -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
 <script src="/carga.js"></script>
 <script>
     const contraseñaCorrecta = "admin"; // Cambia esto
