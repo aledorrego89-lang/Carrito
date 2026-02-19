@@ -70,7 +70,22 @@ function iniciarEscaneo() {
         (decodedText) => {
             procesarCodigo(decodedText);
         }
-    ).catch(err => {
+    ).then(async () => {
+        // Intentamos aplicar zoom 2x al track
+        try {
+            const track = html5QrCode.getState().stream.getVideoTracks()[0];
+            const capabilities = track.getCapabilities();
+            if (capabilities.zoom) {
+                const zoomValor = Math.min(2, capabilities.zoom.max);
+                await track.applyConstraints({ advanced: [{ zoom: zoomValor }] });
+                console.log(`Zoom aplicado: ${zoomValor}x`);
+            } else {
+                console.log("Tu cámara no soporta zoom");
+            }
+        } catch (err) {
+            console.error("Error aplicando zoom:", err);
+        }
+    }).catch(err => {
         console.error(err);
         mostrarToast("Error al iniciar cámara", "error");
     });
