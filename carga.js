@@ -320,7 +320,7 @@ document.addEventListener("DOMContentLoaded", function () {
      // Botón Listar productos
     document.getElementById("btnListarProductos").addEventListener("click", cargarProductos);
 
-    
+
     // ============================
     // Filtrar productos
     // ============================
@@ -358,7 +358,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // ============================
     // Cargar productos al inicio
     // ============================
-    cargarProductos();
+    //cargarProductos();
 });
 
 
