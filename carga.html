@@ -123,38 +123,37 @@
 
 
 
- <div class="card p-3 mt-4 shadow-sm">
-    <h5>Listado de Productos</h5>
+ <div class="card p-3">
+  <h5>Listado de Productos</h5>
 
-    <button id="btnListarProductos" class="btn btn-success mt-2 mb-2">Listar productos</button>
-    <!-- Filtros -->
-    <div class="row mb-2">
-        <div class="col">
-            <input type="text" id="filtroNombre" class="form-control" placeholder="Filtrar por nombre">
-        </div>
-        <div class="col">
-            <input type="text" id="filtroPrecio" class="form-control" placeholder="Filtrar por precio">
-        </div>
-                <div class="col">
-            <input type="text" id="filtroCodigo" class="form-control" placeholder="Filtrar por código">
-        </div>
+  <button id="btnListarProductos" class="btn btn-success w-100 mb-2">Listar productos</button>
+
+  <!-- Filtros -->
+  <div class="row mb-2 g-2">
+    <div class="col">
+      <input type="text" id="filtroNombre" class="form-control" placeholder="Filtrar por nombre">
     </div>
+    <div class="col">
+      <input type="text" id="filtroPrecio" class="form-control" placeholder="Filtrar por precio">
+    </div>
+    <div class="col">
+      <input type="text" id="filtroCodigo" class="form-control" placeholder="Filtrar por código">
+    </div>
+  </div>
 
-    <!-- Tabla -->
-    <table class="table table-striped" id="tablaProductos">
-        <thead>
-            <tr>                
-                <th>Nombre</th>
-                <th>Precio</th>
-                <th>Código</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Se llenará dinámicamente -->
-        </tbody>
-    </table>
+  <!-- Tabla -->
+  <table class="table table-striped" id="tablaProductos">
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Precio</th>
+        <th>Código</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 
-    <button class="btn btn-success mt-2" id="btnExportExcel">📥 Exportar a Excel</button>
+  <button id="btnExportExcel" class="btn btn-success w-100 mt-2">📥 Exportar a Excel</button>
 </div>
 
 
