@@ -144,72 +144,104 @@ acceptBtn.onclick = (e) => {
 // ============================
 // Escanear QR
 // ============================
-const superMode = document.getElementById('super-mode'); // checkbox modo super
+
+const superMode = document.getElementById('super-mode');
 let lastScanTime = 0;
 
-// En tu función scanQR(), reemplazar la parte de mostrar modal:
-html5QrCode.start(
-    { facingMode: "environment" },
-    { fps: 10, qrbox: { width: 300, height: 100 }, formatsToSupport: [Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.CODE_128] },
-    async (decodedText) => {
-        const codigo = decodedText.trim();
-        const now = Date.now();
+async function scanQR() {
 
-        // Permitir reescanear mismo código después de 1s
-        if (codigo === lastScanned && (now - lastScanTime < 1000)) return;
+    clearError();
+    qrReaderDiv.style.display = "block";
 
-        lastScanned = codigo;
-        lastScanTime = now;
-
-        try { await html5QrCode.stop(); } catch(e){console.log(e);}
+    // Detener scanner anterior si existe
+    if (html5QrCode) {
+        try { await html5QrCode.stop(); } catch(e){}
         html5QrCode.clear();
-        qrReaderDiv.style.display = "none";
-        playBeep();
-        clearError();
-
-        try {
-            const res = await fetch(`/api/buscar_producto.php?codigo=${codigo}`);
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const data = await res.json();
-
-            if (!data.existe) {
-                showError("Producto no encontrado: " + codigo);
-                return;
-            }
-
-            currentProduct = data.producto;
-            currentProductIndex = null;
-
-            if (superMode.checked) {
-                // MODO SUPER: agregar automáticamente
-                const existingIndex = cart.findIndex(p => p.nombre === currentProduct.nombre);
-                if (existingIndex !== -1) {
-                    cart[existingIndex].cantidad += 1;
-                } else {
-                    cart.push({ nombre: currentProduct.nombre, precio: currentProduct.precio, cantidad: 1 });
-                }
-                renderCart(searchInput.value);
-                lastScanned = null; // permitir reescaneo
-            } else {
-                // MODO normal: mostrar modal
-                modalTitle.textContent = currentProduct.nombre;
-                modalPrice.textContent = `Precio: $${currentProduct.precio}`;
-                modalQty.value = 1;
-                productModal.show();
-            }
-
-        } catch (err) {
-            showError("Error al consultar servidor: " + err.message);
-        }
+        html5QrCode = null;
     }
-).catch(err => {
-    console.error(err);
-    qrReaderDiv.style.display = "none";
-    showError("Error al iniciar el escáner");
-});
 
+    html5QrCode = new Html5Qrcode("qr-reader");
 
-document.getElementById('scan-products').addEventListener('click', scanQR);
+    html5QrCode.start(
+        { facingMode: "environment" },
+        {
+            fps: 10,
+            qrbox: { width: 300, height: 100 },
+            formatsToSupport: [
+                Html5QrcodeSupportedFormats.EAN_13,
+                Html5QrcodeSupportedFormats.CODE_128
+            ]
+        },
+        async (decodedText) => {
+
+            const codigo = decodedText.trim();
+            const now = Date.now();
+
+            // permitir reescaneo luego de 1 segundo
+            if (codigo === lastScanned && (now - lastScanTime < 1000)) return;
+
+            lastScanned = codigo;
+            lastScanTime = now;
+
+            try { await html5QrCode.stop(); } catch(e){}
+            html5QrCode.clear();
+            qrReaderDiv.style.display = "none";
+
+            playBeep();
+            clearError();
+
+            try {
+                const res = await fetch(`/api/buscar_producto.php?codigo=${codigo}`);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+
+                if (!data.existe) {
+                    showError("Producto no encontrado: " + codigo);
+                    return;
+                }
+
+                currentProduct = data.producto;
+                currentProductIndex = null;
+
+                if (superMode && superMode.checked) {
+                    // MODO SUPER
+                    const existingIndex = cart.findIndex(p => p.nombre === currentProduct.nombre);
+
+                    if (existingIndex !== -1) {
+                        cart[existingIndex].cantidad += 1;
+                    } else {
+                        cart.push({
+                            nombre: currentProduct.nombre,
+                            precio: currentProduct.precio,
+                            cantidad: 1
+                        });
+                    }
+
+                    renderCart(searchInput.value);
+
+                } else {
+                    // MODO NORMAL
+                    modalTitle.textContent = currentProduct.nombre;
+                    modalPrice.textContent = `Precio: $${currentProduct.precio}`;
+                    modalQty.value = 1;
+                    productModal.show();
+                }
+
+            } catch (err) {
+                showError("Error al consultar servidor: " + err.message);
+            }
+        }
+    ).catch(err => {
+        console.error(err);
+        qrReaderDiv.style.display = "none";
+        showError("Error al iniciar el escáner");
+    });
+}
+
+// Botón escanear
+document.getElementById('scan-products')
+    .addEventListener('click', scanQR);
+
 
 // ============================
 // Beep
