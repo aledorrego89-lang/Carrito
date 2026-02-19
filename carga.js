@@ -315,12 +315,19 @@ function mostrarProductos(lista) {
 
         // Al hacer click en la fila, se carga el producto en el formulario
         tr.style.cursor = "pointer";
-        tr.addEventListener("click", () => {
-            codigoActual = p.codigo;           // Seteamos el código actual
-            buscarProductoServidor(p.codigo);  // Carga nombre, precio y estado
-            // Opcional: hacer scroll al formulario
-            document.getElementById("nombre").scrollIntoView({ behavior: "smooth", block: "center" });
-        });
+tr.addEventListener("click", () => {
+    codigoActual = p.codigo;                     // Seteamos el código actual
+    buscarProductoServidor(p.codigo);            // Carga nombre, precio y estado
+
+    // Hacer scroll al formulario
+    document.getElementById("nombre").scrollIntoView({ behavior: "smooth", block: "center" });
+
+    // Dar foco al input de precio
+    const precioInput = document.getElementById("precio");
+    precioInput.focus();
+    precioInput.select(); // Selecciona el valor para reemplazarlo rápidamente
+});
+
 
         tbody.appendChild(tr);
     });
