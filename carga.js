@@ -316,6 +316,11 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+
+     // Botón Listar productos
+    document.getElementById("btnListarProductos").addEventListener("click", cargarProductos);
+
+    
     // ============================
     // Filtrar productos
     // ============================
