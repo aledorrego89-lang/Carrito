@@ -305,16 +305,27 @@ document.addEventListener("DOMContentLoaded", function () {
     // ============================
     // Mostrar productos en la tabla
     // ============================
-    function mostrarProductos(lista) {
-        const tbody = document.querySelector("#tablaProductos tbody");
-        tbody.innerHTML = "";
+function mostrarProductos(lista) {
+    const tbody = document.querySelector("#tablaProductos tbody");
+    tbody.innerHTML = "";
 
-        lista.forEach(p => {
-            const tr = document.createElement("tr");
-            tr.innerHTML = `<td>${p.nombre}</td><td>${p.precio}</td><td>${p.codigo}</td>`;
-            tbody.appendChild(tr);
+    lista.forEach(p => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${p.nombre}</td><td>${p.precio}</td><td>${p.codigo}</td>`;
+
+        // Al hacer click en la fila, se carga el producto en el formulario
+        tr.style.cursor = "pointer";
+        tr.addEventListener("click", () => {
+            codigoActual = p.codigo;           // Seteamos el código actual
+            buscarProductoServidor(p.codigo);  // Carga nombre, precio y estado
+            // Opcional: hacer scroll al formulario
+            document.getElementById("nombre").scrollIntoView({ behavior: "smooth", block: "center" });
         });
-    }
+
+        tbody.appendChild(tr);
+    });
+}
+
 
 
      // Botón Listar productos
