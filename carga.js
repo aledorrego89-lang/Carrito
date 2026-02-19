@@ -284,25 +284,17 @@ function limpiarFormulario() {
 // Lista y busqueda de productos
 // ============================
 
-let productos = []; // Se llenará con fetch desde el servidor
-
-async function cargarProductos() {
-    try {
-        const res = await fetch("/api/listar_productos.php");
-        productos = await res.json();
-        mostrarProductos(productos);
-    } catch (err) {
-        console.error("Error cargando productos:", err);
-    }
-}
+let productos = []; // Se llenará desde el servidor
 
 document.addEventListener("DOMContentLoaded", function () {
 
-    let productos = [];
-
+    // ============================
+    // Cargar productos del servidor
+    // ============================
     async function cargarProductos() {
         try {
             const res = await fetch("/api/listar_productos.php");
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
             productos = await res.json();
             mostrarProductos(productos);
         } catch (err) {
@@ -310,6 +302,9 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
+    // ============================
+    // Mostrar productos en la tabla
+    // ============================
     function mostrarProductos(lista) {
         const tbody = document.querySelector("#tablaProductos tbody");
         tbody.innerHTML = "";
@@ -321,6 +316,9 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    // ============================
+    // Filtrar productos
+    // ============================
     function filtrarProductos() {
         const nombre = document.getElementById("filtroNombre").value.toLowerCase();
         const codigo = document.getElementById("filtroCodigo").value.toLowerCase();
@@ -335,11 +333,16 @@ document.addEventListener("DOMContentLoaded", function () {
         mostrarProductos(filtrados);
     }
 
-    // Asignar eventos
+    // ============================
+    // Eventos de filtros
+    // ============================
     document.getElementById("filtroNombre").addEventListener("keyup", filtrarProductos);
     document.getElementById("filtroCodigo").addEventListener("keyup", filtrarProductos);
     document.getElementById("filtroPrecio").addEventListener("keyup", filtrarProductos);
 
+    // ============================
+    // Exportar a Excel
+    // ============================
     document.getElementById("btnExportExcel").addEventListener("click", () => {
         const ws = XLSX.utils.json_to_sheet(productos);
         const wb = XLSX.utils.book_new();
@@ -347,10 +350,13 @@ document.addEventListener("DOMContentLoaded", function () {
         XLSX.writeFile(wb, "productos.xlsx");
     });
 
-    // Llamar al inicio
+    // ============================
+    // Cargar productos al inicio
+    // ============================
     cargarProductos();
-
 });
+
+
 
 
 
