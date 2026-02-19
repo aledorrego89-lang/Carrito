@@ -1,6 +1,4 @@
 let cart = JSON.parse(localStorage.getItem('cart') || "[]");
-
-// Elementos DOM
 const cartList = document.getElementById('cart-list');
 const totalSpan = document.getElementById('total');
 const totalItemsSpan = document.getElementById('total-items');
@@ -64,15 +62,21 @@ function renderCart(filter = "") {
             <button class="btn btn-sm btn-outline-danger remove-btn" data-index="${index}">🗑️</button>
         `;
 
-        li.addEventListener('click', e => {
+        li.onclick = (e) => {
             if (e.target.classList.contains('remove-btn')) return;
-            currentProduct = item;
             currentProductIndex = index;
+            currentProduct = item;
             modalTitle.textContent = item.nombre;
             modalPrice.textContent = `Precio: $${item.precio}`;
             modalQty.value = item.cantidad;
             productModal.show();
-        });
+        };
+
+        li.querySelector('.remove-btn').onclick = (e) => {
+            e.stopPropagation();
+            cart.splice(index, 1);
+            renderCart(searchInput.value);
+        };
 
         cartList.appendChild(li);
         total += item.precio * item.cantidad;
@@ -82,16 +86,60 @@ function renderCart(filter = "") {
     totalSpan.textContent = total;
     totalItemsSpan.textContent = totalItems;
     localStorage.setItem('cart', JSON.stringify(cart));
-
-    document.querySelectorAll('.remove-btn').forEach(btn => {
-        btn.onclick = e => {
-            e.stopPropagation();
-            const idx = parseInt(btn.getAttribute('data-index'));
-            cart.splice(idx, 1);
-            renderCart(searchInput.value);
-        };
-    });
 }
+
+// ============================
+// Filtrar productos
+// ============================
+searchInput.addEventListener('input', () => renderCart(searchInput.value));
+
+// ============================
+// Vaciar carrito
+// ============================
+document.getElementById('clear-cart').addEventListener('click', () => {
+    if (!cart.length) return;
+    Swal.fire({
+        title: '¿Estás seguro?',
+        text: "Se vaciará todo el carrito",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, vaciar',
+        cancelButtonText: 'Cancelar',
+        reverseButtons: true
+    }).then(result => {
+        if (result.isConfirmed) {
+            cart = [];
+            localStorage.removeItem('cart');
+            renderCart();
+        }
+    });
+});
+
+// ============================
+// Botones del modal (solo una vez)
+// ============================
+decreaseBtn.onclick = () => { modalQty.value = Math.max(1, parseInt(modalQty.value) - 1); };
+increaseBtn.onclick = () => { modalQty.value = Math.max(1, parseInt(modalQty.value) + 1); };
+
+acceptBtn.onclick = (e) => {
+    e.preventDefault();
+    if (!currentProduct) return;
+
+    const cantidad = parseInt(modalQty.value) || 1;
+
+    if (currentProductIndex !== null) {
+        cart[currentProductIndex].cantidad = cantidad;
+    } else {
+        cart.push({ nombre: currentProduct.nombre, precio: currentProduct.precio, cantidad });
+    }
+
+    renderCart(searchInput.value);
+
+    currentProduct = null;
+    currentProductIndex = null;
+    lastScanned = null;
+    productModal.hide();
+};
 
 // ============================
 // Escanear QR
@@ -154,33 +202,7 @@ async function scanQR() {
     });
 }
 
-// Botón escanear
 document.getElementById('scan-products').addEventListener('click', scanQR);
-
-// ============================
-// Botones del modal
-// ============================
-decreaseBtn.addEventListener('click', () => { if (modalQty.value > 1) modalQty.value--; });
-increaseBtn.addEventListener('click', () => { modalQty.value++; });
-
-acceptBtn.addEventListener('click', e => {
-    e.preventDefault();
-    if (!currentProduct) return;
-
-    const cantidad = parseInt(modalQty.value) || 1;
-
-    if (currentProductIndex !== null) {
-        cart[currentProductIndex].cantidad = cantidad;
-    } else {
-        cart.push({ nombre: currentProduct.nombre, precio: currentProduct.precio, cantidad });
-    }
-
-    renderCart(searchInput.value);
-    currentProduct = null;
-    currentProductIndex = null;
-    lastScanned = null;
-    productModal.hide();
-});
 
 // ============================
 // Beep
@@ -200,164 +222,3 @@ function playBeep() {
 const errorBox = document.getElementById('error-box');
 function showError(msg) { errorBox.textContent = msg; errorBox.classList.remove('d-none'); }
 function clearError() { errorBox.textContent = ""; errorBox.classList.add('d-none'); }
-
-// ============================
-// Escaneo QR
-// ============================
-async function scanQR() {
-    clearError();
-    qrReaderDiv.style.display = "block";
-
-    // Detener scanner anterior
-    if (html5QrCode) {
-        try { await html5QrCode.stop(); } catch(e){console.log(e);}
-        html5QrCode.clear();
-        html5QrCode = null;
-    }
-
-    html5QrCode = new Html5Qrcode("qr-reader");
-
-    html5QrCode.start(
-        { facingMode: "environment" },
-        {
-            fps: 10,
-            qrbox: { width: 300, height: 100 },
-            formatsToSupport: [Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.CODE_128]
-        },
-        async (decodedText) => {
-            const codigo = decodedText.trim();
-            if (codigo === lastScanned) return;
-            lastScanned = codigo;
-
-            try { await html5QrCode.stop(); } catch(e){console.log(e);}
-            html5QrCode.clear();
-            qrReaderDiv.style.display = "none";
-            playBeep();
-            clearError();
-
-            modalTitle.textContent = "Cargando...";
-            modalPrice.textContent = "";
-            modalQty.value = 1;
-
-            try {
-                const res = await fetch(`/api/buscar_producto.php?codigo=${codigo}`);
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                const data = await res.json();
-
-                if (!data.existe) {
-                    showError("Producto no encontrado: " + codigo);
-                    return;
-                }
-
-                currentProduct = data.producto;
-                currentProductIndex = null; // nuevo producto
-                modalTitle.textContent = currentProduct.nombre;
-                modalPrice.textContent = `Precio: $${currentProduct.precio}`;
-                modalQty.value = 1;
-                productModal.show();
-
-            } catch (err) {
-                showError("Error al consultar servidor: " + err.message);
-            }
-        }
-    ).catch(err => {
-        console.error(err);
-        qrReaderDiv.style.display = "none";
-        showError("Error al iniciar el escáner");
-    });
-}
-
-// Botón escanear
-document.getElementById('scan-products').addEventListener('click', scanQR);
-
-// ============================
-// Botones del modal
-// ============================
-// ============================
-// Botones del modal
-// ============================
-
-function renderCart(filter = "") {
-    cartList.innerHTML = "";
-    let total = 0;
-    let totalItems = 0;
-
-    cart.forEach((item, index) => {
-        if (!item.nombre.toLowerCase().includes(filter.toLowerCase())) return;
-
-        const li = document.createElement('li');
-        li.className = "list-group-item d-flex justify-content-between align-items-center";
-        li.innerHTML = `
-            <div>${item.nombre} x ${item.cantidad} - $${item.precio * item.cantidad}</div>
-            <button class="btn btn-sm btn-outline-danger remove-btn" data-index="${index}">🗑️</button>
-        `;
-
-        // CLICK para abrir modal (solo una vez por li)
-        li.onclick = (e) => {
-            if (e.target.classList.contains('remove-btn')) return;
-
-            currentProductIndex = index;
-            currentProduct = item;
-            modalTitle.textContent = item.nombre;
-            modalPrice.textContent = `Precio: $${item.precio}`;
-            modalQty.value = item.cantidad;
-            productModal.show();
-        };
-
-        cartList.appendChild(li);
-        total += item.precio * item.cantidad;
-        totalItems += item.cantidad;
-
-        // Botón eliminar (solo una vez)
-        li.querySelector('.remove-btn').onclick = (e) => {
-            e.stopPropagation();
-            cart.splice(index, 1);
-            renderCart(searchInput.value);
-        };
-    });
-
-    totalSpan.textContent = total;
-    totalItemsSpan.textContent = totalItems;
-    localStorage.setItem('cart', JSON.stringify(cart));
-}
-
-// ============================
-// Botones del modal (una sola vez)
-// ============================
-decreaseBtn.onclick = () => {
-    modalQty.value = Math.max(1, parseInt(modalQty.value));
-    modalQty.value = Math.max(1, parseInt(modalQty.value) - 1);
-};
-
-increaseBtn.onclick = () => {
-    modalQty.value = Math.max(1, parseInt(modalQty.value) + 1);
-};
-
-acceptBtn.onclick = (e) => {
-    e.preventDefault();
-    if (!currentProduct) return;
-
-    const cantidad = parseInt(modalQty.value) || 1;
-
-    if (currentProductIndex !== null) {
-        // Actualizar producto existente
-        cart[currentProductIndex].cantidad = cantidad;
-    } else {
-        // Agregar producto nuevo
-        cart.push({ nombre: currentProduct.nombre, precio: currentProduct.precio, cantidad });
-    }
-
-    renderCart(searchInput.value);
-
-    currentProduct = null;
-    currentProductIndex = null;
-    lastScanned = null;
-    productModal.hide();
-};
-
-
-
-// ============================
-// Inicializar
-// ============================
-document.addEventListener('DOMContentLoaded', () => renderCart());
