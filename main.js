@@ -21,6 +21,7 @@ let currentProduct = null;
 let currentProductIndex = null;
 let linternaEncendida = false;
 let trackLinterna = null;
+let nombreLocal = "MI TIENDA";
 // ============================
 // Inicialización
 // ============================
@@ -38,6 +39,7 @@ async function verificarLocal() {
         const res = await fetch(`/api/status_local.php?t=${Date.now()}`, { cache: "no-store" });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
+         nombreLocal = data.mensaje;
         statusDiv.textContent = `Conectado a ${data.mensaje} ✔️`;
     } catch (err) {
         console.error(err);
@@ -332,8 +334,7 @@ function generarTicket() {
     let y = 10;
 
     doc.setFontSize(12);
-    doc.text("MI TIENDA", 40, y, { align: "center" });
-    y += 6;
+doc.text(nombreLocal.toUpperCase(), 40, y, { align: "center" });    y += 6;
 
     doc.setFontSize(8);
     doc.text(new Date().toLocaleString(), 40, y, { align: "center" });
