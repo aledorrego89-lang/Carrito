@@ -210,7 +210,7 @@ async (decodedText) => {
     const codigo = decodedText.trim();
     const now = Date.now();
 
-    if (codigo === lastScanned && (now - lastScanTime < 1000)) return;
+    if (codigo === lastScanned && (now - lastScanTime < 2000)) return;
 
     lastScanned = codigo;
     lastScanTime = now;
