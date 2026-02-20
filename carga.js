@@ -439,42 +439,48 @@ document.getElementById("btnLinterna").addEventListener("click", async () => {
 //**************** EXEL *********************************
 
 document.addEventListener("DOMContentLoaded", function () {
-
     const btnExportExcel = document.getElementById("btnExportExcel");
     const btnImportExcel = document.getElementById("btnImportExcel");
     const inputExcel = document.getElementById("inputExcel");
     const resumenDiv = document.getElementById("resumenImport");
 
-btnExportExcel.addEventListener("click", async () => {
-    try {
-        // 1️⃣ Si no hay productos en memoria, los cargamos
-        if (!Array.isArray(productos) || productos.length === 0) {
-            mostrarToast("Cargando productos del servidor...", "info");
+    let exportando = false; // <-- controla múltiples clicks
 
-            const res = await fetch("/api/listar_productos.php");
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            productos = await res.json();
+    btnExportExcel.addEventListener("click", async () => {
+        if (exportando) return; // evita doble ejecución
+        exportando = true;
 
-            if (!productos.length) {
-                mostrarToast("No hay productos para exportar", "info");
-                return; // No generamos nada
+        try {
+            // 1️⃣ Si no hay productos en memoria, los cargamos
+            if (!Array.isArray(productos) || productos.length === 0) {
+                mostrarToast("Cargando productos del servidor...", "info");
+
+                const res = await fetch("/api/listar_productos.php");
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                productos = await res.json();
+
+                if (!productos.length) {
+                    mostrarToast("No hay productos para exportar", "info");
+                    exportando = false;
+                    return; // No generamos nada
+                }
             }
+
+            // 2️⃣ Generar y descargar Excel
+            const ws = XLSX.utils.json_to_sheet(productos);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Productos");
+            XLSX.writeFile(wb, "productos.xlsx");
+
+            mostrarToast("Excel generado ✅", "success");
+
+        } catch (err) {
+            console.error(err);
+            mostrarToast("Error al exportar productos", "error");
+        } finally {
+            exportando = false; // listo para otro click
         }
-
-        // 2️⃣ Generar y descargar Excel solo una vez
-        const ws = XLSX.utils.json_to_sheet(productos);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Productos");
-        XLSX.writeFile(wb, "productos.xlsx");
-
-        // 3️⃣ Mostrar toast de éxito
-        mostrarToast("Excel generado ✅", "success");
-
-    } catch (err) {
-        console.error(err);
-        mostrarToast("Error al exportar productos", "error");
-    }
-});
+    });
 
     btnImportExcel.addEventListener("click", async () => {
         if (!inputExcel.files.length) {
@@ -514,7 +520,6 @@ btnExportExcel.addEventListener("click", async () => {
                         <p>Errores: ${data.errores.length}</p>
                         ${data.errores.length ? "<ul>" + data.errores.map(e => `<li>${e}</li>`).join("") + "</ul>" : ""}
                     `;
-                    // Refrescar productos en tabla
                     cargarProductos();
                 } else {
                     mostrarToast("Error en importación: " + (data.error || "Desconocido"), "error");
