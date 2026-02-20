@@ -447,7 +447,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 btnExportExcel.addEventListener("click", async () => {
     try {
-        // Si no hay productos en memoria, los cargamos
+        // 1️⃣ Si no hay productos en memoria, los cargamos
         if (!Array.isArray(productos) || productos.length === 0) {
             mostrarToast("Cargando productos del servidor...", "info");
 
@@ -457,17 +457,17 @@ btnExportExcel.addEventListener("click", async () => {
 
             if (!productos.length) {
                 mostrarToast("No hay productos para exportar", "info");
-                return;
+                return; // No generamos nada
             }
         }
 
-        // Generar y descargar Excel
+        // 2️⃣ Generar y descargar Excel solo una vez
         const ws = XLSX.utils.json_to_sheet(productos);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Productos");
         XLSX.writeFile(wb, "productos.xlsx");
 
-        // Mostrar toast de éxito
+        // 3️⃣ Mostrar toast de éxito
         mostrarToast("Excel generado ✅", "success");
 
     } catch (err) {
