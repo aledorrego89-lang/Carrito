@@ -3,13 +3,15 @@ let html5QrCode;
 const apiUrl = "/api/guardar_producto.php";
 let timeoutBusqueda = null;
 let linternaEncendida = false;
-
+let toastActivo = false;
 // ============================
 // TOAST
 // ============================
 function mostrarToast(mensaje, tipo = "info") {
-    let color = "#f3f321"; // amarillo por defecto
+    if (toastActivo) return; // ya hay un toast mostrando
+    toastActivo = true;
 
+    let color = "#f3f321"; // amarillo por defecto
     if (tipo === "success") color = "#4CAF50";
     else if (tipo === "error") color = "#f44336";
 
@@ -21,10 +23,9 @@ function mostrarToast(mensaje, tipo = "info") {
         position: "center",
         backgroundColor: color,
         stopOnFocus: true,
-        style: {
-            color: "#000",
-            fontWeight: "bold"
-        }
+        style: { color: "#000", fontWeight: "bold" },
+        onClick: function(){},  // opcional
+        callback: function(){ toastActivo = false; } // se libera al cerrar
     }).showToast();
 }
 
