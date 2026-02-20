@@ -224,7 +224,6 @@ if (existingIndex !== -1) {
     cart.unshift(productoActualizado);
 renderCart(searchInput.value, 0);
 
-
 } else {
 
     // 🔥 Nuevo producto → agregarlo arriba directamente
@@ -233,12 +232,11 @@ renderCart(searchInput.value, 0);
         precio: currentProduct.precio,
         cantidad: 1
     });
-    renderCart(searchInput.value, 0);
-
+  renderCart(searchInput.value, 0);
 }
 
 
-            renderCart(searchInput.value);
+      
 
         } else {
 
