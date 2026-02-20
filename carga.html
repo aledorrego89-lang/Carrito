@@ -203,7 +203,7 @@
     const loginError = document.getElementById('loginError');
     const loginContainer = document.getElementById('loginContainer');
     const mainContent = document.getElementById('mainContent');
-
+/*
     loginBtn.addEventListener('click', () => {
         const valor = passwordInput.value.trim();
         if(valor === contraseñaCorrecta){
@@ -215,6 +215,24 @@
             passwordInput.focus();
         }
     });
+*/
+loginBtn.addEventListener('click', async () => {
+    const valor = passwordInput.value.trim();
+
+    const res = await fetch("login.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: valor })
+    });
+
+    if(res.ok){
+        loginContainer.style.display = 'none';
+        mainContent.style.display = 'block';
+    } else {
+        loginError.style.display = 'block';
+        passwordInput.value = '';
+    }
+});
 
     passwordInput.addEventListener('keyup', (e) => {
         if(e.key === 'Enter') loginBtn.click();
