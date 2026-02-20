@@ -445,34 +445,25 @@ document.addEventListener("DOMContentLoaded", function () {
     const inputExcel = document.getElementById("inputExcel");
     const resumenDiv = document.getElementById("resumenImport");
 
-btnExportExcel.addEventListener("click", async () => {
+btnExportExcel.addEventListener("click", () => {
     if (!Array.isArray(productos) || productos.length === 0) {
-        mostrarToast("Cargando productos del servidor...", "info");
-
-        try {
-            const res = await fetch("/api/listar_productos.php");
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            productos = await res.json();
-
-            if (!productos.length) {
-                mostrarToast("No hay productos para exportar", "info");
-                return;
-            }
-        } catch (err) {
-            console.error(err);
-            mostrarToast("Error al cargar productos", "error");
-            return;
-        }
+        mostrarToast("Listar productos primero", "info");
+        return;
     }
 
-    // Pequeño delay para que el toast se vea
+    // Mostramos toast primero
+    mostrarToast("Generando Excel...", "info");
+
+    // Dejamos que el toast se renderice antes de abrir la descarga
     setTimeout(() => {
         const ws = XLSX.utils.json_to_sheet(productos);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Productos");
         XLSX.writeFile(wb, "productos.xlsx");
+
+        // Opcional: toast final de éxito
         mostrarToast("Excel generado ✅", "success");
-    }, 100);
+    }, 100); // 100ms es suficiente
 });
 
     btnImportExcel.addEventListener("click", async () => {
