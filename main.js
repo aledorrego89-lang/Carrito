@@ -23,6 +23,9 @@ let linternaEncendida = false;
 let trackLinterna = null;
 let nombreLocal = "MI TIENDA";
 let toastActivo = false;
+let isProcessing = false;
+let lastStableCode = null;
+let stableCount = 0;
 // ============================
 // Inicialización
 // ============================
@@ -207,68 +210,74 @@ async function scanQR() {
         },
 async (decodedText) => {
 
-    const codigo = decodedText.trim();
+    if (isProcessing) return;
+
+    let codigo = decodedText.trim().replace(/\D/g, "");
     const now = Date.now();
 
-    if (codigo === lastScanned && (now - lastScanTime < 2000)) return;
+    // Validación básica
+    if (codigo.length < 8 || codigo.length > 14) return;
 
+    // 🔥 Control de estabilidad (debe leerse 2 veces seguidas igual)
+    if (codigo === lastStableCode) {
+        stableCount++;
+    } else {
+        lastStableCode = codigo;
+        stableCount = 1;
+        return; // esperamos segunda lectura
+    }
+
+    if (stableCount < 2) return;
+
+    // 🔥 Anti rebote por tiempo
+    if (codigo === lastScanned && (now - lastScanTime < 1500)) return;
+
+    isProcessing = true;
     lastScanned = codigo;
     lastScanTime = now;
-
-    playBeep();
-    clearError();
+    stableCount = 0;
 
     try {
+
+        await html5QrCode.pause(); // 🔥 pausa real
+
+        playBeep();
+        clearError();
+
         const res = await fetch(`/api/buscar_producto.php?codigo=${codigo}`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
 
-if (!data || !data.existe || !data.producto) {
-    mostrarToast("Producto no encontrado: " + codigo, "warning");
-    if (navigator.vibrate) navigator.vibrate(120);
-    return;
-}
+        if (!data || !data.existe || !data.producto) {
+            mostrarToast("Producto no encontrado: " + codigo, "warning");
+            if (navigator.vibrate) navigator.vibrate(120);
+            return;
+        }
 
         currentProduct = data.producto;
         currentProductIndex = null;
 
         if (superMode && superMode.checked) {
 
-            // 🟢 MODO SUPER (scanner sigue abierto)
-
             const existingIndex = cart.findIndex(p => p.nombre === currentProduct.nombre);
 
-if (existingIndex !== -1) {
+            if (existingIndex !== -1) {
+                cart[existingIndex].cantidad += 1;
+                const actualizado = cart.splice(existingIndex, 1)[0];
+                cart.unshift(actualizado);
+            } else {
+                cart.unshift({
+                    nombre: currentProduct.nombre,
+                    precio: currentProduct.precio,
+                    cantidad: 1
+                });
+            }
 
-    // 🔥 1. Incrementar cantidad
-    cart[existingIndex].cantidad += 1;
-
-    // 🔥 2. Sacarlo de su posición actual
-    const productoActualizado = cart.splice(existingIndex, 1)[0];
-
-    // 🔥 3. Insertarlo al inicio del array
-    cart.unshift(productoActualizado);
-renderCart(searchInput.value, 0);
-
-} else {
-
-    // 🔥 Nuevo producto → agregarlo arriba directamente
-    cart.unshift({
-        nombre: currentProduct.nombre,
-        precio: currentProduct.precio,
-        cantidad: 1
-    });
-  renderCart(searchInput.value, 0);
-}
-
-
-      
+            renderCart(searchInput.value, 0);
 
         } else {
 
-            // 🔵 MODO NORMAL (cerrar scanner y abrir modal)
-
-            try { await html5QrCode.stop(); } catch(e){}
+            await html5QrCode.stop();
             html5QrCode.clear();
             qrReaderDiv.style.display = "none";
 
@@ -280,6 +289,12 @@ renderCart(searchInput.value, 0);
 
     } catch (err) {
         showError("Error al consultar servidor: " + err.message);
+    } finally {
+
+        setTimeout(async () => {
+            try { await html5QrCode.resume(); } catch(e){}
+            isProcessing = false;
+        }, 700); // delay anti rebote real
     }
 }
 
