@@ -311,6 +311,67 @@ document.getElementById("btnLinterna").addEventListener("click", async () => {
     mostrarToast(linternaEncendida ? "Linterna ON" : "Linterna OFF", "success");
 });
 
+
+
+document.getElementById("btnTicket").addEventListener("click", generarTicket);
+
+function generarTicket() {
+    if (!cart.length) {
+        Swal.fire("El carrito está vacío");
+        return;
+    }
+
+    const { jsPDF } = window.jspdf;
+
+    const doc = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: [80, 200] // tamaño tipo ticket térmico
+    });
+
+    let y = 10;
+
+    doc.setFontSize(12);
+    doc.text("MI TIENDA", 40, y, { align: "center" });
+    y += 6;
+
+    doc.setFontSize(8);
+    doc.text(new Date().toLocaleString(), 40, y, { align: "center" });
+    y += 6;
+
+    doc.line(5, y, 75, y);
+    y += 5;
+
+    let total = 0;
+
+    cart.forEach(item => {
+        const subtotal = item.precio * item.cantidad;
+        total += subtotal;
+
+        doc.text(`${item.nombre}`, 5, y);
+        y += 4;
+
+        doc.text(`${item.cantidad} x $${item.precio}`, 5, y);
+        doc.text(`$${subtotal}`, 75, y, { align: "right" });
+        y += 6;
+    });
+
+    doc.line(5, y, 75, y);
+    y += 6;
+
+    doc.setFontSize(12);
+    doc.text(`TOTAL: $${total}`, 75, y, { align: "right" });
+
+    // Descargar automáticamente
+    doc.save("ticket.pdf");
+
+    // Vaciar carrito después de generar ticket
+    cart = [];
+    localStorage.removeItem("cart");
+    renderCart();
+}
+
+
 // ============================
 // Manejo errores
 // ============================
