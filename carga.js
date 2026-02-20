@@ -4,6 +4,8 @@ const apiUrl = "/api/guardar_producto.php";
 let timeoutBusqueda = null;
 let linternaEncendida = false;
 let toastActivo = false;
+
+let productos = []; // Se llenará desde el servidor
 // ============================
 // TOAST
 // ============================
@@ -294,7 +296,6 @@ function limpiarFormulario() {
 // Lista y busqueda de productos
 // ============================
 
-let productos = []; // Se llenará desde el servidor
 
 document.addEventListener("DOMContentLoaded", function () {
 
@@ -444,17 +445,18 @@ document.addEventListener("DOMContentLoaded", function () {
     const inputExcel = document.getElementById("inputExcel");
     const resumenDiv = document.getElementById("resumenImport");
 
-    btnExportExcel.addEventListener("click", () => {
-    if (!productos || productos.length === 0) {
+btnExportExcel.addEventListener("click", () => {
+    if (!Array.isArray(productos) || productos.length === 0) {
         mostrarToastUnico("Listar productos primero", "info");
-        return;
+        return; // ✅ esto evita que se abra la ventana
     }
-        const ws = XLSX.utils.json_to_sheet(productos);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Productos");
-        XLSX.writeFile(wb, "productos.xlsx");
-        mostrarToast("Excel generado ✅", "success");
-    });
+
+    const ws = XLSX.utils.json_to_sheet(productos);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Productos");
+    XLSX.writeFile(wb, "productos.xlsx");
+    mostrarToast("Excel generado ✅", "success");
+});
 
     btnImportExcel.addEventListener("click", async () => {
         if (!inputExcel.files.length) {
