@@ -111,7 +111,7 @@ label[for="modal-qty"] {
 
 @keyframes flashRow {
     0%   { background-color: #fff3cd; }
-    50%  { background-color: #ffe69c; }
+    50%  { background-color: #68ff31; }
     100% { background-color: transparent; }
 }
 
