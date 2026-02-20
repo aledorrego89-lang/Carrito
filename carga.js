@@ -436,75 +436,77 @@ document.getElementById("btnLinterna").addEventListener("click", async () => {
 
 //**************** EXEL *********************************
 
-document.getElementById("btnExportExcel").addEventListener("click", () => {
-    const ws = XLSX.utils.json_to_sheet(productos);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Productos");
-    XLSX.writeFile(wb, "productos.xlsx");
-});
+document.addEventListener("DOMContentLoaded", function () {
 
-document.getElementById("btnImportExcel").addEventListener("click", async () => {
-    const fileInput = document.getElementById("inputExcel");
-    if (!fileInput.files.length) {
-        mostrarToast("Seleccioná un archivo Excel", "info");
-        return;
-    }
+    const btnExportExcel = document.getElementById("btnExportExcel");
+    const btnImportExcel = document.getElementById("btnImportExcel");
+    const inputExcel = document.getElementById("inputExcel");
+    const resumenDiv = document.getElementById("resumenImport");
 
-    const file = fileInput.files[0];
-    const reader = new FileReader();
+    btnExportExcel.addEventListener("click", () => {
+        if (!productos.length) {
+            mostrarToast("No hay productos para exportar", "info");
+            return;
+        }
+        const ws = XLSX.utils.json_to_sheet(productos);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Productos");
+        XLSX.writeFile(wb, "productos.xlsx");
+        mostrarToast("Excel generado ✅", "success");
+    });
 
-    reader.onload = async (e) => {
-        const data = new Uint8Array(e.target.result);
-        const workbook = XLSX.read(data, { type: "array" });
-
-        // Suponemos que la primera hoja es la que contiene productos
-        const sheetName = workbook.SheetNames[0];
-        const sheet = workbook.Sheets[sheetName];
-
-        const productosExcel = XLSX.utils.sheet_to_json(sheet, { defval: "" });
-
-        if (!productosExcel.length) {
-            mostrarToast("El Excel está vacío", "info");
+    btnImportExcel.addEventListener("click", async () => {
+        if (!inputExcel.files.length) {
+            mostrarToast("Seleccioná un archivo Excel", "info");
             return;
         }
 
-        // Enviar al servidor para procesar
-        try {
-            const res = await fetch("/api/importar_productos.php", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ productos: productosExcel })
-            });
+        const file = inputExcel.files[0];
+        const reader = new FileReader();
 
-            const data = await res.json();
+        reader.onload = async (e) => {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: "array" });
+            const sheetName = workbook.SheetNames[0];
+            const sheet = workbook.Sheets[sheetName];
+            const productosExcel = XLSX.utils.sheet_to_json(sheet, { defval: "" });
 
-            if (data.success) {
-                mostrarToast("Importación procesada ✅", "success");
-
-                // Mostrar resumen de cambios
-                const resumenDiv = document.getElementById("resumenImport");
-                resumenDiv.innerHTML = `
-                    <h5>Resumen de importación:</h5>
-                    <p>Insertados: ${data.insertados}</p>
-                    <p>Actualizados: ${data.actualizados}</p>
-                    <p>Errores: ${data.errores.length}</p>
-                `;
-                if (data.errores.length) {
-                    resumenDiv.innerHTML += "<ul>" + data.errores.map(e => `<li>${e}</li>`).join("") + "</ul>";
-                }
-            } else {
-                mostrarToast("Error en importación: " + (data.error || "Desconocido"), "error");
+            if (!productosExcel.length) {
+                mostrarToast("El Excel está vacío", "info");
+                return;
             }
 
-        } catch (err) {
-            console.error(err);
-            mostrarToast("Error al importar Excel", "error");
-        }
-    };
+            try {
+                const res = await fetch("/api/importar_productos.php", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ productos: productosExcel })
+                });
+                const data = await res.json();
 
-    reader.readAsArrayBuffer(file);
+                if (data.success) {
+                    mostrarToast("Importación procesada ✅", "success");
+                    resumenDiv.innerHTML = `
+                        <h5>Resumen de importación:</h5>
+                        <p>Insertados: ${data.insertados}</p>
+                        <p>Actualizados: ${data.actualizados}</p>
+                        <p>Errores: ${data.errores.length}</p>
+                        ${data.errores.length ? "<ul>" + data.errores.map(e => `<li>${e}</li>`).join("") + "</ul>" : ""}
+                    `;
+                    // Refrescar productos en tabla
+                    cargarProductos();
+                } else {
+                    mostrarToast("Error en importación: " + (data.error || "Desconocido"), "error");
+                }
+            } catch (err) {
+                console.error(err);
+                mostrarToast("Error al importar Excel", "error");
+            }
+        };
+
+        reader.readAsArrayBuffer(file);
+    });
 });
-
 // ============================
 // EVENTOS
 // ============================
