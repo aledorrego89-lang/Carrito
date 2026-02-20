@@ -109,11 +109,18 @@ label[for="modal-qty"] {
 }
 
 
-@keyframes flashRow {
+/* @keyframes flashRow {
     0%   { background-color:  #ffd231;; }
 
     100% { background-color: transparent; }
+} */
+
+@keyframes flashRow {
+  0%   { background-color: #ffd231; transform: scale(1); }
+  50%  { background-color: #fff4c2; transform: scale(1.01); }
+  100% { background-color: transparent; transform: scale(1); }
 }
+
 
 .flash-effect {
     animation: flashRow 0.5s ease-out;
