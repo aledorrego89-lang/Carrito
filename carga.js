@@ -448,22 +448,14 @@ document.addEventListener("DOMContentLoaded", function () {
 btnExportExcel.addEventListener("click", () => {
     if (!Array.isArray(productos) || productos.length === 0) {
         mostrarToast("Listar productos primero", "info");
-        return;
+        return; // ✅ esto evita que se abra la ventana
     }
 
-    // Mostramos toast primero
-    mostrarToast("Generando Excel...", "info");
-
-    // Dejamos que el toast se renderice antes de abrir la descarga
-    setTimeout(() => {
-        const ws = XLSX.utils.json_to_sheet(productos);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Productos");
-        XLSX.writeFile(wb, "productos.xlsx");
-
-        // Opcional: toast final de éxito
-        mostrarToast("Excel generado ✅", "success");
-    }, 100); // 100ms es suficiente
+    const ws = XLSX.utils.json_to_sheet(productos);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Productos");
+    XLSX.writeFile(wb, "productos.xlsx");
+    mostrarToast("Excel generado ✅", "success");
 });
 
     btnImportExcel.addEventListener("click", async () => {
