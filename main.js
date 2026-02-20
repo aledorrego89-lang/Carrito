@@ -50,20 +50,25 @@ async function verificarLocal() {
 // ============================
 // Renderizar carrito
 // ============================
-function renderCart(filter = "") {
-    cartList.innerHTML = "";
+function renderCart(filter = "", highlightIndex = null) {
+        cartList.innerHTML = "";
     let total = 0;
     let totalItems = 0;
 
-    cart.forEach((item, index) => {
-        if (!item.nombre.toLowerCase().includes(filter.toLowerCase())) return;
+cart.forEach((item, index) => {
+    if (!item.nombre.toLowerCase().includes(filter.toLowerCase())) return;
 
-        const li = document.createElement('li');
-        li.className = "list-group-item d-flex justify-content-between align-items-center";
-        li.innerHTML = `
-            <div>${item.nombre} x ${item.cantidad} - $${item.precio * item.cantidad}</div>
-            <button class="btn btn-sm btn-outline-danger remove-btn" data-index="${index}">🗑️</button>
-        `;
+    const li = document.createElement('li');
+    li.className = "list-group-item d-flex justify-content-between align-items-center";
+
+    if (index === highlightIndex) {
+        li.classList.add("flash-effect");
+    }
+
+    li.innerHTML = `
+        <div>${item.nombre} x ${item.cantidad} - $${item.precio * item.cantidad}</div>
+        <button class="btn btn-sm btn-outline-danger remove-btn" data-index="${index}">🗑️</button>
+    `;
 
         li.onclick = (e) => {
             if (e.target.classList.contains('remove-btn')) return;
@@ -194,7 +199,7 @@ async (decodedText) => {
         const data = await res.json();
 
         if (!data.existe) {
-            showError("Producto no encontrado: " + codigo);
+            mostrarToast("Producto no encontrado: " + codigo);
             return;
         }
 
@@ -217,6 +222,8 @@ if (existingIndex !== -1) {
 
     // 🔥 3. Insertarlo al inicio del array
     cart.unshift(productoActualizado);
+renderCart(searchInput.value, 0);
+
 
 } else {
 
@@ -226,6 +233,7 @@ if (existingIndex !== -1) {
         precio: currentProduct.precio,
         cantidad: 1
     });
+    renderCart(searchInput.value, 0);
 
 }
 
