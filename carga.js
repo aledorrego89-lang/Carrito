@@ -445,10 +445,10 @@ document.addEventListener("DOMContentLoaded", function () {
     const resumenDiv = document.getElementById("resumenImport");
 
     btnExportExcel.addEventListener("click", () => {
-        if (!productos.length) {
-            mostrarToast("No hay productos para exportar", "info");
-            return;
-        }
+    if (!productos || productos.length === 0) {
+        mostrarToastUnico("Listar productos primero", "info");
+        return;
+    }
         const ws = XLSX.utils.json_to_sheet(productos);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Productos");
