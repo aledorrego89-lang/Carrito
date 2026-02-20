@@ -116,5 +116,5 @@ label[for="modal-qty"] {
 }
 
 .flash-effect {
-    animation: flashRow 0.8s ease-out;
+    animation: flashRow 0.5s ease-out;
 }
