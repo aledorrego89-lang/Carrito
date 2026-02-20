@@ -45,32 +45,34 @@
   <div id="qr-reader" ></div>
 </div>
 
-<!-- Buscar productos -->
-<input type="text" id="search-cart" class="form-control mt-2" placeholder="Buscar producto en el carrito...">
+    <!-- Buscar productos -->
+    <input type="text" id="search-cart" class="form-control mt-2" placeholder="Buscar producto en el carrito...">
 
-<!-- 🔥 TODO ESTO VA ENVUELTO -->
-<div id="cart-section" style="display:none;">
+<h2 class="text-center mt-2">Productos en carrito</h2>
 
-  <h2 class="text-center mt-2">Productos en carrito</h2>
 
-  <ul id="cart-list" class="list-group mt-3"></ul>
 
-  <div class="text-center mt-2">
-    <h4>Total unidades: <span id="total-items">0</span></h4>
-    <h3>Total: $<span id="total">0</span></h3>
-  </div>
+   <ul id="cart-list" class="list-group mt-3"></ul>
+    <!-- Totales -->
+    <div class="text-center mt-2">
+     
+      <h4>Total unidades: <span id="total-items">0</span></h4>
+      <h3>Total: $<span id="total">0</span></h3>
+    </div>
 
-  <div class="text-center mt-4">
-    <button id="clear-cart" class="btn btn-danger btn-sm">Vaciar carrito</button>
-  </div>
+ 
 
-  <div class="text-center mt-3">
-    <button id="btnTicket" class="btn btn-success">
-      🧾 Finalizar y Generar Ticket
-    </button>
-  </div>
+    <div class="text-center mt-4">
+      <button id="clear-cart" class="btn btn-danger btn-sm">Vaciar carrito</button>
+    </div>
 
-</div>    <!-- Modal Bootstrap -->
+    <div class="text-center mt-3">
+  <button id="btnTicket" class="btn btn-success">
+    🧾 Finalizar y Generar Ticket
+  </button>
+</div>
+
+    <!-- Modal Bootstrap -->
     <div class="modal fade" id="productModal" tabindex="-1">
       <div class="modal-dialog">
         <div class="modal-content text-center">

@@ -14,7 +14,6 @@ const modalQty = document.getElementById('modal-qty');
 const decreaseBtn = document.getElementById('decrease');
 const increaseBtn = document.getElementById('increase');
 const acceptBtn = document.getElementById('accept-product');
-const cartSection = document.getElementById("cart-section");
 
 let html5QrCode;
 let lastScanned = null;
@@ -120,16 +119,9 @@ cart.forEach((item, index) => {
         totalItems += item.cantidad;
     });
 
-totalSpan.textContent = total;
-totalItemsSpan.textContent = totalItems;
-localStorage.setItem('cart', JSON.stringify(cart));
-
-// 🔥 Mostrar u ocultar sección carrito
-if (cart.length > 0) {
-    cartSection.style.display = "block";
-} else {
-    cartSection.style.display = "none";
-}
+    totalSpan.textContent = total;
+    totalItemsSpan.textContent = totalItems;
+    localStorage.setItem('cart', JSON.stringify(cart));
 }
 
 // ============================
@@ -431,52 +423,6 @@ doc.text(nombreLocal.toUpperCase(), 40, y, { align: "center" });    y += 6;
 // ============================
 // LECTOR de MANO
 // ============================
-
-async function procesarCodigoUSB(codigo) {
-
-    if (isProcessing) return;
-
-    isProcessing = true;
-
-    try {
-
-        playBeep();
-
-        const res = await fetch(`/api/buscar_producto.php?codigo=${codigo}`);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-
-        if (!data || !data.existe || !data.producto) {
-            mostrarToast("Producto no encontrado: " + codigo, "warning");
-            return;
-        }
-
-        const producto = data.producto;
-
-        const existingIndex = cart.findIndex(p => p.nombre === producto.nombre);
-
-        if (existingIndex !== -1) {
-            cart[existingIndex].cantidad += 1;
-            const actualizado = cart.splice(existingIndex, 1)[0];
-            cart.unshift(actualizado);
-        } else {
-            cart.unshift({
-                nombre: producto.nombre,
-                precio: producto.precio,
-                cantidad: 1
-            });
-        }
-
-        renderCart(searchInput.value, 0);
-
-    } catch (err) {
-        showError("Error lector USB: " + err.message);
-    } finally {
-        setTimeout(() => {
-            isProcessing = false;
-        }, 300);
-    }
-}
 
 let usbBuffer = "";
 let usbTimer = null;
