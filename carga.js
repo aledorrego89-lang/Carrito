@@ -439,41 +439,46 @@ document.getElementById("btnLinterna").addEventListener("click", async () => {
 //**************** EXEL *********************************
 
 document.addEventListener("DOMContentLoaded", function () {
+
     const btnExportExcel = document.getElementById("btnExportExcel");
     const btnImportExcel = document.getElementById("btnImportExcel");
     const inputExcel = document.getElementById("inputExcel");
     const resumenDiv = document.getElementById("resumenImport");
 
-    // Evitar listeners duplicados
-    btnExportExcel.removeEventListener("click", exportarExcel);
-    btnExportExcel.addEventListener("click", exportarExcel);
+document.addEventListener("DOMContentLoaded", function () {
+    const btnExportExcel = document.getElementById("btnExportExcel");
 
-    async function exportarExcel() {
-        if (!Array.isArray(productos) || productos.length === 0) {
-            mostrarToast("Cargando productos del servidor...", "info");
-            try {
-                const res = await fetch("/api/listar_productos.php");
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                productos = await res.json();
-                if (!productos.length) {
-                    mostrarToast("No hay productos para exportar", "info");
-                    return;
-                }
-            } catch (err) {
-                console.error(err);
-                mostrarToast("Error al cargar productos", "error");
-                return;
-            }
+    // Eliminamos cualquier listener anterior para evitar duplicados
+    btnExportExcel.replaceWith(btnExportExcel.cloneNode(true));
+    const btn = document.getElementById("btnExportExcel");
+
+ document.addEventListener("DOMContentLoaded", function () {
+    const btnExportExcel = document.getElementById("btnExportExcel");
+
+    btnExportExcel.addEventListener("click", async () => {
+        try {
+            // Traemos los productos desde el servidor
+            const res = await fetch("/api/listar_productos.php");
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const productos = await res.json();
+
+            // Si no hay productos, no hacemos nada
+            if (!productos.length) return;
+
+            // Generamos el Excel
+            const ws = XLSX.utils.json_to_sheet(productos);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Productos");
+
+            // Descarga inmediata
+            XLSX.writeFile(wb, "productos.xlsx");
+
+        } catch (err) {
+            console.error("Error exportando productos:", err);
         }
-
-        // Generar Excel solo una vez
-        const ws = XLSX.utils.json_to_sheet(productos);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Productos");
-        XLSX.writeFile(wb, "productos.xlsx");
-        mostrarToast("Excel generado ✅", "success");
-    }
-
+    });
+});
+});
 
     btnImportExcel.addEventListener("click", async () => {
         if (!inputExcel.files.length) {
