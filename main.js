@@ -14,6 +14,7 @@ const modalQty = document.getElementById('modal-qty');
 const decreaseBtn = document.getElementById('decrease');
 const increaseBtn = document.getElementById('increase');
 const acceptBtn = document.getElementById('accept-product');
+const cartSection = document.getElementById("cart-section");
 
 let html5QrCode;
 let lastScanned = null;
@@ -119,9 +120,16 @@ cart.forEach((item, index) => {
         totalItems += item.cantidad;
     });
 
-    totalSpan.textContent = total;
-    totalItemsSpan.textContent = totalItems;
-    localStorage.setItem('cart', JSON.stringify(cart));
+totalSpan.textContent = total;
+totalItemsSpan.textContent = totalItems;
+localStorage.setItem('cart', JSON.stringify(cart));
+
+// 🔥 Mostrar u ocultar sección carrito
+if (cart.length > 0) {
+    cartSection.style.display = "block";
+} else {
+    cartSection.style.display = "none";
+}
 }
 
 // ============================
