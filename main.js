@@ -421,6 +421,86 @@ doc.text(nombreLocal.toUpperCase(), 40, y, { align: "center" });    y += 6;
 
 
 // ============================
+// LECTOR de MANO
+// ============================
+
+async function procesarCodigoUSB(codigo) {
+
+    if (isProcessing) return;
+
+    isProcessing = true;
+
+    try {
+
+        playBeep();
+
+        const res = await fetch(`/api/buscar_producto.php?codigo=${codigo}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+
+        if (!data || !data.existe || !data.producto) {
+            mostrarToast("Producto no encontrado: " + codigo, "warning");
+            return;
+        }
+
+        const producto = data.producto;
+
+        const existingIndex = cart.findIndex(p => p.nombre === producto.nombre);
+
+        if (existingIndex !== -1) {
+            cart[existingIndex].cantidad += 1;
+            const actualizado = cart.splice(existingIndex, 1)[0];
+            cart.unshift(actualizado);
+        } else {
+            cart.unshift({
+                nombre: producto.nombre,
+                precio: producto.precio,
+                cantidad: 1
+            });
+        }
+
+        renderCart(searchInput.value, 0);
+
+    } catch (err) {
+        showError("Error lector USB: " + err.message);
+    } finally {
+        setTimeout(() => {
+            isProcessing = false;
+        }, 300);
+    }
+}
+
+let usbBuffer = "";
+let usbTimer = null;
+
+document.addEventListener("keydown", (e) => {
+
+    // Ignorar si está escribiendo en un input o textarea
+    if (["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) return;
+
+    // Si es Enter → procesar
+    if (e.key === "Enter") {
+        if (usbBuffer.length > 5) {
+            procesarCodigoUSB(usbBuffer);
+        }
+        usbBuffer = "";
+        return;
+    }
+
+    // Solo números
+    if (/^\d$/.test(e.key)) {
+        usbBuffer += e.key;
+
+        // Reset automático si deja de escribir
+        clearTimeout(usbTimer);
+        usbTimer = setTimeout(() => {
+            usbBuffer = "";
+        }, 100); // 100ms detecta que fue tipeo humano
+    }
+});
+
+
+// ============================
 // Manejo errores
 // ============================
 const errorBox = document.getElementById('error-box');
