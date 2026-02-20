@@ -22,6 +22,7 @@ let currentProductIndex = null;
 let linternaEncendida = false;
 let trackLinterna = null;
 let nombreLocal = "MI TIENDA";
+let toastActivo = false;
 // ============================
 // Inicialización
 // ============================
