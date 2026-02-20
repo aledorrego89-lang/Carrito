@@ -439,24 +439,41 @@ document.getElementById("btnLinterna").addEventListener("click", async () => {
 //**************** EXEL *********************************
 
 document.addEventListener("DOMContentLoaded", function () {
-
     const btnExportExcel = document.getElementById("btnExportExcel");
     const btnImportExcel = document.getElementById("btnImportExcel");
     const inputExcel = document.getElementById("inputExcel");
     const resumenDiv = document.getElementById("resumenImport");
 
-btnExportExcel.addEventListener("click", () => {
-    if (!Array.isArray(productos) || productos.length === 0) {
-        mostrarToast("Listar productos primero", "info");
-        return; // ✅ esto evita que se abra la ventana
+    // Evitar listeners duplicados
+    btnExportExcel.removeEventListener("click", exportarExcel);
+    btnExportExcel.addEventListener("click", exportarExcel);
+
+    async function exportarExcel() {
+        if (!Array.isArray(productos) || productos.length === 0) {
+            mostrarToast("Cargando productos del servidor...", "info");
+            try {
+                const res = await fetch("/api/listar_productos.php");
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                productos = await res.json();
+                if (!productos.length) {
+                    mostrarToast("No hay productos para exportar", "info");
+                    return;
+                }
+            } catch (err) {
+                console.error(err);
+                mostrarToast("Error al cargar productos", "error");
+                return;
+            }
+        }
+
+        // Generar Excel solo una vez
+        const ws = XLSX.utils.json_to_sheet(productos);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Productos");
+        XLSX.writeFile(wb, "productos.xlsx");
+        mostrarToast("Excel generado ✅", "success");
     }
 
-    const ws = XLSX.utils.json_to_sheet(productos);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Productos");
-    XLSX.writeFile(wb, "productos.xlsx");
-    mostrarToast("Excel generado ✅", "success");
-});
 
     btnImportExcel.addEventListener("click", async () => {
         if (!inputExcel.files.length) {
