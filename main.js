@@ -198,10 +198,11 @@ async (decodedText) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
 
-        if (!data.existe) {
-            mostrarToast("Producto no encontrado: " + codigo);
-            return;
-        }
+if (!data || !data.existe || !data.producto) {
+    mostrarToast("Producto no encontrado: " + codigo, "warning");
+    if (navigator.vibrate) navigator.vibrate(120);
+    return;
+}
 
         currentProduct = data.producto;
         currentProductIndex = null;
