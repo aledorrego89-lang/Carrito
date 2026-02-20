@@ -457,20 +457,23 @@ document.addEventListener("DOMContentLoaded", function () {
 
     btnExportExcel.addEventListener("click", async () => {
         try {
-            // Traemos los productos desde el servidor
+            // 1️⃣ Traemos los productos desde el servidor y esperamos la respuesta
             const res = await fetch("/api/listar_productos.php");
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const productos = await res.json();
 
-            // Si no hay productos, no hacemos nada
-            if (!productos.length) return;
+            // 2️⃣ Si no hay productos, no hacemos nada
+            if (!productos.length) {
+                console.log("No hay productos para exportar");
+                return;
+            }
 
-            // Generamos el Excel
+            // 3️⃣ Generamos el Excel
             const ws = XLSX.utils.json_to_sheet(productos);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Productos");
 
-            // Descarga inmediata
+            // 4️⃣ Descarga solo después de que productos esté lleno
             XLSX.writeFile(wb, "productos.xlsx");
 
         } catch (err) {
