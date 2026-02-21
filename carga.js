@@ -23,34 +23,40 @@ function hideSpinner() {
     document.getElementById("spinnerOverlay").style.display = "none";
 }
 
-async function loginUsuario() {
-    const valor = passwordInput.value.trim();
+function showSpinnerAndThen(callback) {
     showSpinner();
+    requestAnimationFrame(() => {
+        requestAnimationFrame(callback);
+    });
+}
 
-    // Forzar renderizado del spinner antes del fetch
-    await new Promise(resolve => setTimeout(resolve, 50));
 
-    try {
-        const res = await fetch("/api/login.php", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ password: valor })
-        });
+function loginUsuario() {
+    const valor = passwordInput.value.trim();
 
-        if (res.ok) {
-            loginContainer.style.display = 'none';
-            mainContent.style.display = 'block';
-        } else {
-            loginError.style.display = 'block';
-            passwordInput.value = '';
-            passwordInput.focus();
+    showSpinnerAndThen(async () => {
+        try {
+            const res = await fetch("/api/login.php", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ password: valor })
+            });
+
+            if (res.ok) {
+                loginContainer.style.display = 'none';
+                mainContent.style.display = 'block';
+            } else {
+                loginError.style.display = 'block';
+                passwordInput.value = '';
+                passwordInput.focus();
+            }
+        } catch (err) {
+            console.error(err);
+            mostrarToast("Error de conexión", "error");
+        } finally {
+            hideSpinner();
         }
-    } catch (err) {
-        console.error(err);
-        mostrarToast("Error de conexión", "error");
-    } finally {
-        hideSpinner();
-    }
+    });
 }
 
 
