@@ -35,25 +35,11 @@ function hideSpinner() {
     }
 }
 
-function showSpinnerAndThen(callback) {
-    showSpinner();
-    requestAnimationFrame(() => {
-        requestAnimationFrame(callback);
-    });
-}
-
-
 async function loginUsuario() {
     const valor = passwordInput.value.trim();
-
-    // Mostrar spinner y forzar repaint
-    const spinner = document.getElementById("spinnerOverlay");
-    spinner.style.display = "flex";
-    await new Promise(r => requestAnimationFrame(() => r())); // forzar render
-    await new Promise(r => requestAnimationFrame(() => r()));
+    showSpinner(); // muestra el spinner inmediatamente
 
     try {
-        console.log("Antes de fetch, spinner debería mostrarse");
         const res = await fetch("/api/login.php", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -72,7 +58,7 @@ async function loginUsuario() {
         console.error(err);
         mostrarToast("Error de conexión", "error");
     } finally {
-        spinner.style.display = "none";
+        hideSpinner(); // ocultar spinner al final
     }
 }
 
