@@ -388,16 +388,14 @@ function filtrarProductos() {
 // ============================
 // FOCUS INPUT CÓDIGO CON F3
 // ============================
-document.addEventListener("keydown", function(e) {
-    // Evitamos interferir si estás escribiendo en un input/textarea
-    if (["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) return;
 
+document.addEventListener("keydown", function(e) {
     if (e.key === "F3") {
-        e.preventDefault(); // evita que el navegador haga su acción por defecto
+        e.preventDefault(); // evita la búsqueda del navegador en cualquier caso
         const inputCodigo = document.getElementById("inputCodigoManual");
         if (inputCodigo) {
             inputCodigo.focus();
-            inputCodigo.select(); // opcional: selecciona el contenido para sobreescribirlo
+            inputCodigo.select(); // opcional: selecciona el contenido
         }
     }
 });
