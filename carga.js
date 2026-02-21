@@ -686,7 +686,53 @@ document.getElementById("btnLinterna").addEventListener("click", async () => {
 //     }
 // });
 
+document.getElementById("btnImportExcel").addEventListener("click", () => {
+    document.getElementById("inputImportExcel").click();
+});
 
+document.getElementById("inputImportExcel").addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    showSpinner();
+
+    const reader = new FileReader();
+
+    reader.onload = (evt) => {
+        try {
+            const data = new Uint8Array(evt.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+
+            // Tomamos la primera hoja
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+
+            // Convertimos a JSON
+            const importedProductos = XLSX.utils.sheet_to_json(worksheet);
+
+            if (!importedProductos.length) {
+                mostrarToast("El Excel está vacío", "info");
+                return;
+            }
+
+            // Guardamos en tu variable de productos
+            productos = importedProductos;
+
+            // Mostramos en tabla
+            mostrarProductos(productos);
+
+            mostrarToast(`Importados ${productos.length} productos ✅`, "success");
+
+        } catch (err) {
+            console.error("Error importando Excel:", err);
+            mostrarToast("Error al importar Excel", "error");
+        } finally {
+            hideSpinner();
+        }
+    };
+
+    reader.readAsArrayBuffer(file);
+});
 
 // ============================
 // LECTOR USB - CARGA
