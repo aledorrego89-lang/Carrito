@@ -14,6 +14,7 @@ const modalQty = document.getElementById('modal-qty');
 const decreaseBtn = document.getElementById('decrease');
 const increaseBtn = document.getElementById('increase');
 const acceptBtn = document.getElementById('accept-product');
+const cartSection = document.getElementById("cart-section");
 
 let html5QrCode;
 let lastScanned = null;
@@ -122,6 +123,15 @@ cart.forEach((item, index) => {
     totalSpan.textContent = total;
     totalItemsSpan.textContent = totalItems;
     localStorage.setItem('cart', JSON.stringify(cart));
+totalSpan.textContent = total;
+totalItemsSpan.textContent = totalItems;
+localStorage.setItem('cart', JSON.stringify(cart));
+
+if (cart.length > 0) {
+    cartSection.classList.remove("d-none");
+} else {
+    cartSection.classList.add("d-none");
+}
 }
 
 // ============================
