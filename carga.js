@@ -98,7 +98,7 @@ async function buscarProductoServidor(codigo, focoEn = "nombre") {
     const precioInput = document.getElementById("precio");
     const estado = document.getElementById("estado");
     const btnEliminar = document.getElementById("btnEliminar");
-
+ showSpinner();
     try {
         const response = await fetch(
             `/api/buscar_producto.php?codigo=${codigo}`
@@ -148,7 +148,7 @@ let guardando = false; // evita doble envío
 async function guardarProducto() {
     if (guardando) return; // ya estamos guardando
     guardando = true;
-
+ showSpinner();
     try {
         // Validar código
         if (!codigoActual) {
@@ -206,6 +206,7 @@ async function guardarProducto() {
        mostrarToast("Error al guardar en servidor", "error");
     } finally {
         guardando = false; // liberamos para el próximo envío
+         hideSpinner();
     }
 }
 
@@ -250,6 +251,7 @@ function eliminarProducto() {
             }
         })
         .catch(err => {
+             hideSpinner();
             console.error(err);
             mostrarToast("Error al eliminar en servidor", "error");
         });
@@ -303,6 +305,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Cargar productos del servidor
     // ============================
     async function cargarProductos() {
+         showSpinner();
         try {
             const res = await fetch("/api/listar_productos.php");
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -349,10 +352,11 @@ tr.addEventListener("click", () => {
 document.getElementById("btnListarProductos").addEventListener("click", async function () {
 
     const contenedor = document.getElementById("contenidoListado");
-
+ showSpinner();
     if (contenedor.style.display === "none") {
         contenedor.style.display = "block";
         await cargarProductos();
+         hideSpinner();
         this.textContent = "Ocultar productos";
     } else {
         contenedor.style.display = "none";
@@ -400,6 +404,18 @@ document.addEventListener("keydown", function(e) {
     }
 });
 
+
+
+//SPINNER
+
+function showSpinner() {
+    document.getElementById("spinnerOverlay").style.display = "flex";
+}
+
+function hideSpinner() {
+    document.getElementById("spinnerOverlay").style.display = "none";
+}
+
     // ============================
     // Eventos de filtros
     // ============================
@@ -433,6 +449,7 @@ let trackLinterna = null;
 
 document.getElementById("btnLinterna").addEventListener("click", async () => {
     if (!trackLinterna) {
+         showSpinner();
         try {
             const stream = await navigator.mediaDevices.getUserMedia({
                 video: { facingMode: "environment" }
@@ -467,6 +484,7 @@ document.getElementById("btnLinterna").addEventListener("click", async () => {
 //**************** EXEL *********************************
 
 btnExportExcel.addEventListener("click", async () => {
+     showSpinner();
     try {
         const res = await fetch("/api/listar_productos.php");
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
