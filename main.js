@@ -301,7 +301,7 @@ async (decodedText) => {
 
         } else {
 
-await html5QrCode.pause();
+            await html5QrCode.stop();
             html5QrCode.clear();
             qrReaderDiv.style.display = "none";
 
