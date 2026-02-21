@@ -212,7 +212,7 @@ superMode.addEventListener("change", actualizarTextoBoton);
 
 function actualizarTextoBoton() {
     if (superMode && superMode.checked) {
-        scanButton.textContent = "Buscar productos";
+        scanButton.textContent = "Escanear productos";
         scanButton.classList.remove("btn-primary");
         scanButton.classList.add("btn-success");
     } else {
