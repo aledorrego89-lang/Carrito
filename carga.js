@@ -33,8 +33,9 @@ function showSpinnerAndThen(callback) {
 
 function loginUsuario() {
     const valor = passwordInput.value.trim();
+    showSpinner();
 
-    showSpinnerAndThen(async () => {
+    requestAnimationFrame(async () => {
         try {
             const res = await fetch("/api/login.php", {
                 method: "POST",
