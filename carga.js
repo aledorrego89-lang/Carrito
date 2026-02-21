@@ -351,6 +351,25 @@ function cancelarProducto() {
     }
 }
 
+
+async function buscarProductosServidor(nombre) {
+    showSpinner();
+
+    try {
+        const res = await fetch(`/api/buscar_productos.php?nombre=${encodeURIComponent(nombre)}&limit=50`);
+        if (!res.ok) throw new Error("Error servidor");
+
+        const data = await res.json();
+        mostrarProductos(data);
+
+    } catch (err) {
+        console.error("Error buscando productos:", err);
+        mostrarToast("Error al buscar productos", "error");
+    } finally {
+        hideSpinner();
+    }
+}
+
 function limpiarFormulario() {
     document.getElementById("nombre").value = "";
     document.getElementById("precio").value = "";
@@ -416,23 +435,42 @@ tr.addEventListener("click", () => {
 
 
 
-document.getElementById("btnListarProductos").addEventListener("click", async function () {
+// document.getElementById("btnListarProductos").addEventListener("click", async function () {
 
-    const contenedor = document.getElementById("contenidoListado");
- showSpinner();
-    if (contenedor.style.display === "none") {
-        contenedor.style.display = "block";
-        await cargarProductos();
-         hideSpinner();
-        this.textContent = "Ocultar productos";
-    } else {
-        contenedor.style.display = "none";
-        this.textContent = "Listar productos";
-        hideSpinner();
+//     const contenedor = document.getElementById("contenidoListado");
+//  showSpinner();
+//     if (contenedor.style.display === "none") {
+//         contenedor.style.display = "block";
+//         await cargarProductos();
+//          hideSpinner();
+//         this.textContent = "Ocultar productos";
+//     } else {
+//         contenedor.style.display = "none";
+//         this.textContent = "Listar productos";
+//         hideSpinner();
+//     }
+
+// });
+
+
+let timeoutBusqueda = null;
+
+document.getElementById("filtroNombre").addEventListener("keyup", function() {
+
+    clearTimeout(timeoutBusqueda);
+
+    const texto = this.value.trim();
+
+    // Evitar buscar si tiene menos de 2 letras
+    if (texto.length < 2) {
+        mostrarProductos([]); 
+        return;
     }
 
+    timeoutBusqueda = setTimeout(() => {
+        buscarProductosServidor(texto);
+    }, 300);
 });
-
     // ============================
     // Filtrar productos
     // ============================
@@ -480,8 +518,8 @@ document.addEventListener("keydown", function(e) {
     // Eventos de filtros
     // ============================
     document.getElementById("filtroNombre").addEventListener("keyup", filtrarProductos);
-    document.getElementById("filtroCodigo").addEventListener("keyup", filtrarProductos);
-    document.getElementById("filtroPrecio").addEventListener("keyup", filtrarProductos);
+    // document.getElementById("filtroCodigo").addEventListener("keyup", filtrarProductos);
+    // document.getElementById("filtroPrecio").addEventListener("keyup", filtrarProductos);
 
     // ============================
     // Exportar a Excel
