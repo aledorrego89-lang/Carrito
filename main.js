@@ -32,9 +32,10 @@ let stableCount = 0;
 // Inicialización
 // ============================
 document.addEventListener("DOMContentLoaded", async () => {
+    actualizarTextoBoton();
     await verificarLocal();
     renderCart();
-    actualizarTextoBoton();
+
 });
 
 
@@ -55,8 +56,8 @@ function mostrarToast(mensaje, tipo = "info") {
         backgroundColor: color,
         stopOnFocus: true,
         style: { color: "#000", fontWeight: "bold" },
-        onClick: function(){},  // opcional
-        callback: function(){ toastActivo = false; } // se libera al cerrar
+        onClick: function () { },  // opcional
+        callback: function () { toastActivo = false; } // se libera al cerrar
     }).showToast();
 }
 
@@ -70,7 +71,7 @@ async function verificarLocal() {
         const res = await fetch(`/api/status_local.php?t=${Date.now()}`, { cache: "no-store" });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
-         nombreLocal = data.mensaje;
+        nombreLocal = data.mensaje;
         statusDiv.textContent = `Conectado a ${data.mensaje} ✔️`;
     } catch (err) {
         console.error(err);
@@ -82,21 +83,21 @@ async function verificarLocal() {
 // Renderizar carrito
 // ============================
 function renderCart(filter = "", highlightIndex = null) {
-        cartList.innerHTML = "";
+    cartList.innerHTML = "";
     let total = 0;
     let totalItems = 0;
 
-cart.forEach((item, index) => {
-    if (!item.nombre.toLowerCase().includes(filter.toLowerCase())) return;
+    cart.forEach((item, index) => {
+        if (!item.nombre.toLowerCase().includes(filter.toLowerCase())) return;
 
-    const li = document.createElement('li');
-    li.className = "list-group-item d-flex justify-content-between align-items-center";
+        const li = document.createElement('li');
+        li.className = "list-group-item d-flex justify-content-between align-items-center";
 
-    if (index === highlightIndex) {
-        li.classList.add("flash-effect");
-    }
+        if (index === highlightIndex) {
+            li.classList.add("flash-effect");
+        }
 
-    li.innerHTML = `
+        li.innerHTML = `
         <div>${item.nombre} x ${item.cantidad} - $${item.precio * item.cantidad}</div>
         <button class="btn btn-sm btn-outline-danger remove-btn" data-index="${index}">🗑️</button>
     `;
@@ -125,15 +126,15 @@ cart.forEach((item, index) => {
     totalSpan.textContent = total;
     totalItemsSpan.textContent = totalItems;
     localStorage.setItem('cart', JSON.stringify(cart));
-totalSpan.textContent = total;
-totalItemsSpan.textContent = totalItems;
-localStorage.setItem('cart', JSON.stringify(cart));
+    totalSpan.textContent = total;
+    totalItemsSpan.textContent = totalItems;
+    localStorage.setItem('cart', JSON.stringify(cart));
 
-if (cart.length > 0) {
-    cartSection.classList.remove("d-none");
-} else {
-    cartSection.classList.add("d-none");
-}
+    if (cart.length > 0) {
+        cartSection.classList.remove("d-none");
+    } else {
+        cartSection.classList.add("d-none");
+    }
 }
 
 // ============================
@@ -170,13 +171,13 @@ document.getElementById('clear-cart').addEventListener('click', () => {
 
 
 decreaseBtn.addEventListener("click", function () {
-  modalQty.value = Math.max(1, parseInt(modalQty.value) - 1);
-  this.blur(); // quita el foco para que no quede azul
+    modalQty.value = Math.max(1, parseInt(modalQty.value) - 1);
+    this.blur(); // quita el foco para que no quede azul
 });
 
 increaseBtn.addEventListener("click", function () {
-  modalQty.value = Math.max(1, parseInt(modalQty.value) + 1);
-  this.blur(); // quita el foco
+    modalQty.value = Math.max(1, parseInt(modalQty.value) + 1);
+    this.blur(); // quita el foco
 });
 
 
@@ -229,8 +230,8 @@ async function scanQR() {
 
     // Detener scanner anterior si existe
     if (html5QrCode) {
-        try { await html5QrCode.stop(); } 
-        catch(e){}
+        try { await html5QrCode.stop(); }
+        catch (e) { }
         html5QrCode.clear();
         html5QrCode = null;
     }
@@ -247,95 +248,95 @@ async function scanQR() {
                 Html5QrcodeSupportedFormats.CODE_128
             ]
         },
-async (decodedText) => {
+        async (decodedText) => {
 
-    if (isProcessing) return;
+            if (isProcessing) return;
 
-    let codigo = decodedText.trim().replace(/\D/g, "");
-    const now = Date.now();
+            let codigo = decodedText.trim().replace(/\D/g, "");
+            const now = Date.now();
 
-    // Validación básica
-    if (codigo.length < 8 || codigo.length > 14) return;
+            // Validación básica
+            if (codigo.length < 8 || codigo.length > 14) return;
 
-    // 🔥 Control de estabilidad (debe leerse 2 veces seguidas igual)
-    if (codigo === lastStableCode) {
-        stableCount++;
-    } else {
-        lastStableCode = codigo;
-        stableCount = 1;
-        return; // esperamos segunda lectura
-    }
-
-    if (stableCount < 2) return;
-
-    // 🔥 Anti rebote por tiempo
-    if (codigo === lastScanned && (now - lastScanTime < 1500)) return;
-
-    isProcessing = true;
-    lastScanned = codigo;
-    lastScanTime = now;
-    stableCount = 0;
-
-    try {
-
-        await html5QrCode.pause(); // 🔥 pausa real
-
-        playBeep();
-        clearError();
-
-        const res = await fetch(`/api/buscar_producto.php?codigo=${codigo}`);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-
-        if (!data || !data.existe || !data.producto) {
-            mostrarToast("Producto no encontrado: " + codigo, "warning");
-            if (navigator.vibrate) navigator.vibrate(120);
-            return;
-        }
-
-        currentProduct = data.producto;
-        currentProductIndex = null;
-
-        if (superMode && superMode.checked) {
-
-            const existingIndex = cart.findIndex(p => p.nombre === currentProduct.nombre);
-
-            if (existingIndex !== -1) {
-                cart[existingIndex].cantidad += 1;
-                const actualizado = cart.splice(existingIndex, 1)[0];
-                cart.unshift(actualizado);
+            // 🔥 Control de estabilidad (debe leerse 2 veces seguidas igual)
+            if (codigo === lastStableCode) {
+                stableCount++;
             } else {
-                cart.unshift({
-                    nombre: currentProduct.nombre,
-                    precio: currentProduct.precio,
-                    cantidad: 1
-                });
+                lastStableCode = codigo;
+                stableCount = 1;
+                return; // esperamos segunda lectura
             }
 
-            renderCart(searchInput.value, 0);
+            if (stableCount < 2) return;
 
-        } else {
+            // 🔥 Anti rebote por tiempo
+            if (codigo === lastScanned && (now - lastScanTime < 1500)) return;
 
-            await html5QrCode.stop();
-            html5QrCode.clear();
-            qrReaderDiv.style.display = "none";
+            isProcessing = true;
+            lastScanned = codigo;
+            lastScanTime = now;
+            stableCount = 0;
 
-            modalTitle.textContent = currentProduct.nombre;
-            modalPrice.textContent = `Precio: $${currentProduct.precio}`;
-            modalQty.value = 1;
-            productModal.show();
+            try {
+
+                await html5QrCode.pause(); // 🔥 pausa real
+
+                playBeep();
+                clearError();
+
+                const res = await fetch(`/api/buscar_producto.php?codigo=${codigo}`);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+
+                if (!data || !data.existe || !data.producto) {
+                    mostrarToast("Producto no encontrado: " + codigo, "warning");
+                    if (navigator.vibrate) navigator.vibrate(120);
+                    return;
+                }
+
+                currentProduct = data.producto;
+                currentProductIndex = null;
+
+                if (superMode && superMode.checked) {
+
+                    const existingIndex = cart.findIndex(p => p.nombre === currentProduct.nombre);
+
+                    if (existingIndex !== -1) {
+                        cart[existingIndex].cantidad += 1;
+                        const actualizado = cart.splice(existingIndex, 1)[0];
+                        cart.unshift(actualizado);
+                    } else {
+                        cart.unshift({
+                            nombre: currentProduct.nombre,
+                            precio: currentProduct.precio,
+                            cantidad: 1
+                        });
+                    }
+
+                    renderCart(searchInput.value, 0);
+
+                } else {
+
+                    await html5QrCode.stop();
+                    html5QrCode.clear();
+                    qrReaderDiv.style.display = "none";
+
+                    modalTitle.textContent = currentProduct.nombre;
+                    modalPrice.textContent = `Precio: $${currentProduct.precio}`;
+                    modalQty.value = 1;
+                    productModal.show();
+                }
+
+            } catch (err) {
+                showError("Error al consultar servidor: " + err.message);
+            } finally {
+
+                setTimeout(async () => {
+                    try { await html5QrCode.resume(); } catch (e) { }
+                    isProcessing = false;
+                }, 700); // delay anti rebote real
+            }
         }
-
-    } catch (err) {
-        showError("Error al consultar servidor: " + err.message);
-    } finally {
-
-        setTimeout(async () => {
-            try { await html5QrCode.resume(); } catch(e){}
-            isProcessing = false;
-        }, 700); // delay anti rebote real
-    }
-}
 
     ).catch(err => {
         console.error(err);
@@ -420,7 +421,7 @@ function generarTicket() {
     let y = 10;
 
     doc.setFontSize(12);
-doc.text(nombreLocal.toUpperCase(), 40, y, { align: "center" });    y += 6;
+    doc.text(nombreLocal.toUpperCase(), 40, y, { align: "center" }); y += 6;
 
     doc.setFontSize(8);
     doc.text(new Date().toLocaleString(), 40, y, { align: "center" });
