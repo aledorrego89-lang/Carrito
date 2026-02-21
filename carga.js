@@ -35,30 +35,7 @@ function hideSpinner() {
     }
 }
 
-showSpinner();
-setTimeout(async () => {
-    try {
-        const res = await fetch("/api/login.php", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ password: valor })
-        });
 
-        if (res.ok) {
-            loginContainer.style.display = 'none';
-            mainContent.style.display = 'block';
-        } else {
-            loginError.style.display = 'block';
-            passwordInput.value = '';
-            passwordInput.focus();
-        }
-    } catch (err) {
-        console.error(err);
-        mostrarToast("Error de conexión", "error");
-    } finally {
-        hideSpinner();
-    }
-}, 200); // 50ms alcanza para que pinte el spinner
 
 
 // ============================
@@ -84,6 +61,40 @@ function mostrarToast(mensaje, tipo = "info") {
         onClick: function(){},  // opcional
         callback: function(){ toastActivo = false; } // se libera al cerrar
     }).showToast();
+}
+
+
+
+// ============================
+// LOGIN
+// ============================
+async function loginUsuario() {
+    const valor = passwordInput.value.trim();
+    mostrarToast("Iniciando sesion", "success"); // mostrar spinner
+    setTimeout(() => console.log("Spinner debería ser visible ahora"), 0);
+    console.log("Spinner debería verse ahora");
+
+    try {
+        const res = await fetch("/api/login.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ password: valor })
+        });
+
+        if (res.ok) {
+            loginContainer.style.display = 'none';
+            mainContent.style.display = 'block';
+        } else {
+            loginError.style.display = 'block';
+            passwordInput.value = '';
+            passwordInput.focus();
+        }
+    } catch (err) {
+        console.error(err);
+        mostrarToast("Error de conexión", "error");
+    } finally {
+        hideSpinner();
+    }
 }
 
 
