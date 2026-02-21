@@ -37,7 +37,9 @@ function hideSpinner() {
 
 async function loginUsuario() {
     const valor = passwordInput.value.trim();
-    showSpinner(); // muestra el spinner inmediatamente
+    showSpinner(); // mostrar spinner
+    setTimeout(() => console.log("Spinner debería ser visible ahora"), 0);
+    console.log("Spinner debería verse ahora");
 
     try {
         const res = await fetch("/api/login.php", {
@@ -58,7 +60,7 @@ async function loginUsuario() {
         console.error(err);
         mostrarToast("Error de conexión", "error");
     } finally {
-        hideSpinner(); // ocultar spinner al final
+        hideSpinner();
     }
 }
 
