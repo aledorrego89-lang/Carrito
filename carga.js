@@ -345,18 +345,6 @@ tr.addEventListener("click", () => {
     // ============================
 
 
-document.getElementById("btnListarProductos").addEventListener("click", async function () {
-
-    const contenedor = document.getElementById("contenidoListado");
-
-    // Mostrar contenido
-    contenedor.style.display = "block";
-
-    // Cargar productos
-    await cargarProductos();
-
-});
-
 
 document.getElementById("btnListarProductos").addEventListener("click", async function () {
 
