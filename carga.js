@@ -356,8 +356,9 @@ async function buscarProductosServidor(nombre) {
     showSpinner();
 
     try {
-const res = await fetch(`/api/listar_productos.php?nombre=${encodeURIComponent(nombre)}&limit=50`);
-        if (!res.ok) throw new Error("Error servidor");
+const res = await fetch(`/api/listar_productos.php?nombre=${encodeURIComponent(nombre)}&limit=50`, {
+    credentials: 'same-origin'
+});        if (!res.ok) throw new Error("Error servidor");
 
         const data = await res.json();
         mostrarProductos(data);
