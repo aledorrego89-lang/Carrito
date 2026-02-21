@@ -15,6 +15,7 @@ const decreaseBtn = document.getElementById('decrease');
 const increaseBtn = document.getElementById('increase');
 const acceptBtn = document.getElementById('accept-product');
 const cartSection = document.getElementById("cart-section");
+const scanButton = document.getElementById('scan-products');
 
 let html5QrCode;
 let lastScanned = null;
@@ -33,6 +34,7 @@ let stableCount = 0;
 document.addEventListener("DOMContentLoaded", async () => {
     await verificarLocal();
     renderCart();
+    actualizarTextoBoton();
 });
 
 
@@ -206,6 +208,19 @@ acceptBtn.onclick = (e) => {
 
 const superMode = document.getElementById('super-mode');
 let lastScanTime = 0;
+superMode.addEventListener("change", actualizarTextoBoton);
+
+function actualizarTextoBoton() {
+    if (superMode && superMode.checked) {
+        scanButton.textContent = "Buscar productos";
+        scanButton.classList.remove("btn-primary");
+        scanButton.classList.add("btn-success");
+    } else {
+        scanButton.textContent = "Buscar precio";
+        scanButton.classList.remove("btn-success");
+        scanButton.classList.add("btn-primary");
+    }
+}
 
 async function scanQR() {
 
