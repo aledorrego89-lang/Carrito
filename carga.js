@@ -31,33 +31,36 @@ function showSpinnerAndThen(callback) {
 }
 
 
-function loginUsuario() {
+async function loginUsuario() {
     const valor = passwordInput.value.trim();
-    showSpinner();
 
-    requestAnimationFrame(async () => {
-        try {
-            const res = await fetch("/api/login.php", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ password: valor })
-            });
+    // Mostrar spinner y forzar repaint
+    const spinner = document.getElementById("spinnerOverlay");
+    spinner.style.display = "flex";
+    await new Promise(r => requestAnimationFrame(() => r())); // forzar render
+    await new Promise(r => requestAnimationFrame(() => r()));
 
-            if (res.ok) {
-                loginContainer.style.display = 'none';
-                mainContent.style.display = 'block';
-            } else {
-                loginError.style.display = 'block';
-                passwordInput.value = '';
-                passwordInput.focus();
-            }
-        } catch (err) {
-            console.error(err);
-            mostrarToast("Error de conexión", "error");
-        } finally {
-            hideSpinner();
+    try {
+        const res = await fetch("/api/login.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ password: valor })
+        });
+
+        if (res.ok) {
+            loginContainer.style.display = 'none';
+            mainContent.style.display = 'block';
+        } else {
+            loginError.style.display = 'block';
+            passwordInput.value = '';
+            passwordInput.focus();
         }
-    });
+    } catch (err) {
+        console.error(err);
+        mostrarToast("Error de conexión", "error");
+    } finally {
+        spinner.style.display = "none";
+    }
 }
 
 
