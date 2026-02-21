@@ -690,7 +690,104 @@ document.getElementById("btnLinterna").addEventListener("click", async () => {
 //     document.getElementById("inputImportExcel").click();
 // });
 
+// ============================
+// IMPORTAR EXCEL
+// ============================
+document.getElementById("btnImportExcel").addEventListener("click", () => {
+    document.getElementById("inputExcel").click();
+});
 
+document.getElementById("inputExcel").addEventListener("change", async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    showSpinner();
+
+    try {
+        const data = await file.arrayBuffer();
+        const workbook = XLSX.read(data);
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        const excelData = XLSX.utils.sheet_to_json(sheet);
+
+        if (!excelData.length) {
+            mostrarToast("El archivo está vacío", "info");
+            hideSpinner();
+            return;
+        }
+
+        let insertadas = 0;
+        let actualizadas = 0;
+        let eliminadas = 0;
+
+        // Mapear productos actuales por código para comparación rápida
+        const productosMap = {};
+        productos.forEach(p => {
+            productosMap[p.codigo] = p;
+        });
+
+        // Recorrer Excel y comparar con productos existentes
+        for (const row of excelData) {
+            const codigo = row.codigo?.toString().trim();
+            if (!codigo) continue;
+
+            const nombre = row.nombre?.toString().trim() || "";
+            const precio = parseFloat(row.precio) || 0;
+
+            if (productosMap[codigo]) {
+                // Existe → verificar si hay cambios
+                if (productosMap[codigo].nombre !== nombre || parseFloat(productosMap[codigo].precio) !== precio) {
+                    await fetch("/api/guardar_producto.php", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ codigo, nombre, precio })
+                    });
+                    actualizadas++;
+                }
+                delete productosMap[codigo]; // lo marcamos como procesado
+            } else {
+                // No existe → insertar
+                await fetch("/api/guardar_producto.php", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ codigo, nombre, precio })
+                });
+                insertadas++;
+            }
+        }
+
+        // Lo que quedó en productosMap son productos que no están en Excel → eliminarlos
+        for (const codigoEl of Object.keys(productosMap)) {
+            await fetch("/api/eliminar_producto.php", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ codigo: codigoEl })
+            });
+            eliminadas++;
+        }
+
+        // Mostrar resumen
+        const resumenDiv = document.getElementById("resumenImport");
+        resumenDiv.innerHTML = `
+            <p>✅ Filas insertadas: ${insertadas}</p>
+            <p>✏️ Filas actualizadas: ${actualizadas}</p>
+            <p>🗑 Filas eliminadas: ${eliminadas}</p>
+        `;
+
+        // Recargar listado
+        await cargarProductos();
+
+        mostrarToast("Importación completada", "success");
+
+    } catch (err) {
+        console.error(err);
+        mostrarToast("Error al importar Excel", "error");
+    } finally {
+        hideSpinner();
+        // Limpiar input para permitir reimportar
+        e.target.value = "";
+    }
+});
 
 // ============================
 // LECTOR USB - CARGA
