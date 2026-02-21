@@ -231,7 +231,7 @@
         }
     });
 */
-loginBtn.addEventListener('click', async () => {
+async function loginUsuario() {
     const valor = passwordInput.value.trim();
     showSpinner();
     try {
@@ -247,12 +247,24 @@ loginBtn.addEventListener('click', async () => {
         } else {
             loginError.style.display = 'block';
             passwordInput.value = '';
+            passwordInput.focus();
         }
     } catch(err){
         console.error(err);
         mostrarToast("Error de conexión", "error");
     } finally {
         hideSpinner();
+    }
+}
+
+// Click del botón
+loginBtn.addEventListener('click', loginUsuario);
+
+// Enter en input
+passwordInput.addEventListener('keyup', (e) => {
+    if(e.key === 'Enter') {
+        e.preventDefault();  // ⬅️ importante
+        loginUsuario();
     }
 });
 </script>
