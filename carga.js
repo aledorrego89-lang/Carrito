@@ -405,6 +405,7 @@ document.getElementById("btnListarProductos").addEventListener("click", async fu
     } else {
         contenedor.style.display = "none";
         this.textContent = "Listar productos";
+        hideSpinner();
     }
 
 });
