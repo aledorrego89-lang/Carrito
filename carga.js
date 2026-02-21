@@ -63,6 +63,65 @@ function mostrarToast(mensaje, tipo = "info") {
     }).showToast();
 }
 
+///////////////////
+// EXCEL
+//////////////////
+
+document.getElementById("inputImportExcel").addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    showSpinner();
+
+    const reader = new FileReader();
+
+    reader.onload = (evt) => {
+        try {
+            const data = new Uint8Array(evt.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+            const importedProductos = XLSX.utils.sheet_to_json(worksheet);
+
+            if (!importedProductos.length) {
+                mostrarToast("El Excel está vacío", "info");
+                hideSpinner();
+                return;
+            }
+
+            // =============================
+            // SINCRONIZAR CON LA LISTA EXISTENTE
+            // =============================
+            // Para cada producto importado:
+            importedProductos.forEach(pExcel => {
+                const index = productos.findIndex(p => p.codigo === pExcel.codigo);
+                if (index >= 0) {
+                    // actualizar producto existente
+                    productos[index] = pExcel;
+                } else {
+                    // agregar nuevo producto
+                    productos.push(pExcel);
+                }
+            });
+
+            // Eliminar productos que no están en el Excel (opcional)
+            // productos = productos.filter(p => importedProductos.some(ip => ip.codigo === p.codigo));
+
+            mostrarProductos(productos);
+
+            mostrarToast(`Importados ${importedProductos.length} productos ✅`, "success");
+
+        } catch (err) {
+            console.error("Error importando Excel:", err);
+            mostrarToast("Error al importar Excel", "error");
+        } finally {
+            hideSpinner();
+        }
+    };
+
+    reader.readAsArrayBuffer(file);
+});
+
 
 
 // ============================
@@ -690,60 +749,7 @@ document.getElementById("btnImportExcel").addEventListener("click", () => {
     document.getElementById("inputImportExcel").click();
 });
 
-document.getElementById("inputImportExcel").addEventListener("change", (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
 
-    showSpinner();
-
-    const reader = new FileReader();
-
-    reader.onload = (evt) => {
-        try {
-            const data = new Uint8Array(evt.target.result);
-            const workbook = XLSX.read(data, { type: 'array' });
-            const sheetName = workbook.SheetNames[0];
-            const worksheet = workbook.Sheets[sheetName];
-            const importedProductos = XLSX.utils.sheet_to_json(worksheet);
-
-            if (!importedProductos.length) {
-                mostrarToast("El Excel está vacío", "info");
-                hideSpinner();
-                return;
-            }
-
-            // =============================
-            // SINCRONIZAR CON LA LISTA EXISTENTE
-            // =============================
-            // Para cada producto importado:
-            importedProductos.forEach(pExcel => {
-                const index = productos.findIndex(p => p.codigo === pExcel.codigo);
-                if (index >= 0) {
-                    // actualizar producto existente
-                    productos[index] = pExcel;
-                } else {
-                    // agregar nuevo producto
-                    productos.push(pExcel);
-                }
-            });
-
-            // Eliminar productos que no están en el Excel (opcional)
-            // productos = productos.filter(p => importedProductos.some(ip => ip.codigo === p.codigo));
-
-            mostrarProductos(productos);
-
-            mostrarToast(`Importados ${importedProductos.length} productos ✅`, "success");
-
-        } catch (err) {
-            console.error("Error importando Excel:", err);
-            mostrarToast("Error al importar Excel", "error");
-        } finally {
-            hideSpinner();
-        }
-    };
-
-    reader.readAsArrayBuffer(file);
-});
 
 // ============================
 // LECTOR USB - CARGA
