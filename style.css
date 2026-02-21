@@ -104,12 +104,12 @@ ul {
   }
 
   /* Agrandar los botones + y - */
-  #decrease, #increase {
+  /* #decrease, #increase {
     width: 60px;
     height: 60px;
     font-size: 1.8rem;
     padding: 0;
-  }
+  } */
 
   /* Input de cantidad más grande */
   #modal-qty {
@@ -119,22 +119,22 @@ ul {
 
 
   /* Alinear input con los botones */
-.quantity-input {
+/* .quantity-input {
   width: 70px;
   height: 50px;
   font-size: 1.5rem;
   display: flex;
   align-items: center;
   padding: 0;
-}
+} */
 
 /* Ajustar altura de los botones para que coincida */
-#decrease, #increase {
+/* #decrease, #increase {
   width: 50px;
   height: 50px;
   font-size: 1.5rem;
   padding: 0;
-}
+} */
 
 /* Opcional: aumentar espacio entre título y precio */
 .modal-title {
@@ -167,3 +167,45 @@ label[for="modal-qty"] {
     animation: flashRow 0.5s ease-out;
 }
 
+/* Botones + y - */
+#decrease, #increase {
+  width: 50px;
+  height: 50px;
+  font-size: 1.5rem;
+  border-radius: 50%;
+  border: 2px solid #0d6efd;
+  background-color: #fff;
+  color: #0d6efd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: all 0.2s ease;
+  box-shadow: none !important;
+}
+
+/* Hover */
+#decrease:hover, #increase:hover {
+  background-color: #0d6efd;
+  color: #fff;
+}
+
+/* Quitar azul de Bootstrap */
+#decrease:focus,
+#increase:focus,
+#decrease:active,
+#increase:active {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Input cantidad */
+#modal-qty {
+  width: 70px;
+  height: 50px;
+  font-size: 1.5rem;
+  text-align: center;
+  border: 2px solid #0d6efd;
+  border-radius: 10px;
+  padding: 0;
+}
