@@ -1,7 +1,7 @@
 let codigoActual = null;
 let html5QrCode;
 const apiUrl = "/api/guardar_producto.php";
-let timeoutBusqueda = null;
+// let timeoutBusqueda = null;
 let linternaEncendida = false;
 let toastActivo = false;
 
@@ -356,7 +356,7 @@ async function buscarProductosServidor(nombre) {
     showSpinner();
 
     try {
-        const res = await fetch(`/api/buscar_productos.php?nombre=${encodeURIComponent(nombre)}&limit=50`);
+        const res = await fetch(`/api/listar_productos.php?nombre=${encodeURIComponent(nombre)}&limit=50`);
         if (!res.ok) throw new Error("Error servidor");
 
         const data = await res.json();
@@ -474,26 +474,26 @@ document.getElementById("filtroNombre").addEventListener("keyup", function() {
     // ============================
     // Filtrar productos
     // ============================
-function filtrarProductos() {
-    const nombre = document.getElementById("filtroNombre").value.toLowerCase();
-    const codigo = document.getElementById("filtroCodigo").value.toLowerCase();
-    const precioFiltro = document.getElementById("filtroPrecio").value; // string
+// function filtrarProductos() {
+//     const nombre = document.getElementById("filtroNombre").value.toLowerCase();
+//     const codigo = document.getElementById("filtroCodigo").value.toLowerCase();
+//     const precioFiltro = document.getElementById("filtroPrecio").value; // string
 
-    const filtrados = productos.filter(p => {
-        const matchNombre = p.nombre.toLowerCase().includes(nombre);
-        const matchCodigo = p.codigo.toLowerCase().includes(codigo);
+//     const filtrados = productos.filter(p => {
+//         const matchNombre = p.nombre.toLowerCase().includes(nombre);
+//         const matchCodigo = p.codigo.toLowerCase().includes(codigo);
 
-        let matchPrecio = true;
-        if (precioFiltro) {
-            // Convertimos el precio del producto a string y buscamos coincidencia parcial
-            matchPrecio = p.precio.toString().startsWith(precioFiltro);
-        }
+//         let matchPrecio = true;
+//         if (precioFiltro) {
+//             // Convertimos el precio del producto a string y buscamos coincidencia parcial
+//             matchPrecio = p.precio.toString().startsWith(precioFiltro);
+//         }
 
-        return matchNombre && matchCodigo && matchPrecio;
-    });
+//         return matchNombre && matchCodigo && matchPrecio;
+//     });
 
-    mostrarProductos(filtrados);
-}
+//     mostrarProductos(filtrados);
+// }
 
 // ============================
 // FOCUS INPUT CÓDIGO CON F3
@@ -517,7 +517,7 @@ document.addEventListener("keydown", function(e) {
     // ============================
     // Eventos de filtros
     // ============================
-    document.getElementById("filtroNombre").addEventListener("keyup", filtrarProductos);
+    // document.getElementById("filtroNombre").addEventListener("keyup", filtrarProductos);
     // document.getElementById("filtroCodigo").addEventListener("keyup", filtrarProductos);
     // document.getElementById("filtroPrecio").addEventListener("keyup", filtrarProductos);
 
