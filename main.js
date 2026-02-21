@@ -33,6 +33,22 @@ let stableCount = 0;
 document.addEventListener("DOMContentLoaded", async () => {
     await verificarLocal();
     renderCart();
+
+     const productModalEl = document.getElementById("productModal");
+
+  if (productModalEl) {
+    productModalEl.addEventListener("hidden.bs.modal", async function () {
+
+      if (html5QrCode) {
+        try {
+          await html5QrCode.resume();
+        } catch (e) {
+          console.log("No se pudo reanudar scanner");
+        }
+      }
+
+    });
+  }
 });
 
 
@@ -214,7 +230,8 @@ async function scanQR() {
 
     // Detener scanner anterior si existe
     if (html5QrCode) {
-        try { await html5QrCode.stop(); } catch(e){}
+        try { await html5QrCode.stop(); } 
+        catch(e){}
         html5QrCode.clear();
         html5QrCode = null;
     }
@@ -300,9 +317,8 @@ async (decodedText) => {
 
         } else {
 
-            await html5QrCode.stop();
-            html5QrCode.clear();
-            qrReaderDiv.style.display = "none";
+
+await html5QrCode.pause();
 
             modalTitle.textContent = currentProduct.nombre;
             modalPrice.textContent = `Precio: $${currentProduct.precio}`;
