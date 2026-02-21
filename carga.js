@@ -35,12 +35,8 @@ function hideSpinner() {
     }
 }
 
-async function loginUsuario() {
-    const valor = passwordInput.value.trim();
-    showSpinner(); // mostrar spinner
-    setTimeout(() => console.log("Spinner debería ser visible ahora"), 0);
-    console.log("Spinner debería verse ahora");
-
+showSpinner();
+setTimeout(async () => {
     try {
         const res = await fetch("/api/login.php", {
             method: "POST",
@@ -62,7 +58,7 @@ async function loginUsuario() {
     } finally {
         hideSpinner();
     }
-}
+}, 200); // 50ms alcanza para que pinte el spinner
 
 
 // ============================
