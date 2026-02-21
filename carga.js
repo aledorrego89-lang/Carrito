@@ -575,12 +575,34 @@ document.getElementById("filtroCodigo").addEventListener("keyup", buscarFiltrado
     // ============================
     // Exportar a Excel
     // ============================
-    document.getElementById("btnExportExcel").addEventListener("click", () => {
+document.getElementById("btnExportExcel").addEventListener("click", async () => {
+    showSpinner();
+    try {
+        // Si querés traer la lista actual del servidor:
+        const res = await fetch("/api/listar_productos.php");
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const productos = await res.json();
+
+        if (!productos.length) {
+            mostrarToast("No hay productos para exportar", "info");
+            return;
+        }
+
+        // Crear hoja Excel
         const ws = XLSX.utils.json_to_sheet(productos);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Productos");
+
+        // Descargar archivo Excel
         XLSX.writeFile(wb, "productos.xlsx");
-    });
+
+    } catch (err) {
+        console.error("Error exportando Excel:", err);
+        mostrarToast("Error al exportar Excel", "error");
+    } finally {
+        hideSpinner(); // ⬅️ siempre ocultar spinner
+    }
+});
 
     // ============================
     // Cargar productos al inicio
@@ -632,37 +654,37 @@ document.getElementById("btnLinterna").addEventListener("click", async () => {
 
 //**************** EXEL *********************************
 
-btnExportExcel.addEventListener("click", async () => {
-     showSpinner();
-    try {
-        const res = await fetch("/api/listar_productos.php");
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const productos = await res.json();
+// btnExportExcel.addEventListener("click", async () => {
+//      showSpinner();
+//     try {
+//         const res = await fetch("/api/listar_productos.php");
+//         if (!res.ok) throw new Error(`HTTP ${res.status}`);
+//         const productos = await res.json();
 
-        if (!productos.length) {
-            mostrarToast("No hay productos para exportar", "info");
-            return;
-        }
+//         if (!productos.length) {
+//             mostrarToast("No hay productos para exportar", "info");
+//             return;
+//         }
 
-        // Convertimos JSON a hoja
-        const ws = XLSX.utils.json_to_sheet(productos);
+//         // Convertimos JSON a hoja
+//         const ws = XLSX.utils.json_to_sheet(productos);
 
-        // Generamos CSV directamente
-        const csv = XLSX.utils.sheet_to_csv(ws);
+//         // Generamos CSV directamente
+//         const csv = XLSX.utils.sheet_to_csv(ws);
 
-        // Creamos blob descargable
-        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+//         // Creamos blob descargable
+//         const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
 
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = "productos.csv";
-        link.click();
+//         const link = document.createElement("a");
+//         link.href = URL.createObjectURL(blob);
+//         link.download = "productos.csv";
+//         link.click();
 
-    } catch (err) {
-        console.error("Error exportando CSV:", err);
-        mostrarToast("Error al exportar CSV", "error");
-    }
-});
+//     } catch (err) {
+//         console.error("Error exportando CSV:", err);
+//         mostrarToast("Error al exportar CSV", "error");
+//     }
+// });
 
 
 
