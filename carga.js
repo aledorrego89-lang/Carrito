@@ -13,7 +13,15 @@ let productos = []; // Se llenará desde el servidor
     const loginContainer = document.getElementById('loginContainer');
     const mainContent = document.getElementById('mainContent');
 
+//SPINNER
 
+function showSpinner() {
+    document.getElementById("spinnerOverlay").style.display = "flex";
+}
+
+function hideSpinner() {
+    document.getElementById("spinnerOverlay").style.display = "none";
+}
 
     async function loginUsuario() {
     const valor = passwordInput.value.trim();
@@ -442,15 +450,7 @@ document.addEventListener("keydown", function(e) {
 
 
 
-//SPINNER
 
-function showSpinner() {
-    document.getElementById("spinnerOverlay").style.display = "flex";
-}
-
-function hideSpinner() {
-    document.getElementById("spinnerOverlay").style.display = "none";
-}
 
     // ============================
     // Eventos de filtros
