@@ -162,10 +162,23 @@ document.getElementById('clear-cart').addEventListener('click', () => {
 });
 
 // ============================
-// Botones del modal (solo una vez)
+// Botones del modal
 // ============================
-decreaseBtn.onclick = () => { modalQty.value = Math.max(1, parseInt(modalQty.value) - 1); };
-increaseBtn.onclick = () => { modalQty.value = Math.max(1, parseInt(modalQty.value) + 1); };
+
+
+
+decreaseBtn.addEventListener("click", function () {
+  modalQty.value = Math.max(1, parseInt(modalQty.value) - 1);
+  this.blur(); // quita el foco para que no quede azul
+});
+
+increaseBtn.addEventListener("click", function () {
+  modalQty.value = Math.max(1, parseInt(modalQty.value) + 1);
+  this.blur(); // quita el foco
+});
+
+
+
 
 acceptBtn.onclick = (e) => {
     e.preventDefault();

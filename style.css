@@ -22,6 +22,12 @@ button:not(#decrease):not(#increase) {
   cursor: pointer;
 }
 
+#increase:focus,
+#decrease:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
 /* Botones de cantidad */
 .qty-btn {
   width: 50px;
