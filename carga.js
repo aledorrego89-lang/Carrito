@@ -457,11 +457,6 @@ document.getElementById("btnListarProductos").addEventListener("click", async fu
     if (contenedor.style.display === "none") {
         contenedor.style.display = "block";
         this.textContent = "Ocultar productos";
-
-        showSpinner();
-        await cargarProductos(); // 🔥 Llama a la función que carga los productos
-        hideSpinner();
-
     } else {
         contenedor.style.display = "none";
         this.textContent = "Listar productos";
@@ -526,7 +521,48 @@ document.addEventListener("keydown", function(e) {
 });
 
 
+//filtrado
 
+function buscarFiltrado() {
+    clearTimeout(timeoutBusqueda);
+
+    const nombre = document.getElementById("filtroNombre").value.trim();
+    const precio = document.getElementById("filtroPrecio").value.trim();
+    const codigo = document.getElementById("filtroCodigo").value.trim();
+
+    // No buscar si todos los campos están vacíos
+    if (!nombre && !precio && !codigo) {
+        mostrarProductos([]); // limpia la tabla
+        return;
+    }
+
+    timeoutBusqueda = setTimeout(async () => {
+        showSpinner();
+        try {
+            const params = new URLSearchParams();
+            if (nombre) params.append("nombre", nombre);
+            if (precio) params.append("precio", precio);
+            if (codigo) params.append("codigo", codigo);
+            params.append("limit", 50);
+
+            const res = await fetch(`/api/listar_productos.php?${params.toString()}`);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+
+            mostrarProductos(data);
+        } catch (err) {
+            console.error("Error buscando productos:", err);
+            mostrarToast("Error al buscar productos", "error");
+        } finally {
+            hideSpinner();
+        }
+    }, 300); // delay para no saturar el servidor
+}
+
+// Eventos para los filtros
+document.getElementById("filtroNombre").addEventListener("keyup", buscarFiltrado);
+document.getElementById("filtroPrecio").addEventListener("keyup", buscarFiltrado);
+document.getElementById("filtroCodigo").addEventListener("keyup", buscarFiltrado);
 
 
     // ============================
