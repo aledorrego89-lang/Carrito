@@ -16,7 +16,30 @@ ul {
   padding-left: 0;
 }
 
+/* Hover botones */
+#productModal .btn-primary:hover {
+  background: linear-gradient(45deg, #0d6efd, #6610f2);
+  border-color: #6610f2;
+}
 
+#productModal .btn-outline-primary:hover {
+  background-color: #0d6efd;
+  color: #fff;
+  border-color: #0d6efd;
+}
+
+/* Input cantidad */
+.quantity-input {
+  font-weight: bold;
+  font-size: 1.25rem;
+  border: 2px solid #0d6efd;
+  transition: border-color 0.2s;
+}
+
+.quantity-input:focus {
+  border-color: #6610f2;
+  box-shadow: 0 0 5px rgba(102,16,242,0.5);
+}
 
 
 #scanner-container {
