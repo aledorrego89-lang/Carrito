@@ -33,6 +33,25 @@ let stableCount = 0;
 document.addEventListener("DOMContentLoaded", async () => {
     await verificarLocal();
     renderCart();
+
+
+    document.addEventListener("DOMContentLoaded", () => {
+
+    const modalElement = document.getElementById("productModal");
+
+    modalElement.addEventListener("hidden.bs.modal", async () => {
+
+        if (html5QrCode) {
+            try {
+                await html5QrCode.resume();
+            } catch (e) {
+                console.log("No se pudo reanudar scanner");
+            }
+        }
+
+    });
+
+});
 });
 
 
@@ -299,27 +318,32 @@ async (decodedText) => {
 
             renderCart(searchInput.value, 0);
 
-        } else {
+} else {
 
-            await html5QrCode.stop();
-            html5QrCode.clear();
-            qrReaderDiv.style.display = "none";
+    // 🔥 SOLO pausamos, NO stop, NO clear
+    await html5QrCode.pause();
 
-            modalTitle.textContent = currentProduct.nombre;
-            modalPrice.textContent = `Precio: $${currentProduct.precio}`;
-            modalQty.value = 1;
-            productModal.show();
-        }
+    modalTitle.textContent = currentProduct.nombre;
+    modalPrice.textContent = `Precio: $${currentProduct.precio}`;
+    modalQty.value = 1;
+    productModal.show();
+}
 
     } catch (err) {
         showError("Error al consultar servidor: " + err.message);
     } finally {
 
-        setTimeout(async () => {
+    setTimeout(async () => {
+
+        // 🔥 Solo reanudar automáticamente en modo SUPER
+        if (superMode && superMode.checked) {
             try { await html5QrCode.resume(); } catch(e){}
-            isProcessing = false;
-        }, 700); // delay anti rebote real
-    }
+        }
+
+        isProcessing = false;
+
+    }, 700);
+}
 }
 
     ).catch(err => {
