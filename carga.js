@@ -451,7 +451,19 @@ tr.addEventListener("click", () => {
 //     }
 
 // });
+document.getElementById("btnListarProductos").addEventListener("click", async function () {
 
+    const contenedor = document.getElementById("contenidoListado");
+
+    if (contenedor.style.display === "none") {
+        contenedor.style.display = "block";
+        this.textContent = "Ocultar productos";
+    } else {
+        contenedor.style.display = "none";
+        this.textContent = "Listar productos";
+    }
+
+});
 
 let timeoutBusqueda = null;
 
