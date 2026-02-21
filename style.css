@@ -125,3 +125,19 @@ label[for="modal-qty"] {
 .flash-effect {
     animation: flashRow 0.5s ease-out;
 }
+
+.form-switch .form-check-input {
+  width: 60px;
+  height: 32px;
+  cursor: pointer;
+}
+
+.form-switch .form-check-input:checked {
+  background-color: #221987; /* verde bootstrap */
+  border-color: #193687;
+}
+.form-check-label {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-left: 10px;
+}
