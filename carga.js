@@ -6,6 +6,42 @@ let linternaEncendida = false;
 let toastActivo = false;
 
 let productos = []; // Se llenará desde el servidor
+
+    const loginBtn = document.getElementById('loginBtn');
+    const passwordInput = document.getElementById('passwordInput');
+    const loginError = document.getElementById('loginError');
+    const loginContainer = document.getElementById('loginContainer');
+    const mainContent = document.getElementById('mainContent');
+
+
+
+    async function loginUsuario() {
+    const valor = passwordInput.value.trim();
+    showSpinner();
+    try {
+        const res = await fetch("/api/login.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ password: valor })
+        });
+
+        if(res.ok){
+            loginContainer.style.display = 'none';
+            mainContent.style.display = 'block';
+        } else {
+            loginError.style.display = 'block';
+            passwordInput.value = '';
+            passwordInput.focus();
+        }
+    } catch(err){
+        console.error(err);
+        mostrarToast("Error de conexión", "error");
+    } finally {
+        hideSpinner();
+    }
+}
+
+
 // ============================
 // TOAST
 // ============================
@@ -582,5 +618,16 @@ document.addEventListener("DOMContentLoaded", function () {
             guardarProducto();
         }
     });
+
+    // Click del botón
+loginBtn.addEventListener('click', loginUsuario);
+
+passwordInput.addEventListener('keyup', (e) => {
+    if(e.key === 'Enter') {
+        e.preventDefault();  // ⬅️ importante
+        loginUsuario();
+    }
+});
+
 
 });
