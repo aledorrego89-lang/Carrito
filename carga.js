@@ -23,9 +23,13 @@ function hideSpinner() {
     document.getElementById("spinnerOverlay").style.display = "none";
 }
 
-    async function loginUsuario() {
+async function loginUsuario() {
     const valor = passwordInput.value.trim();
     showSpinner();
+
+    // Forzar renderizado del spinner antes del fetch
+    await new Promise(resolve => setTimeout(resolve, 50));
+
     try {
         const res = await fetch("/api/login.php", {
             method: "POST",
@@ -33,7 +37,7 @@ function hideSpinner() {
             body: JSON.stringify({ password: valor })
         });
 
-        if(res.ok){
+        if (res.ok) {
             loginContainer.style.display = 'none';
             mainContent.style.display = 'block';
         } else {
@@ -41,7 +45,7 @@ function hideSpinner() {
             passwordInput.value = '';
             passwordInput.focus();
         }
-    } catch(err){
+    } catch (err) {
         console.error(err);
         mostrarToast("Error de conexión", "error");
     } finally {
@@ -151,7 +155,7 @@ async function buscarProductoServidor(codigo, focoEn = "nombre") {
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
         const data = await response.json();
-
+hideSpinner();
         if (data.existe) {
             nombreInput.value = data.producto.nombre;
             precioInput.value = data.producto.precio;
@@ -178,6 +182,7 @@ async function buscarProductoServidor(codigo, focoEn = "nombre") {
         }
 
     } catch (err) {
+        hideSpinner();
         console.error("Error buscando producto en servidor:", err);
         estado.innerText = "Error al consultar servidor";
         estado.style.color = "red";
