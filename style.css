@@ -5,22 +5,22 @@
     background-color: rgb(226, 226, 226) !important;
   }
 
-button {
+/* button {
   padding: 10px 15px;
   margin-bottom: 20px;
   cursor: pointer;
-}
+} */
 
 ul {
   list-style: none;
   padding-left: 0;
 }
 
-button:not(#decrease):not(#increase) {
+/* button:not(#decrease):not(#increase) {
   padding: 10px 15px;
   margin-bottom: 20px;
   cursor: pointer;
-}
+} */
 
 #increase:focus,
 #decrease:focus {
