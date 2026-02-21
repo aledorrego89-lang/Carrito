@@ -693,10 +693,6 @@ document.getElementById("btnLinterna").addEventListener("click", async () => {
 // ============================
 // IMPORTAR EXCEL
 // ============================
-document.getElementById("btnImportExcel").addEventListener("click", () => {
-    document.getElementById("inputExcel").click();
-});
-
 document.getElementById("inputExcel").addEventListener("change", async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -716,76 +712,66 @@ document.getElementById("inputExcel").addEventListener("change", async (e) => {
             return;
         }
 
-        let insertadas = 0;
-        let actualizadas = 0;
-        let eliminadas = 0;
-
-        // Mapear productos actuales por código para comparación rápida
+        // Map de productos actuales
         const productosMap = {};
-        productos.forEach(p => {
-            productosMap[p.codigo] = p;
-        });
+        productos.forEach(p => productosMap[p.codigo] = p);
 
-        // Recorrer Excel y comparar con productos existentes
-        for (const row of excelData) {
+        const insertados = [];
+        const actualizados = [];
+        const eliminados = [];
+
+        // Comparar Excel con productos existentes
+        excelData.forEach(row => {
             const codigo = row.codigo?.toString().trim();
-            if (!codigo) continue;
+            if (!codigo) return;
 
             const nombre = row.nombre?.toString().trim() || "";
             const precio = parseFloat(row.precio) || 0;
 
             if (productosMap[codigo]) {
-                // Existe → verificar si hay cambios
+                // Existe → verificar cambios
                 if (productosMap[codigo].nombre !== nombre || parseFloat(productosMap[codigo].precio) !== precio) {
-                    await fetch("/api/guardar_producto.php", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ codigo, nombre, precio })
-                    });
-                    actualizadas++;
+                    actualizados.push({ codigo, nombre, precio });
                 }
                 delete productosMap[codigo]; // lo marcamos como procesado
             } else {
-                // No existe → insertar
-                await fetch("/api/guardar_producto.php", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ codigo, nombre, precio })
-                });
-                insertadas++;
+                insertados.push({ codigo, nombre, precio });
             }
+        });
+
+        // Productos que quedaron en productosMap → eliminar
+        Object.keys(productosMap).forEach(codigo => {
+            eliminados.push({ codigo });
+        });
+
+        // Enviar todo en un solo request
+        const res = await fetch("/api/importar_productos.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ insertados, actualizados, eliminados })
+        });
+
+        const result = await res.json();
+
+        if (result.success) {
+            const resumenDiv = document.getElementById("resumenImport");
+            resumenDiv.innerHTML = `
+                <p>✅ Filas insertadas: ${insertados.length}</p>
+                <p>✏️ Filas actualizadas: ${actualizados.length}</p>
+                <p>🗑 Filas eliminadas: ${eliminados.length}</p>
+            `;
+            mostrarToast("Importación completada ✅", "success");
+            await cargarProductos(); // recargar tabla
+        } else {
+            mostrarToast("Error al importar: " + (result.error || "desconocido"), "error");
         }
-
-        // Lo que quedó en productosMap son productos que no están en Excel → eliminarlos
-        for (const codigoEl of Object.keys(productosMap)) {
-            await fetch("/api/eliminar_producto.php", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ codigo: codigoEl })
-            });
-            eliminadas++;
-        }
-
-        // Mostrar resumen
-        const resumenDiv = document.getElementById("resumenImport");
-        resumenDiv.innerHTML = `
-            <p>✅ Filas insertadas: ${insertadas}</p>
-            <p>✏️ Filas actualizadas: ${actualizadas}</p>
-            <p>🗑 Filas eliminadas: ${eliminadas}</p>
-        `;
-
-        // Recargar listado
-        await cargarProductos();
-
-        mostrarToast("Importación completada", "success");
 
     } catch (err) {
         console.error(err);
-        mostrarToast("Error al importar Excel", "error");
+        mostrarToast("Error al procesar Excel", "error");
     } finally {
         hideSpinner();
-        // Limpiar input para permitir reimportar
-        e.target.value = "";
+        e.target.value = ""; // limpiar input
     }
 });
 
