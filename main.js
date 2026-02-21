@@ -332,17 +332,7 @@ async (decodedText) => {
     } catch (err) {
         showError("Error al consultar servidor: " + err.message);
     } finally {
-
-    setTimeout(async () => {
-
-        // 🔥 Solo reanudar automáticamente en modo SUPER
-        if (superMode && superMode.checked) {
-            try { await html5QrCode.resume(); } catch(e){}
-        }
-
-        isProcessing = false;
-
-    }, 700);
+    isProcessing = false;
 }
 }
 
