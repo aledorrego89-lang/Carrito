@@ -16,11 +16,23 @@ let productos = []; // Se llenará desde el servidor
 //SPINNER
 
 function showSpinner() {
-    document.getElementById("spinnerOverlay").style.display = "flex";
+    const spinner = document.getElementById("spinnerOverlay");
+    console.log("showSpinner llamado, spinner:", spinner);
+    if (spinner) {
+        spinner.style.display = "flex";
+        console.log("Spinner estilo actual:", spinner.style.display);
+    } else {
+        console.warn("No se encontró el spinnerOverlay en el DOM");
+    }
 }
 
 function hideSpinner() {
-    document.getElementById("spinnerOverlay").style.display = "none";
+    const spinner = document.getElementById("spinnerOverlay");
+    console.log("hideSpinner llamado, spinner:", spinner);
+    if (spinner) {
+        spinner.style.display = "none";
+        console.log("Spinner oculto, estilo actual:", spinner.style.display);
+    }
 }
 
 function showSpinnerAndThen(callback) {
@@ -41,6 +53,7 @@ async function loginUsuario() {
     await new Promise(r => requestAnimationFrame(() => r()));
 
     try {
+        console.log("Antes de fetch, spinner debería mostrarse");
         const res = await fetch("/api/login.php", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
