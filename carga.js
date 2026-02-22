@@ -673,7 +673,19 @@ document.getElementById("btnImportExcel").addEventListener("click", async () => 
             body: JSON.stringify({ filas })
         });
 
-        const result = await res.json();
+const text = await res.text();
+
+if (!text) {
+    throw new Error("El servidor devolvió respuesta vacía");
+}
+
+let result;
+try {
+    result = JSON.parse(text);
+} catch (e) {
+    console.error("Respuesta no es JSON:", text);
+    throw new Error("Respuesta inválida del servidor");
+}
 
         // Mostrar resumen al finalizar
         if (result.success) {
