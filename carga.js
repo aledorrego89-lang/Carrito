@@ -529,10 +529,12 @@ const res = await fetch("/api/exportar_productos.php");
         }
 
         // Crear hoja Excel
-        const ws = XLSX.utils.json_to_sheet(productos);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Productos");
+const ws = XLSX.utils.json_to_sheet(productos, {
+    header: ["codigo", "nombre", "precio"]
+});        const wb = XLSX.utils.book_new();
+const ws = XLSX.utils.json_to_sheet(productos);
 
+XLSX.utils.sheet_add_aoa(ws, [["Código", "Nombre", "Precio"]], { origin: "A1" });
         // Descargar archivo Excel
         XLSX.writeFile(wb, "productos.xlsx");
 
