@@ -573,7 +573,7 @@ let trackLinterna = null;
 
 document.getElementById("btnLinterna").addEventListener("click", async () => {
     if (!trackLinterna) {
-         showSpinner();
+        
         try {
             const stream = await navigator.mediaDevices.getUserMedia({
                 video: { facingMode: "environment" }
