@@ -128,7 +128,7 @@ function renderCart(filter = "", highlightIndex = null) {
     localStorage.setItem('cart', JSON.stringify(cart));
     totalSpan.textContent = total;
     totalItemsSpan.textContent = totalItems;
-    localStorage.setItem('cart', JSON.stringify(cart));
+    
 
     if (cart.length > 0) {
         cartSection.classList.remove("d-none");

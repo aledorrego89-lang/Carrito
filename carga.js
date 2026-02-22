@@ -519,7 +519,7 @@ document.getElementById("btnExportExcel").addEventListener("click", async () => 
     showSpinner();
     try {
         // Si querés traer la lista actual del servidor:
-        const res = await fetch("/api/listar_productos.php");
+const res = await fetch("/api/exportar_productos.php");
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const productos = await res.json();
 
