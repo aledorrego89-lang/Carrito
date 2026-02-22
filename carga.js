@@ -613,14 +613,31 @@ document.getElementById("btnLinterna").addEventListener("click", async () => {
 // ============================
 // IMPORTAR EXCEL/CSV
 // ============================
-document.getElementById("inputExcel").addEventListener("change", async (event) => {
+let archivoExcel = null; // variable global para guardar el archivo seleccionado
+
+// Evento al seleccionar archivo
+document.getElementById("inputExcel").addEventListener("change", (event) => {
     const file = event.target.files[0];
-    if (!file) return;
+    if (!file) {
+        archivoExcel = null;
+        mostrarToast("No se seleccionó archivo", "info");
+        return;
+    }
+    archivoExcel = file;
+    mostrarToast(`Archivo seleccionado: ${file.name}`, "success");
+});
+
+// Evento al presionar el botón de importar
+document.getElementById("btnImportExcel").addEventListener("click", async () => {
+    if (!archivoExcel) {
+        mostrarToast("Primero seleccioná un archivo", "info");
+        return;
+    }
 
     showSpinner();
 
     try {
-        const data = await file.arrayBuffer();
+        const data = await archivoExcel.arrayBuffer();
         const workbook = XLSX.read(data);
         const sheetName = workbook.SheetNames[0];
         const sheet = workbook.Sheets[sheetName];
@@ -632,11 +649,11 @@ document.getElementById("inputExcel").addEventListener("change", async (event) =
             return;
         }
 
-        // Llamar a nuestro endpoint de importación completa
+        // Llamada al backend
         const res = await fetch("/api/importar_productos.php", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ filas }) // enviamos todo el Excel de golpe
+            body: JSON.stringify({ filas })
         });
 
         const result = await res.json();
@@ -653,10 +670,10 @@ document.getElementById("inputExcel").addEventListener("change", async (event) =
         mostrarToast("Error al leer el archivo", "error");
     } finally {
         hideSpinner();
-        event.target.value = ""; // limpiar input
+        archivoExcel = null;
+        document.getElementById("inputExcel").value = ""; // limpiar input
     }
 });
-
 
 
 // Evento real de cambio del input file
