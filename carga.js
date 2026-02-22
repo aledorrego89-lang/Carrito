@@ -435,22 +435,6 @@ tr.addEventListener("click", () => {
 
 
 
-// document.getElementById("btnListarProductos").addEventListener("click", async function () {
-
-//     const contenedor = document.getElementById("contenidoListado");
-//  showSpinner();
-//     if (contenedor.style.display === "none") {
-//         contenedor.style.display = "block";
-//         await cargarProductos();
-//          hideSpinner();
-//         this.textContent = "Ocultar productos";
-//     } else {
-//         contenedor.style.display = "none";
-//         this.textContent = "Listar productos";
-//         hideSpinner();
-//     }
-
-// });
 document.getElementById("btnListarProductos").addEventListener("click", async function () {
     const contenedor = document.getElementById("contenidoListado");
 
@@ -481,29 +465,7 @@ document.getElementById("filtroNombre").addEventListener("keyup", function() {
         buscarProductosServidor(texto);
     }, 300);
 });
-    // ============================
-    // Filtrar productos
-    // ============================
-// function filtrarProductos() {
-//     const nombre = document.getElementById("filtroNombre").value.toLowerCase();
-//     const codigo = document.getElementById("filtroCodigo").value.toLowerCase();
-//     const precioFiltro = document.getElementById("filtroPrecio").value; // string
 
-//     const filtrados = productos.filter(p => {
-//         const matchNombre = p.nombre.toLowerCase().includes(nombre);
-//         const matchCodigo = p.codigo.toLowerCase().includes(codigo);
-
-//         let matchPrecio = true;
-//         if (precioFiltro) {
-//             // Convertimos el precio del producto a string y buscamos coincidencia parcial
-//             matchPrecio = p.precio.toString().startsWith(precioFiltro);
-//         }
-
-//         return matchNombre && matchCodigo && matchPrecio;
-//     });
-
-//     mostrarProductos(filtrados);
-// }
 
 // ============================
 // FOCUS INPUT CÓDIGO CON F3
@@ -565,12 +527,6 @@ document.getElementById("filtroPrecio").addEventListener("keyup", buscarFiltrado
 document.getElementById("filtroCodigo").addEventListener("keyup", buscarFiltrado);
 
 
-    // ============================
-    // Eventos de filtros
-    // ============================
-    // document.getElementById("filtroNombre").addEventListener("keyup", filtrarProductos);
-    // document.getElementById("filtroCodigo").addEventListener("keyup", filtrarProductos);
-    // document.getElementById("filtroPrecio").addEventListener("keyup", filtrarProductos);
 
     // ============================
     // Exportar a Excel
@@ -604,10 +560,7 @@ document.getElementById("btnExportExcel").addEventListener("click", async () => 
     }
 });
 
-    // ============================
-    // Cargar productos al inicio
-    // ============================
-    //cargarProductos();
+
 });
 
 
@@ -652,43 +605,7 @@ document.getElementById("btnLinterna").addEventListener("click", async () => {
 });
 
 
-//**************** EXEL *********************************
 
-// btnExportExcel.addEventListener("click", async () => {
-//      showSpinner();
-//     try {
-//         const res = await fetch("/api/listar_productos.php");
-//         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-//         const productos = await res.json();
-
-//         if (!productos.length) {
-//             mostrarToast("No hay productos para exportar", "info");
-//             return;
-//         }
-
-//         // Convertimos JSON a hoja
-//         const ws = XLSX.utils.json_to_sheet(productos);
-
-//         // Generamos CSV directamente
-//         const csv = XLSX.utils.sheet_to_csv(ws);
-
-//         // Creamos blob descargable
-//         const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-
-//         const link = document.createElement("a");
-//         link.href = URL.createObjectURL(blob);
-//         link.download = "productos.csv";
-//         link.click();
-
-//     } catch (err) {
-//         console.error("Error exportando CSV:", err);
-//         mostrarToast("Error al exportar CSV", "error");
-//     }
-// });
-
-// document.getElementById("btnImportExcel").addEventListener("click", () => {
-//     document.getElementById("inputImportExcel").click();
-// });
 
 // ============================
 // IMPORTAR EXCEL
@@ -696,10 +613,51 @@ document.getElementById("btnLinterna").addEventListener("click", async () => {
 // ============================
 // IMPORTAR EXCEL/CSV
 // ============================
-// Cuando se haga click en el botón, dispara click en el input file
-document.getElementById("btnImportExcel").addEventListener("click", () => {
-    document.getElementById("inputExcel").click();
+document.getElementById("inputExcel").addEventListener("change", async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    showSpinner();
+
+    try {
+        const data = await file.arrayBuffer();
+        const workbook = XLSX.read(data);
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        const filas = XLSX.utils.sheet_to_json(sheet);
+
+        if (!filas.length) {
+            mostrarToast("El archivo está vacío", "info");
+            hideSpinner();
+            return;
+        }
+
+        // Llamar a nuestro endpoint de importación completa
+        const res = await fetch("/api/importar_productos.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ filas }) // enviamos todo el Excel de golpe
+        });
+
+        const result = await res.json();
+
+        if (result.success) {
+            mostrarToast(`✅ Insertados: ${result.insertados} | Actualizados: ${result.actualizados}`, "success");
+            if (result.errores.length) console.warn("Errores importación:", result.errores);
+        } else {
+            mostrarToast("Error en importación: " + (result.error || "Desconocido"), "error");
+        }
+
+    } catch (err) {
+        console.error("Error leyendo Excel:", err);
+        mostrarToast("Error al leer el archivo", "error");
+    } finally {
+        hideSpinner();
+        event.target.value = ""; // limpiar input
+    }
 });
+
+
 
 // Evento real de cambio del input file
 document.getElementById("inputExcel").addEventListener("change", async (event) => {
