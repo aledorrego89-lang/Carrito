@@ -73,7 +73,7 @@ function mostrarToast(mensaje, tipo = "info") {
 async function loginUsuario() {
     const valor = passwordInput.value.trim();
     mostrarToast("Iniciando sesion", "success"); // mostrar spinner
-    setTimeout(() => console.log("Spinner debería ser visible ahora"), 0);
+  //  setTimeout(() => console.log("Spinner debería ser visible ahora"), 0);
 
 
     try {
