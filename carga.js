@@ -427,7 +427,7 @@ document.getElementById("btnListarProductos").addEventListener("click", async fu
         this.textContent = "Ocultar productos";
     } else {
         contenedor.style.display = "none";
-        this.textContent = "Listar productos";
+        this.textContent = "Buscar productos";
     }
 });
 
