@@ -39,7 +39,7 @@ function hideSpinner() {
 // TOAST
 // ============================
 function mostrarToast(mensaje, tipo = "info") {
-    if (toastActivo) return; // ya hay un toast mostrando
+    if (toastActivo) return;
     toastActivo = true;
 
     let color = "#f3f321"; // amarillo por defecto
@@ -52,11 +52,16 @@ function mostrarToast(mensaje, tipo = "info") {
         close: true,
         gravity: "top",
         position: "center",
-        backgroundColor: color,
         stopOnFocus: true,
-        style: { color: "#000", fontWeight: "bold" },
-        onClick: function () { },  // opcional
-        callback: function () { toastActivo = false; } // se libera al cerrar
+        style: {
+            background: color,   // ✅ NUEVA FORMA
+            color: "#000",
+            fontWeight: "bold"
+        },
+        onClick: function () {},
+        callback: function () {
+            toastActivo = false;
+        }
     }).showToast();
 }
 
