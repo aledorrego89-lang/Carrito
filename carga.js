@@ -615,7 +615,9 @@ document.getElementById("btnLinterna").addEventListener("click", async () => {
 // ============================
 let archivoExcel = null; // variable global para guardar el archivo seleccionado
 
-// Evento al seleccionar archivo
+// ============================
+// Selección del archivo
+// ============================
 document.getElementById("inputExcel").addEventListener("change", (event) => {
     const file = event.target.files[0];
     if (!file) {
@@ -625,18 +627,22 @@ document.getElementById("inputExcel").addEventListener("change", (event) => {
     }
     archivoExcel = file;
     mostrarToast(`Archivo seleccionado: ${file.name}`, "success");
+    // ⬅️ NO showSpinner aquí
 });
 
-// Evento al presionar el botón de importar
+// ============================
+// Botón de importar
+// ============================
 document.getElementById("btnImportExcel").addEventListener("click", async () => {
     if (!archivoExcel) {
         mostrarToast("Primero seleccioná un archivo", "info");
         return;
     }
 
-   // showSpinner();
+    showSpinner(); // ⬅️ Solo aquí mostramos el spinner
 
     try {
+        // Leer archivo Excel
         const data = await archivoExcel.arrayBuffer();
         const workbook = XLSX.read(data);
         const sheetName = workbook.SheetNames[0];
@@ -645,11 +651,10 @@ document.getElementById("btnImportExcel").addEventListener("click", async () => 
 
         if (!filas.length) {
             mostrarToast("El archivo está vacío", "info");
-            hideSpinner();
             return;
         }
 
-        // Llamada al backend
+        // Enviar todo al backend
         const res = await fetch("/api/importar_productos.php", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -658,8 +663,12 @@ document.getElementById("btnImportExcel").addEventListener("click", async () => 
 
         const result = await res.json();
 
+        // Mostrar resumen al finalizar
         if (result.success) {
-            mostrarToast(`✅ Insertados: ${result.insertados} | Actualizados: ${result.actualizados}`, "success");
+            mostrarToast(
+                `✅ Insertados: ${result.insertados} | Actualizados: ${result.actualizados}`,
+                "success"
+            );
             if (result.errores.length) console.warn("Errores importación:", result.errores);
         } else {
             mostrarToast("Error en importación: " + (result.error || "Desconocido"), "error");
@@ -672,72 +681,6 @@ document.getElementById("btnImportExcel").addEventListener("click", async () => 
         hideSpinner();
         archivoExcel = null;
         document.getElementById("inputExcel").value = ""; // limpiar input
-    }
-});
-
-
-// Evento real de cambio del input file
-document.getElementById("inputExcel").addEventListener("change", async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    showSpinner();
-
-    try {
-        const data = await file.arrayBuffer();
-        const workbook = XLSX.read(data);
-        const sheetName = workbook.SheetNames[0];
-        const sheet = workbook.Sheets[sheetName];
-        const filas = XLSX.utils.sheet_to_json(sheet);
-
-        if (!filas.length) {
-            mostrarToast("El archivo está vacío", "info");
-            hideSpinner();
-            return;
-        }
-
-        let insertados = 0;
-        let errores = [];
-
-        for (let i = 0; i < filas.length; i++) {
-            const p = filas[i];
-            const codigo = (p.codigo || p.Codigo || "").toString().trim();
-            const nombre = (p.nombre || p.Nombre || "").toString().trim();
-            const precio = parseFloat(p.precio || p.Precio || 0);
-
-            if (!codigo || !nombre || isNaN(precio)) {
-                errores.push(`Fila ${i + 1} inválida`);
-                continue;
-            }
-
-            try {
-                const res = await fetch("/api/guardar_producto.php", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ codigo, nombre, precio })
-                });
-
-                const data = await res.json();
-                if (data.success) insertados++;
-                else errores.push(`Fila ${i + 1}: ${data.error || "Error desconocido"}`);
-            } catch (err) {
-                console.error(err);
-                errores.push(`Fila ${i + 1}: error de conexión`);
-            }
-        }
-
-        mostrarToast(`✅ Insertados: ${insertados}`, "success");
-        if (errores.length) {
-            console.warn("Errores importación:", errores);
-            mostrarToast(`Algunas filas no se importaron`, "error");
-        }
-
-    } catch (err) {
-        console.error("Error leyendo Excel:", err);
-        mostrarToast("Error al leer el archivo", "error");
-    } finally {
-        hideSpinner();
-        event.target.value = ""; // limpiar input
     }
 });
 // ============================
