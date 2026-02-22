@@ -13,6 +13,17 @@ const loginError = document.getElementById('loginError');
 const loginContainer = document.getElementById('loginContainer');
 const mainContent = document.getElementById('mainContent');
 
+
+//Formulario guardar eliminar
+function mostrarFormulario() {
+    document.getElementById("formProducto").style.display = "block";
+}
+
+function ocultarFormulario() {
+    document.getElementById("formProducto").style.display = "none";
+}
+
+
 //SPINNER
 
 function showSpinner() {
@@ -104,12 +115,14 @@ async function loginUsuario() {
 // PROCESAR CÓDIGO
 // ============================
 function procesarCodigo(codigoDetectado) {
+
     const codigo = codigoDetectado.trim();
 
     if (!codigo) return;
     if (codigo === codigoActual) return;
 
     codigoActual = codigo;
+        mostrarFormulario();
     playBeep();
 
     document.getElementById("codigo").innerText = codigoActual;
@@ -379,6 +392,8 @@ function limpiarFormulario() {
     document.getElementById("codigo").textContent = "";
     document.getElementById("estado").textContent = "";
     document.getElementById("btnEliminar").style.display = "none";
+
+    ocultarFormulario();
 }
 
 
