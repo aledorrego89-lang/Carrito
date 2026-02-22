@@ -17,10 +17,9 @@ let productos = []; // Se llenará desde el servidor
 
 function showSpinner() {
     const spinner = document.getElementById("spinnerOverlay");
-    console.log("showSpinner llamado, spinner:", spinner);
+
     if (spinner) {
         spinner.style.display = "flex";
-        console.log("Spinner estilo actual:", spinner.style.display);
     } else {
         console.warn("No se encontró el spinnerOverlay en el DOM");
     }
@@ -28,10 +27,8 @@ function showSpinner() {
 
 function hideSpinner() {
     const spinner = document.getElementById("spinnerOverlay");
-    console.log("hideSpinner llamado, spinner:", spinner);
     if (spinner) {
         spinner.style.display = "none";
-        console.log("Spinner oculto, estilo actual:", spinner.style.display);
     }
 }
 
@@ -72,7 +69,7 @@ async function loginUsuario() {
     const valor = passwordInput.value.trim();
     mostrarToast("Iniciando sesion", "success"); // mostrar spinner
     setTimeout(() => console.log("Spinner debería ser visible ahora"), 0);
-    console.log("Spinner debería verse ahora");
+   
 
     try {
         const res = await fetch("/api/login.php", {
@@ -387,20 +384,7 @@ function limpiarFormulario() {
 
 document.addEventListener("DOMContentLoaded", function () {
 
-    // ============================
-    // Cargar productos del servidor
-    // ============================
-    async function cargarProductos() {
-         showSpinner();
-        try {
-            const res = await fetch("/api/listar_productos.php");
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            productos = await res.json();
-            mostrarProductos(productos);
-        } catch (err) {
-            console.error("Error cargando productos:", err);
-        }
-    }
+
 
     // ============================
     // Mostrar productos en la tabla
