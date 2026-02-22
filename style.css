@@ -223,7 +223,7 @@ label[for="modal-qty"] {
 }
 
 
-#spinnerOverlay {
+/* #spinnerOverlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -232,6 +232,6 @@ label[for="modal-qty"] {
     background: rgba(0,0,0,0.5);
     z-index: 100000;
     display: none; /* oculto por defecto */
-    justify-content: center;
-    align-items: center;
-}
+    /* justify-content: center;
+    align-items: center; */
+/* } */ 
