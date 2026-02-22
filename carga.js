@@ -7,11 +7,11 @@ let toastActivo = false;
 
 let productos = []; // Se llenará desde el servidor
 
-    const loginBtn = document.getElementById('loginBtn');
-    const passwordInput = document.getElementById('passwordInput');
-    const loginError = document.getElementById('loginError');
-    const loginContainer = document.getElementById('loginContainer');
-    const mainContent = document.getElementById('mainContent');
+const loginBtn = document.getElementById('loginBtn');
+const passwordInput = document.getElementById('passwordInput');
+const loginError = document.getElementById('loginError');
+const loginContainer = document.getElementById('loginContainer');
+const mainContent = document.getElementById('mainContent');
 
 //SPINNER
 
@@ -55,8 +55,8 @@ function mostrarToast(mensaje, tipo = "info") {
         backgroundColor: color,
         stopOnFocus: true,
         style: { color: "#000", fontWeight: "bold" },
-        onClick: function(){},  // opcional
-        callback: function(){ toastActivo = false; } // se libera al cerrar
+        onClick: function () { },  // opcional
+        callback: function () { toastActivo = false; } // se libera al cerrar
     }).showToast();
 }
 
@@ -69,7 +69,7 @@ async function loginUsuario() {
     const valor = passwordInput.value.trim();
     mostrarToast("Iniciando sesion", "success"); // mostrar spinner
     setTimeout(() => console.log("Spinner debería ser visible ahora"), 0);
-   
+
 
     try {
         const res = await fetch("/api/login.php", {
@@ -161,7 +161,7 @@ async function buscarProductoServidor(codigo, focoEn = "nombre") {
     const precioInput = document.getElementById("precio");
     const estado = document.getElementById("estado");
     const btnEliminar = document.getElementById("btnEliminar");
- showSpinner();
+    showSpinner();
     try {
         const response = await fetch(
             `/api/buscar_producto.php?codigo=${codigo}`
@@ -170,7 +170,7 @@ async function buscarProductoServidor(codigo, focoEn = "nombre") {
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
         const data = await response.json();
-hideSpinner();
+        hideSpinner();
         if (data.existe) {
             nombreInput.value = data.producto.nombre;
             precioInput.value = data.producto.precio;
@@ -187,7 +187,7 @@ hideSpinner();
             btnEliminar.style.display = "none";
         }
 
-                // Hacer foco según parámetro
+        // Hacer foco según parámetro
         if (focoEn === "nombre") {
             nombreInput.focus();
             nombreInput.select();
@@ -212,7 +212,7 @@ let guardando = false; // evita doble envío
 async function guardarProducto() {
     if (guardando) return; // ya estamos guardando
     guardando = true;
- showSpinner();
+    showSpinner();
     try {
         // Validar código
         if (!codigoActual) {
@@ -267,10 +267,10 @@ async function guardarProducto() {
 
     } catch (err) {
         console.error(err);
-       mostrarToast("Error al guardar en servidor", "error");
+        mostrarToast("Error al guardar en servidor", "error");
     } finally {
         guardando = false; // liberamos para el próximo envío
-         hideSpinner();
+        hideSpinner();
     }
 }
 
@@ -303,22 +303,22 @@ function eliminarProducto() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ codigo: codigoActual })
         })
-        .then(res => res.json())
-        .then(data => {
-            // Validamos que la API indique éxito
-            if (data.success) {
-                mostrarToast("Producto eliminado ✅", "success");
-                limpiarFormulario();
-                codigoActual = null;
-            } else {
-                mostrarToast("Error al eliminar: " + (data.error || "Desconocido"), "error");
-            }
-        })
-        .catch(err => {
-             hideSpinner();
-            console.error(err);
-            mostrarToast("Error al eliminar en servidor", "error");
-        });
+            .then(res => res.json())
+            .then(data => {
+                // Validamos que la API indique éxito
+                if (data.success) {
+                    mostrarToast("Producto eliminado ✅", "success");
+                    limpiarFormulario();
+                    codigoActual = null;
+                } else {
+                    mostrarToast("Error al eliminar: " + (data.error || "Desconocido"), "error");
+                }
+            })
+            .catch(err => {
+                hideSpinner();
+                console.error(err);
+                mostrarToast("Error al eliminar en servidor", "error");
+            });
     });
 }
 
@@ -389,162 +389,163 @@ document.addEventListener("DOMContentLoaded", function () {
     // ============================
     // Mostrar productos en la tabla
     // ============================
-function mostrarProductos(lista) {
-    const tbody = document.querySelector("#tablaProductos tbody");
-    tbody.innerHTML = "";
+    function mostrarProductos(lista) {
+        const tbody = document.querySelector("#tablaProductos tbody");
+        tbody.innerHTML = "";
 
-    lista.forEach(p => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${p.nombre}</td><td>${p.precio}</td><td>${p.codigo}</td>`;
+        lista.forEach(p => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `<td>${p.nombre}</td><td>${p.precio}</td><td>${p.codigo}</td>`;
 
-        // Al hacer click en la fila, se carga el producto en el formulario
-        tr.style.cursor = "pointer";
-tr.addEventListener("click", () => {
-    codigoActual = p.codigo;                          // Seteamos el código actual
-    document.getElementById("inputCodigoManual").value = p.codigo; // <-- cargamos input manual
-    buscarProductoServidor(p.codigo, "precio");       // Carga nombre, precio y da foco a precio
+            // Al hacer click en la fila, se carga el producto en el formulario
+            tr.style.cursor = "pointer";
+            tr.addEventListener("click", () => {
+                codigoActual = p.codigo;                          // Seteamos el código actual
+                document.getElementById("inputCodigoManual").value = p.codigo; // <-- cargamos input manual
+                buscarProductoServidor(p.codigo, "precio");       // Carga nombre, precio y da foco a precio
 
-    // Hacer scroll al formulario
-    document.getElementById("nombre").scrollIntoView({ behavior: "smooth", block: "center" });
-});
+                // Hacer scroll al formulario
+                document.getElementById("nombre").scrollIntoView({ behavior: "smooth", block: "center" });
+            });
 
 
-        tbody.appendChild(tr);
+            tbody.appendChild(tr);
+        });
+    }
+
+    // ============================
+    // Botón Listar productos
+    // ============================
+
+
+
+    document.getElementById("btnListarProductos").addEventListener("click", async function () {
+        const contenedor = document.getElementById("contenidoListado");
+
+        if (contenedor.style.display === "none") {
+            contenedor.style.display = "block";
+            this.textContent = "Ocultar productos";
+        } else {
+            contenedor.style.display = "none";
+            this.textContent = "Buscar productos";
+        }
     });
-}
+
+    let timeoutBusqueda = null;
+
+    document.getElementById("filtroNombre").addEventListener("keyup", function () {
+
+        clearTimeout(timeoutBusqueda);
+
+        const texto = this.value.trim();
+
+        // Evitar buscar si tiene menos de 2 letras
+        if (texto.length < 2) {
+            mostrarProductos([]);
+            return;
+        }
+
+        timeoutBusqueda = setTimeout(() => {
+            buscarProductosServidor(texto);
+        }, 300);
+    });
+
 
     // ============================
-        // Botón Listar productos
+    // FOCUS INPUT CÓDIGO CON F3
     // ============================
 
-
-
-document.getElementById("btnListarProductos").addEventListener("click", async function () {
-    const contenedor = document.getElementById("contenidoListado");
-
-    if (contenedor.style.display === "none") {
-        contenedor.style.display = "block";
-        this.textContent = "Ocultar productos";
-    } else {
-        contenedor.style.display = "none";
-        this.textContent = "Buscar productos";
-    }
-});
-
-let timeoutBusqueda = null;
-
-document.getElementById("filtroNombre").addEventListener("keyup", function() {
-
-    clearTimeout(timeoutBusqueda);
-
-    const texto = this.value.trim();
-
-    // Evitar buscar si tiene menos de 2 letras
-    if (texto.length < 2) {
-        mostrarProductos([]); 
-        return;
-    }
-
-    timeoutBusqueda = setTimeout(() => {
-        buscarProductosServidor(texto);
-    }, 300);
-});
-
-
-// ============================
-// FOCUS INPUT CÓDIGO CON F3
-// ============================
-
-document.addEventListener("keydown", function(e) {
-    if (e.key === "F3") {
-        e.preventDefault(); // evita la búsqueda del navegador en cualquier caso
-        const inputCodigo = document.getElementById("inputCodigoManual");
-        if (inputCodigo) {
-            inputCodigo.focus();
-            inputCodigo.select(); // opcional: selecciona el contenido
+    document.addEventListener("keydown", function (e) {
+        if (e.key === "F3") {
+            e.preventDefault(); // evita la búsqueda del navegador en cualquier caso
+            const inputCodigo = document.getElementById("inputCodigoManual");
+            if (inputCodigo) {
+                inputCodigo.focus();
+                inputCodigo.select(); // opcional: selecciona el contenido
+            }
         }
-    }
-});
+    });
 
 
-//filtrado
+    //filtrado
 
-function buscarFiltrado() {
-    clearTimeout(timeoutBusqueda);
+    function buscarFiltrado() {
+        clearTimeout(timeoutBusqueda);
 
-    const nombre = document.getElementById("filtroNombre").value.trim();
-    const precio = document.getElementById("filtroPrecio").value.trim();
-    const codigo = document.getElementById("filtroCodigo").value.trim();
+        const nombre = document.getElementById("filtroNombre").value.trim();
+        const precio = document.getElementById("filtroPrecio").value.trim();
+        const codigo = document.getElementById("filtroCodigo").value.trim();
 
-    // No buscar si todos los campos están vacíos
-    if (!nombre && !precio && !codigo) {
-        mostrarProductos([]); // limpia la tabla
-        return;
-    }
-
-    timeoutBusqueda = setTimeout(async () => {
-        showSpinner();
-        try {
-            const params = new URLSearchParams();
-            if (nombre) params.append("nombre", nombre);
-            if (precio) params.append("precio", precio);
-            if (codigo) params.append("codigo", codigo);
-            params.append("limit", 50);
-
-            const res = await fetch(`/api/listar_productos.php?${params.toString()}`);
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const data = await res.json();
-
-            mostrarProductos(data);
-        } catch (err) {
-            console.error("Error buscando productos:", err);
-            mostrarToast("Error al buscar productos", "error");
-        } finally {
-            hideSpinner();
+        // No buscar si todos los campos están vacíos
+        if (!nombre && !precio && !codigo) {
+            mostrarProductos([]); // limpia la tabla
+            return;
         }
-    }, 300); // delay para no saturar el servidor
-}
 
-// Eventos para los filtros
-document.getElementById("filtroNombre").addEventListener("keyup", buscarFiltrado);
-document.getElementById("filtroPrecio").addEventListener("keyup", buscarFiltrado);
-document.getElementById("filtroCodigo").addEventListener("keyup", buscarFiltrado);
+        timeoutBusqueda = setTimeout(async () => {
+            showSpinner();
+            try {
+                const params = new URLSearchParams();
+                if (nombre) params.append("nombre", nombre);
+                if (precio) params.append("precio", precio);
+                if (codigo) params.append("codigo", codigo);
+                params.append("limit", 50);
+
+                const res = await fetch(`/api/listar_productos.php?${params.toString()}`);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+
+                mostrarProductos(data);
+            } catch (err) {
+                console.error("Error buscando productos:", err);
+                mostrarToast("Error al buscar productos", "error");
+            } finally {
+                hideSpinner();
+            }
+        }, 300); // delay para no saturar el servidor
+    }
+
+    // Eventos para los filtros
+    document.getElementById("filtroNombre").addEventListener("keyup", buscarFiltrado);
+    document.getElementById("filtroPrecio").addEventListener("keyup", buscarFiltrado);
+    document.getElementById("filtroCodigo").addEventListener("keyup", buscarFiltrado);
 
 
 
     // ============================
     // Exportar a Excel
     // ============================
-document.getElementById("btnExportExcel").addEventListener("click", async () => {
-    showSpinner();
-    try {
-        // Si querés traer la lista actual del servidor:
-const res = await fetch("/api/exportar_productos.php");
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const productos = await res.json();
+    document.getElementById("btnExportExcel").addEventListener("click", async () => {
+        showSpinner();
+        try {
+            // Si querés traer la lista actual del servidor:
+            const res = await fetch("/api/exportar_productos.php");
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const productos = await res.json();
 
-        if (!productos.length) {
-            mostrarToast("No hay productos para exportar", "info");
-            return;
+            if (!productos.length) {
+                mostrarToast("No hay productos para exportar", "info");
+                return;
+            }
+
+            // Crear hoja Excel
+            const ws = XLSX.utils.json_to_sheet(productos, {
+                header: ["codigo", "nombre", "precio"]
+            });
+            const wb = XLSX.utils.json_to_sheet(productos);
+
+            XLSX.utils.sheet_add_aoa(ws, [["Código", "Nombre", "Precio"]], { origin: "A1" });
+
+            // Descargar archivo Excel
+            XLSX.writeFile(wb, "productos.xlsx");
+
+        } catch (err) {
+            console.error("Error exportando Excel:", err);
+            mostrarToast("Error al exportar Excel", "error");
+        } finally {
+            hideSpinner(); // ⬅️ siempre ocultar spinner
         }
-
-        // Crear hoja Excel
-const ws = XLSX.utils.json_to_sheet(productos, {
-    header: ["codigo", "nombre", "precio"]
-});        const wb = XLSX.utils.book_new();
-const ws = XLSX.utils.json_to_sheet(productos);
-
-XLSX.utils.sheet_add_aoa(ws, [["Código", "Nombre", "Precio"]], { origin: "A1" });
-        // Descargar archivo Excel
-        XLSX.writeFile(wb, "productos.xlsx");
-
-    } catch (err) {
-        console.error("Error exportando Excel:", err);
-        mostrarToast("Error al exportar Excel", "error");
-    } finally {
-        hideSpinner(); // ⬅️ siempre ocultar spinner
-    }
-});
+    });
 
 
 });
@@ -559,7 +560,7 @@ let trackLinterna = null;
 
 document.getElementById("btnLinterna").addEventListener("click", async () => {
     if (!trackLinterna) {
-        
+
         try {
             const stream = await navigator.mediaDevices.getUserMedia({
                 video: { facingMode: "environment" }
@@ -736,14 +737,14 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // Click del botón
-loginBtn.addEventListener('click', loginUsuario);
+    loginBtn.addEventListener('click', loginUsuario);
 
-passwordInput.addEventListener('keyup', (e) => {
-    if(e.key === 'Enter') {
-        e.preventDefault();  // ⬅️ importante
-        loginUsuario();
-    }
-});
+    passwordInput.addEventListener('keyup', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();  // ⬅️ importante
+            loginUsuario();
+        }
+    });
 
 
 });
