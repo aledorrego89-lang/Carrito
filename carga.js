@@ -659,8 +659,13 @@ document.getElementById("btnImportExcel").addEventListener("click", async () => 
         const workbook = XLSX.read(data);
         const sheetName = workbook.SheetNames[0];
         const sheet = workbook.Sheets[sheetName];
-        const filas = XLSX.utils.sheet_to_json(sheet);
+const filasRaw = XLSX.utils.sheet_to_json(sheet);
 
+const filas = filasRaw.map(f => ({
+    codigo: f["Código"] ?? f["codigo"] ?? "",
+    nombre: f["Nombre"] ?? f["nombre"] ?? "",
+    precio: f["Precio"] ?? f["precio"] ?? 0
+}));
         if (!filas.length) {
             mostrarToast("El archivo está vacío", "info");
             return;
