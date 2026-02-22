@@ -696,14 +696,19 @@ document.getElementById("btnLinterna").addEventListener("click", async () => {
 // ============================
 // IMPORTAR EXCEL/CSV
 // ============================
-document.getElementById("btnImportExcel").addEventListener("change", async (event) => {
+// Cuando se haga click en el botón, dispara click en el input file
+document.getElementById("btnImportExcel").addEventListener("click", () => {
+    document.getElementById("inputExcel").click();
+});
+
+// Evento real de cambio del input file
+document.getElementById("inputExcel").addEventListener("change", async (event) => {
     const file = event.target.files[0];
     if (!file) return;
 
     showSpinner();
 
     try {
-        // Leer archivo
         const data = await file.arrayBuffer();
         const workbook = XLSX.read(data);
         const sheetName = workbook.SheetNames[0];
@@ -717,10 +722,8 @@ document.getElementById("btnImportExcel").addEventListener("change", async (even
         }
 
         let insertados = 0;
-        let actualizados = 0;
         let errores = [];
 
-        // Procesar fila por fila
         for (let i = 0; i < filas.length; i++) {
             const p = filas[i];
             const codigo = (p.codigo || p.Codigo || "").toString().trim();
@@ -740,20 +743,15 @@ document.getElementById("btnImportExcel").addEventListener("change", async (even
                 });
 
                 const data = await res.json();
-                if (data.success) {
-                    insertados++; // Tu PHP siempre inserta si no existe
-                } else {
-                    errores.push(`Fila ${i + 1}: ${data.error || "Error desconocido"}`);
-                }
-
+                if (data.success) insertados++;
+                else errores.push(`Fila ${i + 1}: ${data.error || "Error desconocido"}`);
             } catch (err) {
                 console.error(err);
                 errores.push(`Fila ${i + 1}: error de conexión`);
             }
         }
 
-        mostrarToast(`✅ Insertados: ${insertados} ✏️ Actualizados: ${actualizados}`, "success");
-
+        mostrarToast(`✅ Insertados: ${insertados}`, "success");
         if (errores.length) {
             console.warn("Errores importación:", errores);
             mostrarToast(`Algunas filas no se importaron`, "error");
@@ -767,7 +765,6 @@ document.getElementById("btnImportExcel").addEventListener("change", async (even
         event.target.value = ""; // limpiar input
     }
 });
-
 // ============================
 // LECTOR USB - CARGA
 // ============================
