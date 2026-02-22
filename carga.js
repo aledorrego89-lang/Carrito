@@ -693,85 +693,78 @@ document.getElementById("btnLinterna").addEventListener("click", async () => {
 // ============================
 // IMPORTAR EXCEL
 // ============================
-document.getElementById("inputExcel").addEventListener("change", async (e) => {
-    const file = e.target.files[0];
+// ============================
+// IMPORTAR EXCEL/CSV
+// ============================
+document.getElementById("btnImportExcel").addEventListener("change", async (event) => {
+    const file = event.target.files[0];
     if (!file) return;
 
     showSpinner();
 
     try {
+        // Leer archivo
         const data = await file.arrayBuffer();
         const workbook = XLSX.read(data);
         const sheetName = workbook.SheetNames[0];
         const sheet = workbook.Sheets[sheetName];
-        const excelData = XLSX.utils.sheet_to_json(sheet);
+        const filas = XLSX.utils.sheet_to_json(sheet);
 
-        if (!excelData.length) {
+        if (!filas.length) {
             mostrarToast("El archivo está vacío", "info");
             hideSpinner();
             return;
         }
 
-        // Map de productos actuales
-        const productosMap = {};
-        productos.forEach(p => productosMap[p.codigo] = p);
+        let insertados = 0;
+        let actualizados = 0;
+        let errores = [];
 
-        const insertados = [];
-        const actualizados = [];
-        const eliminados = [];
+        // Procesar fila por fila
+        for (let i = 0; i < filas.length; i++) {
+            const p = filas[i];
+            const codigo = (p.codigo || p.Codigo || "").toString().trim();
+            const nombre = (p.nombre || p.Nombre || "").toString().trim();
+            const precio = parseFloat(p.precio || p.Precio || 0);
 
-        // Comparar Excel con productos existentes
-        excelData.forEach(row => {
-            const codigo = row.codigo?.toString().trim();
-            if (!codigo) return;
-
-            const nombre = row.nombre?.toString().trim() || "";
-            const precio = parseFloat(row.precio) || 0;
-
-            if (productosMap[codigo]) {
-                // Existe → verificar cambios
-                if (productosMap[codigo].nombre !== nombre || parseFloat(productosMap[codigo].precio) !== precio) {
-                    actualizados.push({ codigo, nombre, precio });
-                }
-                delete productosMap[codigo]; // lo marcamos como procesado
-            } else {
-                insertados.push({ codigo, nombre, precio });
+            if (!codigo || !nombre || isNaN(precio)) {
+                errores.push(`Fila ${i + 1} inválida`);
+                continue;
             }
-        });
 
-        // Productos que quedaron en productosMap → eliminar
-        Object.keys(productosMap).forEach(codigo => {
-            eliminados.push({ codigo });
-        });
+            try {
+                const res = await fetch("/api/guardar_producto.php", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ codigo, nombre, precio })
+                });
 
-        // Enviar todo en un solo request
-        const res = await fetch("/api/importar_productos.php", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ insertados, actualizados, eliminados })
-        });
+                const data = await res.json();
+                if (data.success) {
+                    insertados++; // Tu PHP siempre inserta si no existe
+                } else {
+                    errores.push(`Fila ${i + 1}: ${data.error || "Error desconocido"}`);
+                }
 
-        const result = await res.json();
+            } catch (err) {
+                console.error(err);
+                errores.push(`Fila ${i + 1}: error de conexión`);
+            }
+        }
 
-        if (result.success) {
-            const resumenDiv = document.getElementById("resumenImport");
-            resumenDiv.innerHTML = `
-                <p>✅ Filas insertadas: ${insertados.length}</p>
-                <p>✏️ Filas actualizadas: ${actualizados.length}</p>
-                <p>🗑 Filas eliminadas: ${eliminados.length}</p>
-            `;
-            mostrarToast("Importación completada ✅", "success");
-            await cargarProductos(); // recargar tabla
-        } else {
-            mostrarToast("Error al importar: " + (result.error || "desconocido"), "error");
+        mostrarToast(`✅ Insertados: ${insertados} ✏️ Actualizados: ${actualizados}`, "success");
+
+        if (errores.length) {
+            console.warn("Errores importación:", errores);
+            mostrarToast(`Algunas filas no se importaron`, "error");
         }
 
     } catch (err) {
-        console.error(err);
-        mostrarToast("Error al procesar Excel", "error");
+        console.error("Error leyendo Excel:", err);
+        mostrarToast("Error al leer el archivo", "error");
     } finally {
         hideSpinner();
-        e.target.value = ""; // limpiar input
+        event.target.value = ""; // limpiar input
     }
 });
 
