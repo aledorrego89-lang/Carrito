@@ -512,42 +512,77 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
-    // ============================
-    // Exportar a Excel
-    // ============================
-    document.getElementById("btnExportExcel").addEventListener("click", async () => {
-        showSpinner();
-        try {
-            // Si querés traer la lista actual del servidor:
-            const res = await fetch("/api/exportar_productos.php");
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const productos = await res.json();
+ // ============================
+// Exportar a Excel (Versión Profesional)
+// ============================
+document.getElementById("btnExportExcel").addEventListener("click", async () => {
+    showSpinner();
 
-            if (!productos.length) {
-                mostrarToast("No hay productos para exportar", "info");
-                return;
-            }
+    try {
+        const res = await fetch("/api/exportar_productos.php");
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-            // Crear hoja Excel
-            const ws = XLSX.utils.json_to_sheet(productos, {
-                header: ["codigo", "nombre", "precio"]
-            });
-            const wb = XLSX.utils.json_to_sheet(productos);
+        const productos = await res.json();
 
-            XLSX.utils.sheet_add_aoa(ws, [["Código", "Nombre", "Precio"]], { origin: "A1" });
-
-            // Descargar archivo Excel
-            XLSX.writeFile(wb, "productos.xlsx");
-
-        } catch (err) {
-            console.error("Error exportando Excel:", err);
-            mostrarToast("Error al exportar Excel", "error");
-        } finally {
-            hideSpinner(); // ⬅️ siempre ocultar spinner
+        if (!productos || !productos.length) {
+            mostrarToast("No hay productos para exportar", "info");
+            return;
         }
-    });
 
+        // ============================
+        // Formatear datos
+        // ============================
+        const datosFormateados = productos.map(p => ({
+            "Código": p.codigo,
+            "Nombre": p.nombre,
+            "Precio": Number(p.precio) || 0
+        }));
 
+        // Crear hoja
+        const ws = XLSX.utils.json_to_sheet(datosFormateados);
+
+        // ============================
+        // Formato moneda en columna Precio
+        // ============================
+        const rango = XLSX.utils.decode_range(ws['!ref']);
+        for (let fila = 1; fila <= rango.e.r; fila++) {
+            const celdaPrecio = ws[XLSX.utils.encode_cell({ r: fila, c: 2 })];
+            if (celdaPrecio) {
+                celdaPrecio.t = "n";
+                celdaPrecio.z = '"$"#,##0.00';
+            }
+        }
+
+        // ============================
+        // Auto ancho de columnas
+        // ============================
+        ws['!cols'] = [
+            { wch: 15 }, // Código
+            { wch: 40 }, // Nombre
+            { wch: 15 }  // Precio
+        ];
+
+        // Crear libro
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Productos");
+
+        // ============================
+        // Nombre con fecha
+        // ============================
+        const hoy = new Date();
+        const fecha = hoy.toISOString().split("T")[0];
+        const nombreArchivo = `productos_${fecha}.xlsx`;
+
+        XLSX.writeFile(wb, nombreArchivo);
+
+        mostrarToast("Excel exportado correctamente", "success");
+
+    } catch (err) {
+        console.error("Error exportando Excel:", err);
+        mostrarToast("Error al exportar Excel", "error");
+    } finally {
+        hideSpinner();
+    }
 });
 
 
