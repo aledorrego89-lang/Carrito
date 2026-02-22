@@ -541,17 +541,7 @@ document.getElementById("btnExportExcel").addEventListener("click", async () => 
         // Crear hoja
         const ws = XLSX.utils.json_to_sheet(datosFormateados);
 
-        // ============================
-        // Formato moneda en columna Precio
-        // ============================
-        const rango = XLSX.utils.decode_range(ws['!ref']);
-        for (let fila = 1; fila <= rango.e.r; fila++) {
-            const celdaPrecio = ws[XLSX.utils.encode_cell({ r: fila, c: 2 })];
-            if (celdaPrecio) {
-                celdaPrecio.t = "n";
-                celdaPrecio.z = '"$"#,##0.00';
-            }
-        }
+
 
         // ============================
         // Auto ancho de columnas
