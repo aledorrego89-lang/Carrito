@@ -634,7 +634,7 @@ document.getElementById("btnImportExcel").addEventListener("click", async () => 
         return;
     }
 
-    showSpinner();
+   // showSpinner();
 
     try {
         const data = await archivoExcel.arrayBuffer();
