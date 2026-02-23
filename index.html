@@ -89,14 +89,14 @@
       <!-- Body -->
       <div class="modal-body py-4">
         <p id="modal-price" class="fw-bold mb-4 fs-4">Precio: $0</p>
-
-        <!-- Comparación de otros locales -->
-<div id="modal-comparison" class="mt-3" style="display:none;">
-  <h6>Precios en otros locales:</h6>
-  <ul id="comparison-list" class="list-group list-group-flush"></ul>
+        
+        <label for="modal-qty" class="form-label fw-semibold">Cantidad</label>
+<div class="d-flex justify-content-center align-items-center gap-2 mt-3">
+<button id="decrease">−</button>
+<input type="number" id="modal-qty" value="1" min="1">
+<button id="increase">+</button>
 </div>
-
-
+      </div>
 
       <!-- Footer -->
       <div class="modal-footer justify-content-center gap-3 border-0 pb-4">

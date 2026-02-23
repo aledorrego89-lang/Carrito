@@ -504,3 +504,4 @@ const errorBox = document.getElementById('error-box');
 function showError(msg) { errorBox.textContent = msg; errorBox.classList.remove('d-none'); }
 function clearError() { errorBox.textContent = ""; errorBox.classList.add('d-none'); }
 
+
