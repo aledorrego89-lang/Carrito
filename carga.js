@@ -376,7 +376,7 @@ async function buscarProductosServidor(nombre) {
 
         const data = await res.json();
         mostrarProductos(data);
-
+mostrarFormulario();
     } catch (err) {
         console.error("Error buscando productos:", err);
         mostrarToast("Error al buscar productos", "error");
