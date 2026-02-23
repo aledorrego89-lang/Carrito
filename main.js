@@ -461,6 +461,87 @@ function generarTicket() {
 
 
 // ============================
+// Comparar productos
+// ============================
+async function compararProducto(codigo) {
+    const res = await fetch(`/comparar_productos.php?codigo=${codigo}`);
+    const data = await res.json();
+
+    if (!data.length) {
+        alert("Producto no encontrado en otros locales");
+        return;
+    }
+
+    // Crear lista de comparación
+    let html = "<ul>";
+    data.forEach(item => {
+        html += `<li>${item.local}: $${item.precio}</li>`;
+    });
+    html += "</ul>";
+
+    // Mostrar en modal o div
+    Swal.fire({
+        title: "Comparación de precios",
+        html: html,
+        icon: "info"
+    });
+}
+
+// Ejemplo: cuando se escanea o selecciona un producto
+document.getElementById("btnComparar").addEventListener("click", () => {
+    if (!currentProduct) return;
+    compararProducto(currentProduct.codigo); // suponiendo que tu JS tiene el código
+});
+
+
+// Botón comparar
+const btnCompare = document.getElementById("btnCompare");
+const comparisonList = document.getElementById("comparison-list");
+const comparisonContainer = document.getElementById("modal-comparison");
+
+btnCompare.addEventListener("click", async () => {
+    if (!currentProduct || !currentProduct.codigo) return;
+
+    try {
+        const res = await fetch(`/comparar_productos.php?codigo=${currentProduct.codigo}`);
+        const data = await res.json();
+
+        if (!data.length) {
+            comparisonContainer.style.display = "none";
+            Toastify({
+                text: "Producto no encontrado en otros locales",
+                duration: 3000,
+                gravity: "top",
+                position: "center",
+                style: { background: "orange" }
+            }).showToast();
+            return;
+        }
+
+        // Limpiamos lista
+        comparisonList.innerHTML = "";
+
+        data.forEach(item => {
+            const li = document.createElement("li");
+            li.className = "list-group-item";
+            li.textContent = `${item.local}: $${item.precio}`;
+            comparisonList.appendChild(li);
+        });
+
+        comparisonContainer.style.display = "block";
+
+    } catch (err) {
+        console.error(err);
+        Toastify({
+            text: "Error al obtener comparación",
+            duration: 3000,
+            gravity: "top",
+            position: "center",
+            style: { background: "red" }
+        }).showToast();
+    }
+});
+// ============================
 // LECTOR de MANO
 // ============================
 
