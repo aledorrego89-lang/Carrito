@@ -376,7 +376,7 @@ async function buscarProductosServidor(nombre) {
 
         const data = await res.json();
         mostrarProductos(data);
-mostrarFormulario();
+
     } catch (err) {
         console.error("Error buscando productos:", err);
         mostrarToast("Error al buscar productos", "error");
@@ -420,7 +420,8 @@ document.addEventListener("DOMContentLoaded", function () {
             // Al hacer click en la fila, se carga el producto en el formulario
             tr.style.cursor = "pointer";
             tr.addEventListener("click", () => {
-                codigoActual = p.codigo;                          // Seteamos el código actual
+                mostrarFormulario();
+                codigoActual = p.codigo;                          // Seteamos el código actual              
                 document.getElementById("inputCodigoManual").value = p.codigo; // <-- cargamos input manual
                 buscarProductoServidor(p.codigo, "precio");       // Carga nombre, precio y da foco a precio
 
