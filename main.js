@@ -506,45 +506,45 @@ function clearError() { errorBox.textContent = ""; errorBox.classList.add('d-non
 
 
 document.addEventListener("DOMContentLoaded", () => {
-    const btnCompare = document.getElementById("btnCompare");
-    const comparisonList = document.getElementById("comparison-list");
-    const comparisonContainer = document.getElementById("modal-comparison");
+  const btnCompare = document.getElementById("btnCompare");
+const comparisonList = document.getElementById("comparison-list");
+const comparisonContainer = document.getElementById("modal-comparison");
 
-    if (btnCompare) {  // ✅ verifica que exista
-        btnCompare.addEventListener("click", async () => {
-            if (!currentProduct || !currentProduct.codigo) return;
-            try {
-                const res = await fetch(`/api/comparar_productos.php?codigo=${currentProduct.codigo}`);
-                const data = await res.json();
-                if (!data.length) {
-                    comparisonContainer.style.display = "none";
-                    Toastify({
-                        text: "Producto no encontrado en otros locales",
-                        duration: 3000,
-                        gravity: "top",
-                        position: "center",
-                        style: { background: "orange" }
-                    }).showToast();
-                    return;
-                }
-                comparisonList.innerHTML = "";
-                data.forEach(item => {
-                    const li = document.createElement("li");
-                    li.className = "list-group-item";
-                    li.textContent = `${item.local}: $${item.precio}`;
-                    comparisonList.appendChild(li);
-                });
-                comparisonContainer.style.display = "block";
-            } catch (err) {
-                console.error(err);
+if (btnCompare) {
+    btnCompare.addEventListener("click", async () => {
+        if (!currentProduct || !currentProduct.codigo) return;
+        try {
+            const res = await fetch(`/comparar_productos.php?codigo=${currentProduct.codigo}`);
+            const data = await res.json();
+            if (!data.length) {
+                comparisonContainer.style.display = "none";
                 Toastify({
-                    text: "Error al obtener comparación",
+                    text: "Producto no encontrado en otros locales",
                     duration: 3000,
                     gravity: "top",
                     position: "center",
-                    style: { background: "red" }
+                    style: { background: "orange" }
                 }).showToast();
+                return;
             }
-        });
-    }
+            comparisonList.innerHTML = "";
+            data.forEach(item => {
+                const li = document.createElement("li");
+                li.className = "list-group-item";
+                li.textContent = `${item.local}: $${item.precio}`;
+                comparisonList.appendChild(li);
+            });
+            comparisonContainer.style.display = "block";
+        } catch (err) {
+            console.error(err);
+            Toastify({
+                text: "Error al obtener comparación",
+                duration: 3000,
+                gravity: "top",
+                position: "center",
+                style: { background: "red" }
+            }).showToast();
+        }
+    });
+}
 });
