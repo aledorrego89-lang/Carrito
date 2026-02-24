@@ -190,12 +190,24 @@ acceptBtn.onclick = (e) => {
     const cantidad = parseInt(modalQty.value) || 1;
 
     if (currentProductIndex !== null) {
+
         cart[currentProductIndex].cantidad = cantidad;
+
+        // 🔥 Lo movemos arriba también cuando se edita
+        const actualizado = cart.splice(currentProductIndex, 1)[0];
+        cart.unshift(actualizado);
+
     } else {
-        cart.push({ nombre: currentProduct.nombre, precio: currentProduct.precio, cantidad });
+
+        // 🔥 Nuevo producto → arriba
+        cart.unshift({
+            nombre: currentProduct.nombre,
+            precio: currentProduct.precio,
+            cantidad
+        });
     }
 
-    renderCart(searchInput.value);
+    renderCart(searchInput.value, 0); // resaltamos el primero
 
     currentProduct = null;
     currentProductIndex = null;
