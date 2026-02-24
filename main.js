@@ -539,6 +539,9 @@ async function procesarCodigoUSB(codigo) {
 // ============================
 // LECTOR de MANO
 // ============================
+let usbBuffer = "";
+let usbTimer = null;
+
 document.addEventListener("keydown", (e) => {
 
     // 🔥 NO ignoramos inputs → funciona siempre
