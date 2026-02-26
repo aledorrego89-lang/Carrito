@@ -739,26 +739,22 @@ try {
 
 let usbBuffer = "";
 let usbTimer = null;
+const USB_TIMEOUT = 300; // tiempo para limpiar buffer si no llega Enter
 
 document.addEventListener("keydown", (e) => {
-
-    if (["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) return;
-
-    if (e.key === "Enter") {
-        if (usbBuffer.length > 5) {
-            procesarCodigo(usbBuffer);
-        }
-        usbBuffer = "";
-        return;
-    }
-
+    // Solo números y Enter
     if (/^\d$/.test(e.key)) {
         usbBuffer += e.key;
 
         clearTimeout(usbTimer);
         usbTimer = setTimeout(() => {
-            usbBuffer = "";
-        }, 100);
+            usbBuffer = ""; // limpiamos si tarda demasiado
+        }, USB_TIMEOUT);
+    } else if (e.key === "Enter") {
+        if (usbBuffer.length > 0) {
+            procesarCodigo(usbBuffer); // ✅ procesa automáticamente
+        }
+        usbBuffer = "";
     }
 });
 // ============================
